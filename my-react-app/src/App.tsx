@@ -1,122 +1,94 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import React, { useState } from 'react';
+import './index.css';
+
+import ArchbishopDashboard from './pages/ArchbishopDashboard';
+import BishopDashboard from './pages/BishopDashboard';
+import PriestDashboard from './pages/PriestDashboard';
+import SecretaryDashboard from './pages/SecretaryDashboard';
+import TreasurerDashboard from './pages/TreasurerDashboard';
+import CellLeaderDashboard from './pages/CellLeaderDashboard';
+
+type Role = 'Archbishop' | 'Bishop' | 'Priest' | 'Secretary' | 'Treasurer' | 'CellLeader';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [currentRole, setCurrentRole] = useState<Role>('Archbishop');
+
+  const renderDashboard = () => {
+    switch (currentRole) {
+      case 'Archbishop': return <ArchbishopDashboard />;
+      case 'Bishop': return <BishopDashboard />;
+      case 'Priest': return <PriestDashboard />;
+      case 'Secretary': return <SecretaryDashboard />;
+      case 'Treasurer': return <TreasurerDashboard />;
+      case 'CellLeader': return <CellLeaderDashboard />;
+      default: return <ArchbishopDashboard />;
+    }
+  };
+
+  const getProfileName = () => {
+    switch (currentRole) {
+      case 'Archbishop': return 'Stephen K. (Archbishop)';
+      case 'Bishop': return 'James W. (Bishop)';
+      case 'Priest': return 'Rev. John D. (Priest)';
+      case 'Secretary': return 'Mary S. (Secretary)';
+      case 'Treasurer': return 'Peter T. (Treasurer)';
+      case 'CellLeader': return 'David C. (Cell Leader)';
+      default: return '';
+    }
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
+    <div className="app-container">
+      {/* Sidebar */}
+      <aside className="sidebar">
+        <div className="sidebar-brand">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
           </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+          CMS Portal
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+        <nav className="sidebar-nav">
+          <div className="nav-item active">Dashboard</div>
+          <div className="nav-item">Hierarchy</div>
+          <div className="nav-item">Members</div>
+          <div className="nav-item">Finances</div>
+          <div className="nav-item">Certificates</div>
+          <div className="nav-item">Settings</div>
+        </nav>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+        {/* Demo Role Switcher */}
+        <div style={{ marginTop: 'auto', padding: '1rem', background: 'rgba(0,0,0,0.03)', borderRadius: '8px' }}>
+          <p style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Demo Role Switcher</p>
+          <select 
+            value={currentRole} 
+            onChange={(e) => setCurrentRole(e.target.value as Role)}
+            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--color-border)', fontFamily: 'inherit' }}
+          >
+            <option value="Archbishop">Archbishop</option>
+            <option value="Bishop">Bishop</option>
+            <option value="Priest">Priest</option>
+            <option value="Secretary">Secretary</option>
+            <option value="Treasurer">Treasurer</option>
+            <option value="CellLeader">Cell Leader</option>
+          </select>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="main-content">
+        <header className="header" style={{ marginBottom: '-1rem' }}>
+          <div style={{ visibility: 'hidden' }}>Spacer</div>
+          <div className="user-profile">
+            <span style={{ fontWeight: 500 }}>{getProfileName()}</span>
+            <div className="avatar">{currentRole.charAt(0)}</div>
+          </div>
+        </header>
+
+        {/* Render Active Dashboard */}
+        {renderDashboard()}
+      </main>
+    </div>
+  );
 }
 
-export default App
+export default App;
