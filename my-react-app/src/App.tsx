@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import './index.css';
 
+import LoginPage from './pages/LoginPage';
 import ArchbishopDashboard from './pages/ArchbishopDashboard';
 import BishopDashboard from './pages/BishopDashboard';
 import PriestDashboard from './pages/PriestDashboard';
@@ -10,7 +12,7 @@ import CellLeaderDashboard from './pages/CellLeaderDashboard';
 
 type Role = 'Archbishop' | 'Bishop' | 'Priest' | 'Secretary' | 'Treasurer' | 'CellLeader';
 
-function App() {
+function DashboardLayout() {
   const [currentRole, setCurrentRole] = useState<Role>('Archbishop');
 
   const renderDashboard = () => {
@@ -91,4 +93,12 @@ function App() {
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/dashboard" element={<DashboardLayout />} />
+      <Route path="*" element={<Navigate to="/login" replace />} />
+    </Routes>
+  );
+}
