@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { fetchDirectory } from '../services/api';
 
 // Mock Data structure for the hierarchy
 const diocesesData = [
@@ -152,6 +153,12 @@ export default function ArchbishopDashboard() {
   const [zoomLevel, setZoomLevel] = useState(100);
   const [excelData, setExcelData] = useState<any[][]>([]);
   const [excelEditCell, setExcelEditCell] = useState<{ r: number; c: number } | null>(null);
+
+  const [directory, setDirectory] = useState<{ dioceses: any[]; archdeaconries: any[]; parishes: any[] }>({ dioceses: [], archdeaconries: [], parishes: [] });
+
+  useEffect(() => {
+    fetchDirectory().then(setDirectory).catch(console.error);
+  }, []);
 
   useEffect(() => {
     const stored = localStorage.getItem('cms_messages');
@@ -420,13 +427,15 @@ export default function ArchbishopDashboard() {
               <thead style={{ position: 'sticky', top: 0, background: 'var(--color-surface)', boxShadow: '0 1px 0 var(--color-border)', zIndex: 10 }}>
                 <tr>
                   <th style={{ padding: '1rem 1.5rem', fontWeight: 500, color: 'var(--color-text-muted)' }}>Organization Unit</th>
-                  <th style={{ padding: '1rem 1.5rem', fontWeight: 500, color: 'var(--color-text-muted)' }}>Members</th>
+                  <th style={{ padding: '1rem 1.5rem', fontWeight: 500, color: 'var(--color-text-muted)' }}>Current Bishop</th>
                   <th style={{ padding: '1rem 1.5rem', fontWeight: 500, color: 'var(--color-text-muted)' }}>Revenue (YTD)</th>
                   <th style={{ padding: '1rem 1.5rem', fontWeight: 500, color: 'var(--color-text-muted)' }}>Action</th>
                 </tr>
               </thead>
               <tbody>
-                {diocesesData.map((diocese, dIndex) => (
+                {directory.dioceses.map((diocese, dIndex) => {
+                  const archs = directory.archdeaconries.filter(a => a.diocese_id === diocese.id);
+                  return (
                   <React.Fragment key={`d-${dIndex}`}>
                     {/* Diocese Row */}
                     <tr 
@@ -436,10 +445,10 @@ export default function ArchbishopDashboard() {
                     >
                       <td style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>
                         <span style={{ display: 'inline-block', width: '20px' }}>{expandedDiocese === diocese.name ? '▼' : '▶'}</span>
-                        {diocese.name}
+                        {diocese.name} Diocese
                       </td>
-                      <td style={{ padding: '1rem 1.5rem' }}>{diocese.members.toLocaleString()}</td>
-                      <td style={{ padding: '1rem 1.5rem' }}>{diocese.revenue}</td>
+                      <td style={{ padding: '1rem 1.5rem' }}>{diocese.bishop_name || 'N/A'}</td>
+                      <td style={{ padding: '1rem 1.5rem' }}>--</td>
                       <td style={{ padding: '1rem 1.5rem' }}>
                         <button 
                           className="btn" 
@@ -457,7 +466,9 @@ export default function ArchbishopDashboard() {
                     </tr>
 
                     {/* Archdeaconry Rows (Shown if Diocese is expanded) */}
-                    {expandedDiocese === diocese.name && diocese.archdeaconries?.map((arch, aIndex) => (
+                    {expandedDiocese === diocese.name && archs.map((arch, aIndex) => {
+                      const archParishes = directory.parishes.filter(p => p.archdeaconry_id === arch.id);
+                      return (
                       <React.Fragment key={`a-${aIndex}`}>
                         <tr 
                           style={{ borderBottom: '1px solid var(--color-border)', cursor: 'pointer', backgroundColor: expandedArchdeaconry === arch.name ? 'rgba(14, 165, 233, 0.05)' : '#fafafa' }}
@@ -468,30 +479,26 @@ export default function ArchbishopDashboard() {
                             <span style={{ display: 'inline-block', width: '20px', color: 'var(--color-text-muted)' }}>{expandedArchdeaconry === arch.name ? '▼' : '▶'}</span>
                             {arch.name}
                           </td>
-                          <td style={{ padding: '0.75rem 1.5rem', color: 'var(--color-text-muted)' }}>{arch.members.toLocaleString()}</td>
-                          <td style={{ padding: '0.75rem 1.5rem', color: 'var(--color-text-muted)' }}>{arch.revenue}</td>
-                          <td style={{ padding: '0.75rem 1.5rem' }}>
-                            <span style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)' }}>Archdeaconry</span>
-                          </td>
+                          <td style={{ padding: '0.75rem 1.5rem', color: 'var(--color-text-muted)' }}>--</td>
+                          <td style={{ padding: '0.75rem 1.5rem', color: 'var(--color-text-muted)' }}>--</td>
+                          <td style={{ padding: '0.75rem 1.5rem' }}></td>
                         </tr>
 
                         {/* Parish Rows (Shown if Archdeaconry is expanded) */}
-                        {expandedArchdeaconry === arch.name && arch.parishes?.map((parish, pIndex) => (
-                          <tr key={`p-${pIndex}`} style={{ borderBottom: '1px solid var(--color-border)', backgroundColor: '#ffffff' }}>
-                            <td style={{ padding: '0.5rem 1.5rem 0.5rem 5rem', fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>
+                        {expandedArchdeaconry === arch.name && archParishes.map((parish, pIndex) => (
+                          <tr key={`p-${pIndex}`} style={{ borderBottom: '1px solid var(--color-border)', backgroundColor: 'white' }}>
+                            <td style={{ padding: '0.5rem 1.5rem 0.5rem 5rem', color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
                               • {parish.name}
                             </td>
-                            <td style={{ padding: '0.5rem 1.5rem', fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>{parish.members.toLocaleString()}</td>
-                            <td style={{ padding: '0.5rem 1.5rem', fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>{parish.revenue}</td>
-                            <td style={{ padding: '0.5rem 1.5rem' }}>
-                              <span style={{ fontSize: '0.75rem', color: 'var(--color-secondary)' }}>Parish Level</span>
-                            </td>
+                            <td style={{ padding: '0.5rem 1.5rem', color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>--</td>
+                            <td style={{ padding: '0.5rem 1.5rem', color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>--</td>
+                            <td style={{ padding: '0.5rem 1.5rem' }}></td>
                           </tr>
                         ))}
                       </React.Fragment>
-                    ))}
+                    )})}
                   </React.Fragment>
-                ))}
+                )})}
               </tbody>
             </table>
           </div>

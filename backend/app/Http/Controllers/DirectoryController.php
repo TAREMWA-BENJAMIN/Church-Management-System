@@ -10,7 +10,7 @@ class DirectoryController extends Controller
 {
     public function dioceses()
     {
-        $dioceses = Diocese::select('id', 'name')->get();
+        $dioceses = Diocese::select('id', 'name', 'bishop_name')->get();
         return response()->json($dioceses);
     }
 
