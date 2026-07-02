@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { fetchCommunications, sendCommunication, markAsRead, fetchDirectory } from '../services/api';
 
 // Mock Data for Kampala Diocese
 const diocesanData = [
@@ -83,7 +84,7 @@ const initialBishopMessages: Message[] = [
 ];
 
 export default function BishopDashboard() {
-  const [activeTab, setActiveTab] = useState<'overview' | 'comms'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'comms' | 'finance'>('overview');
   const [expandedArchdeaconry, setExpandedArchdeaconry] = useState<string | null>(null);
 
   // Communications State
@@ -107,30 +108,37 @@ export default function BishopDashboard() {
   const [excelData, setExcelData] = useState<any[][]>([]);
   const [excelEditCell, setExcelEditCell] = useState<{ r: number; c: number } | null>(null);
 
-  useEffect(() => {
-    const stored = localStorage.getItem('cms_messages');
-    let allMessages: Message[] = [];
-    if (stored) {
-      try {
-        allMessages = JSON.parse(stored);
-      } catch (e) {
-        allMessages = [];
-      }
-    }
+  const [directory, setDirectory] = useState<{ dioceses: {id: number, name: string}[]; archdeaconries: {id: number, name: string}[]; parishes: {id: number, name: string}[] }>({ dioceses: [], archdeaconries: [], parishes: [] });
 
-    // Check if Bishop seed messages are in the global list
-    const hasBishopSeeds = allMessages.some(m => m.id.startsWith('msg-bishop-'));
-    if (!hasBishopSeeds) {
-      allMessages = [...allMessages, ...initialBishopMessages];
-      localStorage.setItem('cms_messages', JSON.stringify(allMessages));
-    }
-    
-    setMessages(allMessages);
+  useEffect(() => {
+    fetchDirectory().then(setDirectory).catch(console.error);
   }, []);
+
+  useEffect(() => {
+    const loadMessages = async () => {
+      try {
+        const data = await fetchCommunications('App\\Models\\Diocese', 1, commsView);
+        const formattedMessages: Message[] = data.map((c: any) => ({
+          id: c.id.toString(),
+          from: c.sender?.name || 'Unknown',
+          fromRole: c.sender_type.includes('Diocese') ? 'Bishop' : 'Priest',
+          to: c.receiver?.name || 'Unknown',
+          subject: c.subject,
+          body: c.message,
+          date: c.created_at,
+          read: c.is_read,
+          attachments: []
+        }));
+        setMessages(formattedMessages);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    loadMessages();
+  }, [commsView]);
 
   const saveMessages = (updated: Message[]) => {
     setMessages(updated);
-    localStorage.setItem('cms_messages', JSON.stringify(updated));
   };
 
   const toggleArchdeaconry = (name: string) => {
@@ -142,29 +150,21 @@ export default function BishopDashboard() {
   };
 
   // Mark message as read
-  const handleSelectMessage = (msg: Message) => {
+  const handleSelectMessage = async (msg: Message) => {
     setSelectedMessage(msg);
     setShowCompose(false);
     setActivePreview(null);
-    if (!msg.read && (msg.to === 'Kampala Diocese' || msg.to === 'All Dioceses')) {
-      const updated = messages.map(m => m.id === msg.id ? { ...m, read: true } : m);
-      saveMessages(updated);
+    if (!msg.read && commsView === 'inbox') {
+      try {
+        await markAsRead(parseInt(msg.id));
+        const updated = messages.map(m => m.id === msg.id ? { ...m, read: true } : m);
+        setMessages(updated);
+      } catch(e) { console.error(e); }
     }
   };
 
-  // Filter messages based on Bishop permissions (Kampala Diocese)
+  // Filter messages
   const filteredMessages = messages.filter(msg => {
-    const isInboxDirection = commsView === 'inbox';
-    
-    if (isInboxDirection) {
-      // Received either from Archbishop (to Kampala/All) OR from Archdeaconries to Bishop
-      const isFromArchbishop = msg.fromRole === 'Archbishop' && (msg.to === 'Kampala Diocese' || msg.to === 'All Dioceses');
-      const isFromArchdeaconry = msg.fromRole === 'Archdeaconry' && (msg.to === 'Kampala Diocese' || msg.to === 'Bishop');
-      if (!isFromArchbishop && !isFromArchdeaconry) return false;
-    } else {
-      // Sent by Bishop James W.
-      if (msg.fromRole !== 'Bishop' || msg.fromDiocese !== 'Kampala Diocese') return false;
-    }
 
     // Search query matching
     const matchesSearch = 
@@ -230,38 +230,41 @@ export default function BishopDashboard() {
   };
 
   // Submit Compose Email
-  const handleSendEmail = (e: React.FormEvent) => {
+  const handleSendEmail = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!composeSubject.trim() || !composeBody.trim()) return;
 
-    const newMessage: Message = {
-      id: `msg-${Date.now()}`,
-      from: 'Bishop James W. (Kampala)',
-      fromRole: 'Bishop',
-      fromDiocese: 'Kampala Diocese',
-      to: composeTo,
-      subject: composeSubject,
-      body: composeBody,
-      date: new Date().toISOString(),
-      read: true,
-      attachments: attachedFiles.map(file => ({
-        name: file.name,
-        type: file.type,
-        size: file.size,
-        fileUrl: file.fileUrl
-      }))
-    };
+    let receiverType = 'App\\Models\\Parish';
+    let receiverId = parseInt(composeTo);
 
-    saveMessages([newMessage, ...messages]);
+    if (composeTo.startsWith('d-')) {
+      receiverType = 'App\\Models\\Diocese';
+      receiverId = parseInt(composeTo.replace('d-', ''));
+    } else if (composeTo.startsWith('a-')) {
+      receiverType = 'App\\Models\\Archdeaconry';
+      receiverId = parseInt(composeTo.replace('a-', ''));
+    }
 
-    // Reset Form
-    setComposeSubject('');
-    setComposeBody('');
-    setAttachedFiles([]);
-    setShowCompose(false);
-    setSelectedMessage(newMessage);
-    setCommsView('sent');
-    alert(`Message successfully sent to ${composeTo}!`);
+    try {
+      await sendCommunication({
+        sender_type: 'App\\Models\\Diocese',
+        sender_id: 1, // Mock Diocese Kampala
+        receiver_type: receiverType,
+        receiver_id: receiverId,
+        subject: composeSubject,
+        message: composeBody,
+      });
+
+      setComposeSubject('');
+      setComposeBody('');
+      setAttachedFiles([]);
+      setShowCompose(false);
+      setCommsView('sent');
+      alert(`Message successfully sent!`);
+    } catch(e) {
+      console.error(e);
+      alert('Failed to send message');
+    }
   };
 
   // Open rich attachment preview
@@ -348,6 +351,12 @@ export default function BishopDashboard() {
               <span className="badge-unread">{unreadCount}</span>
             )}
           </div>
+        </button>
+        <button 
+          onClick={() => setActiveTab('finance')}
+          className={`tab-btn ${activeTab === 'finance' ? 'active' : ''}`}
+        >
+          Finance Overview
         </button>
       </div>
 
@@ -546,17 +555,27 @@ export default function BishopDashboard() {
                 </div>
                 
                 <div>
-                  <label className="form-label">Recipient (Archbishop or Archdeaconry)</label>
+                  <label className="form-label">Recipient</label>
                   <select 
                     value={composeTo} 
                     onChange={(e) => setComposeTo(e.target.value)}
                     className="form-select"
                   >
-                    <option value="Archbishop">ArchbishopStephen K. (Provincial Level)</option>
-                    <option value="Central Archdeaconry">Central Archdeaconry (Ven. Robert K.)</option>
-                    <option value="Eastern Archdeaconry">Eastern Archdeaconry (Ven. Michael S.)</option>
-                    <option value="Northern Archdeaconry">Northern Archdeaconry (Ven. Samuel B.)</option>
-                    <option value="All Archdeaconries">All Archdeaconries (Diocesan Circular)</option>
+                    <optgroup label="Archdeaconries (Downward — Primary)">
+                      {directory.archdeaconries?.map(a => (
+                        <option key={`a-${a.id}`} value={`a-${a.id}`}>{a.name}</option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="Parishes">
+                      {directory.parishes.map(p => (
+                        <option key={`p-${p.id}`} value={p.id}>{p.name}</option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="Dioceses">
+                      {directory.dioceses.map(d => (
+                        <option key={`d-${d.id}`} value={`d-${d.id}`}>{d.name}</option>
+                      ))}
+                    </optgroup>
                   </select>
                 </div>
 
@@ -703,6 +722,84 @@ export default function BishopDashboard() {
                 <p style={{ fontWeight: 500 }}>Select a message to display details, or compose a new email.</p>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* TAB CONTENT: FINANCE OVERVIEW */}
+      {activeTab === 'finance' && (
+        <div className="card-grid" style={{ gridTemplateColumns: '1fr', alignItems: 'start' }}>
+          <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
+            <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>Diocesan Financial Summary</h2>
+              <button className="btn btn-primary" style={{ fontSize: '0.875rem', padding: '0.4rem 0.8rem' }}>+ Record Diocesan Entry</button>
+            </div>
+            
+            <div style={{ padding: '1.5rem', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', background: '#fafafa', borderBottom: '1px solid var(--color-border)' }}>
+              <div>
+                <span style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>Gross Revenue (Quotas + Cathedral)</span>
+                <div style={{ fontSize: '1.5rem', fontWeight: 600, color: '#16a34a' }}>1,120,000,000 UGX</div>
+              </div>
+              <div>
+                <span style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>Diocesan Expenses</span>
+                <div style={{ fontSize: '1.5rem', fontWeight: 600, color: '#dc2626' }}>-120,000,000 UGX</div>
+              </div>
+              <div>
+                <span style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>Net Submittable to Province</span>
+                <div style={{ fontSize: '1.5rem', fontWeight: 600 }}>1,000,000,000 UGX</div>
+              </div>
+            </div>
+
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                <thead style={{ background: 'var(--color-surface)' }}>
+                  <tr>
+                    <th style={{ padding: '1rem 1.5rem', fontWeight: 500, color: 'var(--color-text-muted)' }}>Date</th>
+                    <th style={{ padding: '1rem 1.5rem', fontWeight: 500, color: 'var(--color-text-muted)' }}>Source / Category</th>
+                    <th style={{ padding: '1rem 1.5rem', fontWeight: 500, color: 'var(--color-text-muted)' }}>Description</th>
+                    <th style={{ padding: '1rem 1.5rem', fontWeight: 500, color: 'var(--color-text-muted)', textAlign: 'right' }}>Amount (UGX)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style={{ borderBottom: '1px solid var(--color-border)' }}>
+                    <td style={{ padding: '1rem 1.5rem' }}>2026-07-01</td>
+                    <td style={{ padding: '1rem 1.5rem' }}><span style={{ padding: '0.2rem 0.5rem', background: 'rgba(22, 163, 74, 0.1)', color: '#16a34a', borderRadius: '4px', fontSize: '0.75rem' }}>Direct Collection</span></td>
+                    <td style={{ padding: '1rem 1.5rem' }}>All Saints Cathedral (Diocesan HQ) Tithes & Offerings</td>
+                    <td style={{ padding: '1rem 1.5rem', textAlign: 'right', color: '#16a34a', fontWeight: 500 }}>+150,000,000</td>
+                  </tr>
+                  <tr style={{ borderBottom: '1px solid var(--color-border)' }}>
+                    <td style={{ padding: '1rem 1.5rem' }}>2026-07-02</td>
+                    <td style={{ padding: '1rem 1.5rem' }}><span style={{ padding: '0.2rem 0.5rem', background: 'rgba(22, 163, 74, 0.1)', color: '#16a34a', borderRadius: '4px', fontSize: '0.75rem' }}>Quota Received</span></td>
+                    <td style={{ padding: '1rem 1.5rem' }}>Central Archdeaconry Q2 Quota</td>
+                    <td style={{ padding: '1rem 1.5rem', textAlign: 'right', color: '#16a34a', fontWeight: 500 }}>+300,000,000</td>
+                  </tr>
+                  <tr style={{ borderBottom: '1px solid var(--color-border)' }}>
+                    <td style={{ padding: '1rem 1.5rem' }}>2026-07-02</td>
+                    <td style={{ padding: '1rem 1.5rem' }}><span style={{ padding: '0.2rem 0.5rem', background: 'rgba(22, 163, 74, 0.1)', color: '#16a34a', borderRadius: '4px', fontSize: '0.75rem' }}>Quota Received</span></td>
+                    <td style={{ padding: '1rem 1.5rem' }}>Eastern Archdeaconry Q2 Quota</td>
+                    <td style={{ padding: '1rem 1.5rem', textAlign: 'right', color: '#16a34a', fontWeight: 500 }}>+550,000,000</td>
+                  </tr>
+                  <tr style={{ borderBottom: '1px solid var(--color-border)' }}>
+                    <td style={{ padding: '1rem 1.5rem' }}>2026-07-03</td>
+                    <td style={{ padding: '1rem 1.5rem' }}><span style={{ padding: '0.2rem 0.5rem', background: 'rgba(22, 163, 74, 0.1)', color: '#16a34a', borderRadius: '4px', fontSize: '0.75rem' }}>Quota Received</span></td>
+                    <td style={{ padding: '1rem 1.5rem' }}>Northern Archdeaconry Q2 Quota</td>
+                    <td style={{ padding: '1rem 1.5rem', textAlign: 'right', color: '#16a34a', fontWeight: 500 }}>+120,000,000</td>
+                  </tr>
+                  <tr style={{ borderBottom: '1px solid var(--color-border)', background: 'rgba(220, 38, 38, 0.02)' }}>
+                    <td style={{ padding: '1rem 1.5rem' }}>2026-07-05</td>
+                    <td style={{ padding: '1rem 1.5rem' }}><span style={{ padding: '0.2rem 0.5rem', background: 'rgba(220, 38, 38, 0.1)', color: '#dc2626', borderRadius: '4px', fontSize: '0.75rem' }}>Expense (Clergy)</span></td>
+                    <td style={{ padding: '1rem 1.5rem' }}>Clergy Stipends and Training</td>
+                    <td style={{ padding: '1rem 1.5rem', textAlign: 'right', color: '#dc2626', fontWeight: 500 }}>-50,000,000</td>
+                  </tr>
+                  <tr style={{ borderBottom: '1px solid var(--color-border)', background: 'rgba(220, 38, 38, 0.02)' }}>
+                    <td style={{ padding: '1rem 1.5rem' }}>2026-07-06</td>
+                    <td style={{ padding: '1rem 1.5rem' }}><span style={{ padding: '0.2rem 0.5rem', background: 'rgba(220, 38, 38, 0.1)', color: '#dc2626', borderRadius: '4px', fontSize: '0.75rem' }}>Expense (Operations)</span></td>
+                    <td style={{ padding: '1rem 1.5rem' }}>Diocesan Secretariat Maintenance</td>
+                    <td style={{ padding: '1rem 1.5rem', textAlign: 'right', color: '#dc2626', fontWeight: 500 }}>-70,000,000</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}

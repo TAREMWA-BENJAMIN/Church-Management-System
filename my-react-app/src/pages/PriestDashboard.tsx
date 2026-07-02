@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-
+import { fetchCommunications, sendCommunication, markAsRead, fetchDirectory } from '../services/api';
 // Mock Data for Parish Cells
 const parishData = [
   {
@@ -80,7 +80,7 @@ const initialPriestMessages: Message[] = [
 ];
 
 export default function PriestDashboard() {
-  const [activeTab, setActiveTab] = useState<'overview' | 'comms'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'comms' | 'finance'>('overview');
   const [expandedCell, setExpandedCell] = useState<string | null>(null);
 
   // Communications State
@@ -104,30 +104,37 @@ export default function PriestDashboard() {
   const [excelData, setExcelData] = useState<any[][]>([]);
   const [excelEditCell, setExcelEditCell] = useState<{ r: number; c: number } | null>(null);
 
-  useEffect(() => {
-    const stored = localStorage.getItem('cms_messages');
-    let allMessages: Message[] = [];
-    if (stored) {
-      try {
-        allMessages = JSON.parse(stored);
-      } catch (e) {
-        allMessages = [];
-      }
-    }
+  const [directory, setDirectory] = useState<{ dioceses: {id: number, name: string}[]; archdeaconries: {id: number, name: string}[]; parishes: {id: number, name: string}[] }>({ dioceses: [], archdeaconries: [], parishes: [] });
 
-    // Check if Priest seed messages are in the list
-    const hasPriestSeeds = allMessages.some(m => m.id.startsWith('msg-priest-'));
-    if (!hasPriestSeeds) {
-      allMessages = [...allMessages, ...initialPriestMessages];
-      localStorage.setItem('cms_messages', JSON.stringify(allMessages));
-    }
-    
-    setMessages(allMessages);
+  useEffect(() => {
+    fetchDirectory().then(setDirectory).catch(console.error);
   }, []);
+
+  useEffect(() => {
+    const loadMessages = async () => {
+      try {
+        const data = await fetchCommunications('App\\Models\\Parish', 1, commsView); // Mock Parish ID 1
+        const formattedMessages: Message[] = data.map((c: any) => ({
+          id: c.id.toString(),
+          from: c.sender?.name || 'Unknown',
+          fromRole: c.sender_type.includes('Diocese') ? 'Bishop' : 'Priest',
+          to: c.receiver?.name || 'Unknown',
+          subject: c.subject,
+          body: c.message,
+          date: c.created_at,
+          read: c.is_read,
+          attachments: []
+        }));
+        setMessages(formattedMessages);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    loadMessages();
+  }, [commsView]);
 
   const saveMessages = (updated: Message[]) => {
     setMessages(updated);
-    localStorage.setItem('cms_messages', JSON.stringify(updated));
   };
 
   const toggleCell = (name: string) => {
@@ -139,29 +146,21 @@ export default function PriestDashboard() {
   };
 
   // Mark message as read
-  const handleSelectMessage = (msg: Message) => {
+  const handleSelectMessage = async (msg: Message) => {
     setSelectedMessage(msg);
     setShowCompose(false);
     setActivePreview(null);
-    if (!msg.read && msg.to === 'St. Paul\'s Parish') {
-      const updated = messages.map(m => m.id === msg.id ? { ...m, read: true } : m);
-      saveMessages(updated);
+    if (!msg.read && commsView === 'inbox') {
+      try {
+        await markAsRead(parseInt(msg.id));
+        const updated = messages.map(m => m.id === msg.id ? { ...m, read: true } : m);
+        setMessages(updated);
+      } catch(e) { console.error(e); }
     }
   };
 
   // Filter messages based on Priest restrictions (St. Paul's Parish)
   const filteredMessages = messages.filter(msg => {
-    const isInboxDirection = commsView === 'inbox';
-    
-    if (isInboxDirection) {
-      // Received from Eastern Archdeaconry to Parish
-      const isFromArchdeaconry = msg.fromRole === 'Archdeaconry' && msg.to === 'St. Paul\'s Parish';
-      if (!isFromArchdeaconry) return false;
-    } else {
-      // Sent by Priest Rev. John D.
-      if (msg.fromRole !== 'Priest') return false;
-    }
-
     // Search query matching
     const matchesSearch = 
       msg.subject.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -226,37 +225,41 @@ export default function PriestDashboard() {
   };
 
   // Submit Compose Email
-  const handleSendEmail = (e: React.FormEvent) => {
+  const handleSendEmail = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!composeSubject.trim() || !composeBody.trim()) return;
 
-    const newMessage: Message = {
-      id: `msg-${Date.now()}`,
-      from: 'Rev. John D. (St. Paul\'s Parish)',
-      fromRole: 'Priest',
-      to: composeTo,
-      subject: composeSubject,
-      body: composeBody,
-      date: new Date().toISOString(),
-      read: true,
-      attachments: attachedFiles.map(file => ({
-        name: file.name,
-        type: file.type,
-        size: file.size,
-        fileUrl: file.fileUrl
-      }))
-    };
+    let receiverType = 'App\\Models\\Parish';
+    let receiverId = parseInt(composeTo);
 
-    saveMessages([newMessage, ...messages]);
+    if (composeTo.startsWith('d-')) {
+      receiverType = 'App\\Models\\Diocese';
+      receiverId = parseInt(composeTo.replace('d-', ''));
+    } else if (composeTo.startsWith('a-')) {
+      receiverType = 'App\\Models\\Archdeaconry';
+      receiverId = parseInt(composeTo.replace('a-', ''));
+    }
 
-    // Reset Form
-    setComposeSubject('');
-    setComposeBody('');
-    setAttachedFiles([]);
-    setShowCompose(false);
-    setSelectedMessage(newMessage);
-    setCommsView('sent');
-    alert(`Message successfully sent to ${composeTo}!`);
+    try {
+      await sendCommunication({
+        sender_type: 'App\\Models\\Parish',
+        sender_id: 1, // Mock Parish
+        receiver_type: receiverType,
+        receiver_id: receiverId,
+        subject: composeSubject,
+        message: composeBody,
+      });
+
+      setComposeSubject('');
+      setComposeBody('');
+      setAttachedFiles([]);
+      setShowCompose(false);
+      setCommsView('sent');
+      alert(`Message successfully sent!`);
+    } catch(e) {
+      console.error(e);
+      alert('Failed to send message');
+    }
   };
 
   // Open rich attachment preview
@@ -290,7 +293,7 @@ export default function PriestDashboard() {
     setExcelData(updated);
   };
 
-  const unreadCount = messages.filter(m => m.to === 'St. Paul\'s Parish' && !m.read).length;
+  const unreadCount = messages.filter(m => !m.read).length;
 
   return (
     <>
@@ -340,6 +343,12 @@ export default function PriestDashboard() {
               <span className="badge-unread">{unreadCount}</span>
             )}
           </div>
+        </button>
+        <button 
+          onClick={() => setActiveTab('finance')}
+          className={`tab-btn ${activeTab === 'finance' ? 'active' : ''}`}
+        >
+          Finance Overview
         </button>
       </div>
 
@@ -546,17 +555,28 @@ export default function PriestDashboard() {
                 </div>
                 
                 <div>
-                  <label className="form-label">Recipient Archdeaconry</label>
+                  <label className="form-label">Recipient</label>
                   <select 
                     value={composeTo} 
                     onChange={(e) => setComposeTo(e.target.value)}
                     className="form-select"
                   >
-                    <option value="Eastern Archdeaconry">Eastern Archdeaconry (Ven. Michael S.)</option>
+                    <optgroup label="Archdeaconries (Upward — Primary)">
+                      {directory.archdeaconries?.map(a => (
+                        <option key={`a-${a.id}`} value={`a-${a.id}`}>{a.name}</option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="Parishes (Lateral)">
+                      {directory.parishes.map(p => (
+                        <option key={`p-${p.id}`} value={p.id}>{p.name}</option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="Dioceses">
+                      {directory.dioceses.map(d => (
+                        <option key={`d-${d.id}`} value={`d-${d.id}`}>{d.name}</option>
+                      ))}
+                    </optgroup>
                   </select>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: '0.25rem', display: 'block' }}>
-                    ⚠️ Note: As a Parish Priest, you can only communicate directly with your parent Archdeaconry.
-                  </span>
                 </div>
 
                 <div>
@@ -702,6 +722,78 @@ export default function PriestDashboard() {
                 <p style={{ fontWeight: 500 }}>Select a message to display details, or compose a new email.</p>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* TAB CONTENT: FINANCE OVERVIEW */}
+      {activeTab === 'finance' && (
+        <div className="card-grid" style={{ gridTemplateColumns: '1fr', alignItems: 'start' }}>
+          <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
+            <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>Parish Financial Log</h2>
+              <button className="btn btn-primary" style={{ fontSize: '0.875rem', padding: '0.4rem 0.8rem' }}>+ Record Entry</button>
+            </div>
+            
+            <div style={{ padding: '1.5rem', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', background: '#fafafa', borderBottom: '1px solid var(--color-border)' }}>
+              <div>
+                <span style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>Gross Income</span>
+                <div style={{ fontSize: '1.5rem', fontWeight: 600, color: '#16a34a' }}>10,000,000 UGX</div>
+              </div>
+              <div>
+                <span style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>Immediate Expenses</span>
+                <div style={{ fontSize: '1.5rem', fontWeight: 600, color: '#dc2626' }}>-1,200,000 UGX</div>
+              </div>
+              <div>
+                <span style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>Net Submittable to Diocese</span>
+                <div style={{ fontSize: '1.5rem', fontWeight: 600 }}>8,800,000 UGX</div>
+              </div>
+            </div>
+
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                <thead style={{ background: 'var(--color-surface)' }}>
+                  <tr>
+                    <th style={{ padding: '1rem 1.5rem', fontWeight: 500, color: 'var(--color-text-muted)' }}>Date</th>
+                    <th style={{ padding: '1rem 1.5rem', fontWeight: 500, color: 'var(--color-text-muted)' }}>Category</th>
+                    <th style={{ padding: '1rem 1.5rem', fontWeight: 500, color: 'var(--color-text-muted)' }}>Description</th>
+                    <th style={{ padding: '1rem 1.5rem', fontWeight: 500, color: 'var(--color-text-muted)', textAlign: 'right' }}>Amount (UGX)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style={{ borderBottom: '1px solid var(--color-border)' }}>
+                    <td style={{ padding: '1rem 1.5rem' }}>2026-07-05</td>
+                    <td style={{ padding: '1rem 1.5rem' }}><span style={{ padding: '0.2rem 0.5rem', background: 'rgba(22, 163, 74, 0.1)', color: '#16a34a', borderRadius: '4px', fontSize: '0.75rem' }}>Tithe</span></td>
+                    <td style={{ padding: '1rem 1.5rem' }}>Main Sunday Service Tithes</td>
+                    <td style={{ padding: '1rem 1.5rem', textAlign: 'right', color: '#16a34a', fontWeight: 500 }}>+6,000,000</td>
+                  </tr>
+                  <tr style={{ borderBottom: '1px solid var(--color-border)' }}>
+                    <td style={{ padding: '1rem 1.5rem' }}>2026-07-05</td>
+                    <td style={{ padding: '1rem 1.5rem' }}><span style={{ padding: '0.2rem 0.5rem', background: 'rgba(22, 163, 74, 0.1)', color: '#16a34a', borderRadius: '4px', fontSize: '0.75rem' }}>Giving</span></td>
+                    <td style={{ padding: '1rem 1.5rem' }}>General Offering</td>
+                    <td style={{ padding: '1rem 1.5rem', textAlign: 'right', color: '#16a34a', fontWeight: 500 }}>+2,500,000</td>
+                  </tr>
+                  <tr style={{ borderBottom: '1px solid var(--color-border)' }}>
+                    <td style={{ padding: '1rem 1.5rem' }}>2026-07-05</td>
+                    <td style={{ padding: '1rem 1.5rem' }}><span style={{ padding: '0.2rem 0.5rem', background: 'rgba(22, 163, 74, 0.1)', color: '#16a34a', borderRadius: '4px', fontSize: '0.75rem' }}>Donation</span></td>
+                    <td style={{ padding: '1rem 1.5rem' }}>Building Fund Envelopes</td>
+                    <td style={{ padding: '1rem 1.5rem', textAlign: 'right', color: '#16a34a', fontWeight: 500 }}>+1,500,000</td>
+                  </tr>
+                  <tr style={{ borderBottom: '1px solid var(--color-border)', background: 'rgba(220, 38, 38, 0.02)' }}>
+                    <td style={{ padding: '1rem 1.5rem' }}>2026-07-05</td>
+                    <td style={{ padding: '1rem 1.5rem' }}><span style={{ padding: '0.2rem 0.5rem', background: 'rgba(220, 38, 38, 0.1)', color: '#dc2626', borderRadius: '4px', fontSize: '0.75rem' }}>Expense (Utility)</span></td>
+                    <td style={{ padding: '1rem 1.5rem' }}>Umeme Electricity Pre-paid Token</td>
+                    <td style={{ padding: '1rem 1.5rem', textAlign: 'right', color: '#dc2626', fontWeight: 500 }}>-400,000</td>
+                  </tr>
+                  <tr style={{ borderBottom: '1px solid var(--color-border)', background: 'rgba(220, 38, 38, 0.02)' }}>
+                    <td style={{ padding: '1rem 1.5rem' }}>2026-07-05</td>
+                    <td style={{ padding: '1rem 1.5rem' }}><span style={{ padding: '0.2rem 0.5rem', background: 'rgba(220, 38, 38, 0.1)', color: '#dc2626', borderRadius: '4px', fontSize: '0.75rem' }}>Expense (Maintenance)</span></td>
+                    <td style={{ padding: '1rem 1.5rem' }}>Plumbing repair for washrooms</td>
+                    <td style={{ padding: '1rem 1.5rem', textAlign: 'right', color: '#dc2626', fontWeight: 500 }}>-800,000</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}

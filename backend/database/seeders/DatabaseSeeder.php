@@ -15,11 +15,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        if (\App\Models\Diocese::count() === 0) {
+            $d = \App\Models\Diocese::create(['name' => 'Diocese of Kampala', 'bishop_name' => 'Bishop James']);
+            $a = \App\Models\Archdeaconry::create(['diocese_id' => $d->id, 'name' => 'Central Archdeaconry']);
+            \App\Models\Parish::create(['archdeaconry_id' => $a->id, 'name' => 'All Saints Cathedral', 'priest_name' => 'Rev. John']);
+            \App\Models\Parish::create(['archdeaconry_id' => $a->id, 'name' => 'St. Pauls Parish', 'priest_name' => 'Rev. Peter']);
+        }
     }
 }
