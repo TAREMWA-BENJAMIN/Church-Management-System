@@ -99,7 +99,7 @@ const mockArchdeaconMessages: Message[] = [
 ];
 
 export default function ArchdeaconDashboard() {
-  const [activeTab, setActiveTab] = useState<'overview' | 'comms' | 'finance'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'comms'>('overview');
   const [expandedParish, setExpandedParish] = useState<string | null>(null);
 
   // Communications State
@@ -344,12 +344,6 @@ export default function ArchdeaconDashboard() {
               <span className="badge-unread">{unreadCount}</span>
             )}
           </div>
-        </button>
-        <button
-          onClick={() => setActiveTab('finance')}
-          className={`tab-btn ${activeTab === 'finance' ? 'active' : ''}`}
-        >
-          Finance Overview
         </button>
       </div>
 
@@ -740,73 +734,7 @@ export default function ArchdeaconDashboard() {
       )}
 
       {/* TAB: FINANCE OVERVIEW */}
-      {activeTab === 'finance' && (
-        <div className="card-grid" style={{ gridTemplateColumns: '1fr', alignItems: 'start' }}>
-          <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
-            <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>Archdeaconry Financial Summary</h2>
-              <button className="btn btn-primary" style={{ fontSize: '0.875rem', padding: '0.4rem 0.8rem' }}>+ Record Entry</button>
-            </div>
-
-            <div style={{ padding: '1.5rem', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', background: '#fafafa', borderBottom: '1px solid var(--color-border)' }}>
-              <div>
-                <span style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>Combined Parish Income</span>
-                <div style={{ fontSize: '1.5rem', fontWeight: 600, color: '#16a34a' }}>595,000,000 UGX</div>
-              </div>
-              <div>
-                <span style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>Combined Expenses</span>
-                <div style={{ fontSize: '1.5rem', fontWeight: 600, color: '#dc2626' }}>-50,000,000 UGX</div>
-              </div>
-              <div>
-                <span style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>Net Submittable to Diocese</span>
-                <div style={{ fontSize: '1.5rem', fontWeight: 600 }}>545,000,000 UGX</div>
-              </div>
-            </div>
-
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                <thead style={{ background: 'var(--color-surface)' }}>
-                  <tr>
-                    <th style={{ padding: '1rem 1.5rem', fontWeight: 500, color: 'var(--color-text-muted)' }}>Parish</th>
-                    <th style={{ padding: '1rem 1.5rem', fontWeight: 500, color: 'var(--color-text-muted)' }}>Gross Income (UGX)</th>
-                    <th style={{ padding: '1rem 1.5rem', fontWeight: 500, color: 'var(--color-text-muted)' }}>Expenses (UGX)</th>
-                    <th style={{ padding: '1rem 1.5rem', fontWeight: 500, color: 'var(--color-text-muted)', textAlign: 'right' }}>Net (UGX)</th>
-                    <th style={{ padding: '1rem 1.5rem', fontWeight: 500, color: 'var(--color-text-muted)' }}>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {[
-                    { parish: "St. Paul's Parish", income: '200,000,000', expenses: '18,000,000', net: '182,000,000', status: 'Healthy' },
-                    { parish: "St. Luke's Parish", income: '350,000,000', expenses: '24,000,000', net: '326,000,000', status: 'Healthy' },
-                    { parish: "St. Mark's Mission", income: '45,000,000', expenses: '8,000,000', net: '37,000,000', status: 'Review' },
-                  ].map((row, i) => (
-                    <tr key={i} style={{ borderBottom: '1px solid var(--color-border)' }}>
-                      <td style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>{row.parish}</td>
-                      <td style={{ padding: '1rem 1.5rem', color: '#16a34a' }}>+{row.income}</td>
-                      <td style={{ padding: '1rem 1.5rem', color: '#dc2626' }}>-{row.expenses}</td>
-                      <td style={{ padding: '1rem 1.5rem', textAlign: 'right', fontWeight: 500 }}>{row.net}</td>
-                      <td style={{ padding: '1rem 1.5rem' }}>
-                        <span style={{
-                          padding: '0.25rem 0.6rem',
-                          borderRadius: '999px',
-                          fontSize: '0.75rem',
-                          fontWeight: 500,
-                          backgroundColor: row.status === 'Healthy' ? 'rgba(22, 163, 74, 0.1)' : 'rgba(245, 158, 11, 0.1)',
-                          color: row.status === 'Healthy' ? '#16a34a' : '#d97706',
-                        }}>
-                          {row.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ATTACHMENT PREVIEW MODAL */}
+{/* ATTACHMENT PREVIEW MODAL */}
       {activePreview && (
         <div className="preview-overlay">
           <div className={`preview-container ${activePreview.type}`}>

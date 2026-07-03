@@ -129,7 +129,7 @@ const initialMessages: Message[] = [
 ];
 
 export default function ArchbishopDashboard() {
-  const [activeTab, setActiveTab] = useState<'hierarchy' | 'comms' | 'finance'>('hierarchy');
+  const [activeTab, setActiveTab] = useState<'hierarchy' | 'comms'>('hierarchy');
   const [expandedDiocese, setExpandedDiocese] = useState<string | null>(null);
   const [expandedArchdeaconry, setExpandedArchdeaconry] = useState<string | null>(null);
 
@@ -406,12 +406,6 @@ export default function ArchbishopDashboard() {
               </span>
             )}
           </div>
-        </button>
-        <button 
-          onClick={() => setActiveTab('finance')}
-          className={`tab-btn ${activeTab === 'finance' ? 'active' : ''}`}
-        >
-          Finance Overview
         </button>
       </div>
 
@@ -767,78 +761,7 @@ export default function ArchbishopDashboard() {
       )}
 
       {/* TAB CONTENT: FINANCE OVERVIEW */}
-      {activeTab === 'finance' && (
-        <div className="card-grid" style={{ gridTemplateColumns: '1fr', alignItems: 'start' }}>
-          <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
-            <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>National Financial Summary</h2>
-              <button className="btn btn-primary" style={{ fontSize: '0.875rem', padding: '0.4rem 0.8rem' }}>+ Record Provincial Entry</button>
-            </div>
-            
-            <div style={{ padding: '1.5rem', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', background: '#fafafa', borderBottom: '1px solid var(--color-border)' }}>
-              <div>
-                <span style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>Gross Quota Received (Provincial Level)</span>
-                <div style={{ fontSize: '1.5rem', fontWeight: 600, color: '#16a34a' }}>4,200,000,000 UGX</div>
-              </div>
-              <div>
-                <span style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>Provincial Expenses</span>
-                <div style={{ fontSize: '1.5rem', fontWeight: 600, color: '#dc2626' }}>-400,000,000 UGX</div>
-              </div>
-              <div>
-                <span style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>Net Provincial Funds</span>
-                <div style={{ fontSize: '1.5rem', fontWeight: 600 }}>3,800,000,000 UGX</div>
-              </div>
-            </div>
-
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                <thead style={{ background: 'var(--color-surface)' }}>
-                  <tr>
-                    <th style={{ padding: '1rem 1.5rem', fontWeight: 500, color: 'var(--color-text-muted)' }}>Date</th>
-                    <th style={{ padding: '1rem 1.5rem', fontWeight: 500, color: 'var(--color-text-muted)' }}>Source / Category</th>
-                    <th style={{ padding: '1rem 1.5rem', fontWeight: 500, color: 'var(--color-text-muted)' }}>Description</th>
-                    <th style={{ padding: '1rem 1.5rem', fontWeight: 500, color: 'var(--color-text-muted)', textAlign: 'right' }}>Amount (UGX)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr style={{ borderBottom: '1px solid var(--color-border)' }}>
-                    <td style={{ padding: '1rem 1.5rem' }}>2026-07-01</td>
-                    <td style={{ padding: '1rem 1.5rem' }}><span style={{ padding: '0.2rem 0.5rem', background: 'rgba(22, 163, 74, 0.1)', color: '#16a34a', borderRadius: '4px', fontSize: '0.75rem' }}>Diocesan Quota</span></td>
-                    <td style={{ padding: '1rem 1.5rem' }}>Kampala Diocese Q2 Quota Received</td>
-                    <td style={{ padding: '1rem 1.5rem', textAlign: 'right', color: '#16a34a', fontWeight: 500 }}>+850,000,000</td>
-                  </tr>
-                  <tr style={{ borderBottom: '1px solid var(--color-border)' }}>
-                    <td style={{ padding: '1rem 1.5rem' }}>2026-07-02</td>
-                    <td style={{ padding: '1rem 1.5rem' }}><span style={{ padding: '0.2rem 0.5rem', background: 'rgba(22, 163, 74, 0.1)', color: '#16a34a', borderRadius: '4px', fontSize: '0.75rem' }}>Diocesan Quota</span></td>
-                    <td style={{ padding: '1rem 1.5rem' }}>Namirembe Diocese Q2 Quota Received</td>
-                    <td style={{ padding: '1rem 1.5rem', textAlign: 'right', color: '#16a34a', fontWeight: 500 }}>+1,200,000,000</td>
-                  </tr>
-                  <tr style={{ borderBottom: '1px solid var(--color-border)' }}>
-                    <td style={{ padding: '1rem 1.5rem' }}>2026-07-03</td>
-                    <td style={{ padding: '1rem 1.5rem' }}><span style={{ padding: '0.2rem 0.5rem', background: 'rgba(22, 163, 74, 0.1)', color: '#16a34a', borderRadius: '4px', fontSize: '0.75rem' }}>Donation (International)</span></td>
-                    <td style={{ padding: '1rem 1.5rem' }}>Partner Church Grant for Development</td>
-                    <td style={{ padding: '1rem 1.5rem', textAlign: 'right', color: '#16a34a', fontWeight: 500 }}>+500,000,000</td>
-                  </tr>
-                  <tr style={{ borderBottom: '1px solid var(--color-border)', background: 'rgba(220, 38, 38, 0.02)' }}>
-                    <td style={{ padding: '1rem 1.5rem' }}>2026-07-05</td>
-                    <td style={{ padding: '1rem 1.5rem' }}><span style={{ padding: '0.2rem 0.5rem', background: 'rgba(220, 38, 38, 0.1)', color: '#dc2626', borderRadius: '4px', fontSize: '0.75rem' }}>Expense (Clergy)</span></td>
-                    <td style={{ padding: '1rem 1.5rem' }}>Provincial Clergy Retirement Fund Alloc</td>
-                    <td style={{ padding: '1rem 1.5rem', textAlign: 'right', color: '#dc2626', fontWeight: 500 }}>-150,000,000</td>
-                  </tr>
-                  <tr style={{ borderBottom: '1px solid var(--color-border)', background: 'rgba(220, 38, 38, 0.02)' }}>
-                    <td style={{ padding: '1rem 1.5rem' }}>2026-07-06</td>
-                    <td style={{ padding: '1rem 1.5rem' }}><span style={{ padding: '0.2rem 0.5rem', background: 'rgba(220, 38, 38, 0.1)', color: '#dc2626', borderRadius: '4px', fontSize: '0.75rem' }}>Expense (Operations)</span></td>
-                    <td style={{ padding: '1rem 1.5rem' }}>Provincial Secretariat Maintenance</td>
-                    <td style={{ padding: '1rem 1.5rem', textAlign: 'right', color: '#dc2626', fontWeight: 500 }}>-250,000,000</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* DETAILED ATTACHMENT PREVIEW MODAL */}
+{/* DETAILED ATTACHMENT PREVIEW MODAL */}
       {activePreview && (
         <div className="preview-overlay">
           <div className={`preview-container ${activePreview.type}`}>
