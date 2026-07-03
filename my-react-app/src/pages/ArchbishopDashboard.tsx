@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import CertificatesPage from './CertificatesPage';
 import { fetchDirectory } from '../services/api';
 
 // Mock Data structure for the hierarchy
@@ -129,7 +130,7 @@ const initialMessages: Message[] = [
 ];
 
 export default function ArchbishopDashboard() {
-  const [activeTab, setActiveTab] = useState<'hierarchy' | 'comms'>('hierarchy');
+  const [activeTab, setActiveTab] = useState<'hierarchy' | 'comms' | 'certificates'>('hierarchy');
   const [expandedDiocese, setExpandedDiocese] = useState<string | null>(null);
   const [expandedArchdeaconry, setExpandedArchdeaconry] = useState<string | null>(null);
 
@@ -406,6 +407,12 @@ export default function ArchbishopDashboard() {
               </span>
             )}
           </div>
+        </button>
+        <button 
+          onClick={() => setActiveTab('certificates')}
+          className={`tab-btn ${activeTab === 'certificates' ? 'active' : ''}`}
+        >
+          Certificates
         </button>
       </div>
 
@@ -760,8 +767,14 @@ export default function ArchbishopDashboard() {
         </div>
       )}
 
-      {/* TAB CONTENT: FINANCE OVERVIEW */}
-{/* DETAILED ATTACHMENT PREVIEW MODAL */}
+      {/* TAB CONTENT: CERTIFICATES */}
+      {activeTab === 'certificates' && (
+        <div style={{ marginTop: '1rem' }}>
+          <CertificatesPage />
+        </div>
+      )}
+
+      {/* DETAILED ATTACHMENT PREVIEW MODAL */}
       {activePreview && (
         <div className="preview-overlay">
           <div className={`preview-container ${activePreview.type}`}>

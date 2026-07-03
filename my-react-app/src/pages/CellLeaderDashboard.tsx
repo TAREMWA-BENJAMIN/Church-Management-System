@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
+import CertificatesPage from './CertificatesPage';
 
 export default function CellLeaderDashboard() {
-  const [activeTab, setActiveTab] = useState<'overview'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'certificates'>('overview');
 
   return (
     <>
@@ -35,7 +36,12 @@ export default function CellLeaderDashboard() {
         >
           Members & Attendance
         </button>
-
+        <button 
+          onClick={() => setActiveTab('certificates')}
+          className={`tab-btn ${activeTab === 'certificates' ? 'active' : ''}`}
+        >
+          Certificates
+        </button>
       </div>
 
       {activeTab === 'overview' && (
@@ -61,6 +67,11 @@ export default function CellLeaderDashboard() {
         </div>
       )}
 
+      {activeTab === 'certificates' && (
+        <div style={{ marginTop: '1rem' }}>
+          <CertificatesPage />
+        </div>
+      )}
 
     </>
   );

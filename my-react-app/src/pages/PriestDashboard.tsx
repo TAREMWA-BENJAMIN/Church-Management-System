@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import CertificatesPage from './CertificatesPage';
 import { fetchCommunications, sendCommunication, markAsRead, fetchDirectory } from '../services/api';
 // Mock Data for Parish Cells
 const parishData = [
@@ -80,7 +81,7 @@ const initialPriestMessages: Message[] = [
 ];
 
 export default function PriestDashboard() {
-  const [activeTab, setActiveTab] = useState<'overview' | 'comms'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'comms' | 'certificates'>('overview');
   const [expandedCell, setExpandedCell] = useState<string | null>(null);
 
   // Communications State
@@ -343,6 +344,12 @@ export default function PriestDashboard() {
               <span className="badge-unread">{unreadCount}</span>
             )}
           </div>
+        </button>
+        <button 
+          onClick={() => setActiveTab('certificates')}
+          className={`tab-btn ${activeTab === 'certificates' ? 'active' : ''}`}
+        >
+          Certificates
         </button>
       </div>
 
@@ -720,8 +727,14 @@ export default function PriestDashboard() {
         </div>
       )}
 
-      {/* TAB CONTENT: FINANCE OVERVIEW */}
-{/* DETAILED ATTACHMENT PREVIEW MODAL */}
+      {/* TAB CONTENT: CERTIFICATES */}
+      {activeTab === 'certificates' && (
+        <div style={{ marginTop: '1rem' }}>
+          <CertificatesPage />
+        </div>
+      )}
+
+      {/* DETAILED ATTACHMENT PREVIEW MODAL */}
       {activePreview && (
         <div className="preview-overlay">
           <div className={`preview-container ${activePreview.type}`}>
