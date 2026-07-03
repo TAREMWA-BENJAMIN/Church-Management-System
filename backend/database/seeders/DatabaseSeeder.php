@@ -70,18 +70,40 @@ class DatabaseSeeder extends Seeder
 
         // Ensure mock data for frontend demo still exists under Kampala
         $kampala = Diocese::where('name', 'Kampala')->first();
-        if ($kampala && $kampala->archdeaconries()->count() === 0) {
-            $a = Archdeaconry::updateOrCreate(
+        if ($kampala) {
+            $central = Archdeaconry::updateOrCreate(
                 ['diocese_id' => $kampala->id, 'name' => 'Central Archdeaconry']
             );
-            Parish::updateOrCreate(
-                ['archdeaconry_id' => $a->id, 'name' => 'All Saints Cathedral'],
-                ['priest_name' => 'Rev. John']
+            $centralParishes = [
+                "All Saints' Cathedral, Nakasero", "All Saints Chapel, Lweza", "St. Stephen's Kitara",
+                "St. Francis Chapel, Makerere University", "Kabanyolo Chapel", "St. John's Makerere",
+                "St. Peter's Wandegeya", "St. Nicholas Kalerwe", "Holy Trinity Kivulu", "St. Paul's Mulago",
+                "St. Luke's Chapel Mulago", "Allied Health Anglican Chapel", "St. John's Kamwokya",
+                "St. James Kifumbiro", "St. Philip's Kyebando Kisalosalo"
+            ];
+            foreach ($centralParishes as $parishName) {
+                Parish::updateOrCreate(['archdeaconry_id' => $central->id, 'name' => $parishName]);
+            }
+
+            $eastern = Archdeaconry::updateOrCreate(
+                ['diocese_id' => $kampala->id, 'name' => 'Eastern Archdeaconry']
             );
-            Parish::updateOrCreate(
-                ['archdeaconry_id' => $a->id, 'name' => 'St. Pauls Parish'],
-                ['priest_name' => 'Rev. Peter']
+            $easternParishes = [
+                "St. Luke's Ntinda", "St. Peter's Naguru", "St. Paul's Mbuya–Kiwanawataka", "Kakumba Chapel"
+            ];
+            foreach ($easternParishes as $parishName) {
+                Parish::updateOrCreate(['archdeaconry_id' => $eastern->id, 'name' => $parishName]);
+            }
+
+            $southern = Archdeaconry::updateOrCreate(
+                ['diocese_id' => $kampala->id, 'name' => 'Southern Archdeaconry']
             );
+            $southernParishes = [
+                "Kisugu", "Muyenga", "Kansanga", "Ggaba", "Luzira", "Bugolobi"
+            ];
+            foreach ($southernParishes as $parishName) {
+                Parish::updateOrCreate(['archdeaconry_id' => $southern->id, 'name' => $parishName]);
+            }
         }
     }
 }
