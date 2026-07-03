@@ -12,4 +12,16 @@ class Diocese extends Model
     {
         return $this->hasMany(Archdeaconry::class);
     }
+
+    public function parishes()
+    {
+        return $this->hasManyThrough(Parish::class, Archdeaconry::class);
+    }
+
+    public function finances()
+    {
+        // Custom query to get all finances for this diocese's parishes
+        $parishIds = $this->parishes()->pluck('parishes.id');
+        return FinanceRecord::whereIn('parish_id', $parishIds);
+    }
 }

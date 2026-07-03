@@ -17,4 +17,9 @@ class Archdeaconry extends Model
     {
         return $this->hasMany(Parish::class);
     }
+
+    public function finances()
+    {
+        return $this->hasManyThrough(FinanceRecord::class, Parish::class);
+    }
 }

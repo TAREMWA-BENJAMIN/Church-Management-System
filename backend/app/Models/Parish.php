@@ -17,4 +17,9 @@ class Parish extends Model
     {
         return $this->hasMany(Cell::class);
     }
+
+    public function finances()
+    {
+        return $this->hasMany(FinanceRecord::class);
+    }
 }
