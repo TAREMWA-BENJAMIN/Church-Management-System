@@ -1,11 +1,22 @@
 export const API_BASE_URL = 'http://localhost:8000/api';
 
+export function getAuthToken() {
+  return localStorage.getItem('auth_token');
+}
+
+export function authHeaders(customHeaders: any = {}) {
+  const token = getAuthToken();
+  return {
+    'Accept': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    ...customHeaders,
+  };
+}
+
 export async function fetchCommunications(entityType: string, entityId: number, tab: 'inbox' | 'sent') {
   const url = `${API_BASE_URL}/communications?entity_type=${encodeURIComponent(entityType)}&entity_id=${entityId}&tab=${tab}`;
   const response = await fetch(url, {
-    headers: {
-      'Accept': 'application/json',
-    },
+    headers: authHeaders(),
   });
   if (!response.ok) {
     throw new Error('Failed to fetch communications');
@@ -16,10 +27,9 @@ export async function fetchCommunications(entityType: string, entityId: number, 
 export async function sendCommunication(data: any) {
   const response = await fetch(`${API_BASE_URL}/communications`, {
     method: 'POST',
-    headers: {
+    headers: authHeaders({
       'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    },
+    }),
     body: JSON.stringify(data),
   });
   if (!response.ok) {
@@ -31,10 +41,9 @@ export async function sendCommunication(data: any) {
 export async function markAsRead(id: number) {
   const response = await fetch(`${API_BASE_URL}/communications/${id}/read`, {
     method: 'PATCH',
-    headers: {
+    headers: authHeaders({
       'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    },
+    }),
   });
   if (!response.ok) {
     throw new Error('Failed to mark communication as read');
@@ -44,9 +53,9 @@ export async function markAsRead(id: number) {
 
 export async function fetchDirectory() {
   const [diocesesRes, archdeaconriesRes, parishesRes] = await Promise.all([
-    fetch(`${API_BASE_URL}/directory/dioceses`, { headers: { 'Accept': 'application/json' } }),
-    fetch(`${API_BASE_URL}/directory/archdeaconries`, { headers: { 'Accept': 'application/json' } }),
-    fetch(`${API_BASE_URL}/directory/parishes`, { headers: { 'Accept': 'application/json' } }),
+    fetch(`${API_BASE_URL}/directory/dioceses`, { headers: authHeaders() }),
+    fetch(`${API_BASE_URL}/directory/archdeaconries`, { headers: authHeaders() }),
+    fetch(`${API_BASE_URL}/directory/parishes`, { headers: authHeaders() }),
   ]);
 
   if (!diocesesRes.ok || !archdeaconriesRes.ok || !parishesRes.ok) {

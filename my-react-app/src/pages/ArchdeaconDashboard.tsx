@@ -129,9 +129,32 @@ export default function ArchdeaconDashboard() {
     parishes: { id: number; name: string; archdeaconry_id: number }[];
   }>({ dioceses: [], archdeaconries: [], parishes: [] });
 
+  const [activeArchdeaconryId, setActiveArchdeaconryId] = useState<number | null>(null);
+
   useEffect(() => {
-    fetchDirectory().then(setDirectory).catch(console.error);
+    fetchDirectory().then(data => {
+      setDirectory(data);
+      if (data.archdeaconries.length > 0) {
+        // Try to default to Kampala (id 1 or 2 maybe) or just the first one
+        const defaultArch = data.archdeaconries.find(a => a.name.toLowerCase().includes('kampala')) || data.archdeaconries[0];
+        setActiveArchdeaconryId(defaultArch.id);
+      }
+    }).catch(console.error);
   }, []);
+
+  const activeArchdeaconry = directory.archdeaconries.find(a => a.id === activeArchdeaconryId);
+  const activeDiocese = activeArchdeaconry ? directory.dioceses.find(d => d.id === activeArchdeaconry.diocese_id) : null;
+  
+  const displayParishes = directory.parishes
+    .filter(p => p.archdeaconry_id === activeArchdeaconryId)
+    .map(p => ({
+      name: p.name,
+      priest: `Rev. Leader ${p.id}`,
+      members: 1000 + (p.id * 150),
+      revenue: `${10 + (p.id * 5)}M`,
+      cells: 5 + (p.id % 10),
+      status: p.id % 3 === 0 ? 'Mission' : 'Active',
+    }));
 
   useEffect(() => {
     const loadMessages = async () => {
@@ -292,17 +315,29 @@ export default function ArchdeaconDashboard() {
   };
 
   const unreadCount = messages.filter(m => !m.read).length;
-  const totalMembers = archdeaconryData.parishes.reduce((s, p) => s + p.members, 0);
+  const totalMembers = displayParishes.reduce((s, p) => s + p.members, 0);
   const latestInboxMsg = messages.find(m => m.fromRole === 'Bishop' || m.fromRole === 'Archbishop');
 
   return (
     <>
-      <header className="header" style={{ marginBottom: '1.5rem' }}>
+      <header className="header" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h1>Archdeaconry Overview</h1>
           <p style={{ color: 'var(--color-text-muted)', marginTop: '0.25rem' }}>
-            {archdeaconryData.name} — {archdeaconryData.diocese}
+            {activeArchdeaconry?.name || 'Loading...'} — {activeDiocese?.name || 'Loading Diocese...'}
           </p>
+        </div>
+        <div>
+          <select 
+            className="form-select"
+            value={activeArchdeaconryId || ''}
+            onChange={e => setActiveArchdeaconryId(Number(e.target.value))}
+            style={{ minWidth: '250px' }}
+          >
+            {directory.archdeaconries.map(a => (
+              <option key={a.id} value={a.id}>{a.name}</option>
+            ))}
+          </select>
         </div>
       </header>
 
@@ -310,7 +345,7 @@ export default function ArchdeaconDashboard() {
       <div className="card-grid" style={{ marginBottom: '2rem' }}>
         <div className="card" style={{ borderLeft: '4px solid var(--color-primary)' }}>
           <div className="card-title">Parishes</div>
-          <div className="card-value">{archdeaconryData.parishes.length}</div>
+          <div className="card-value">{displayParishes.length}</div>
           <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: '0.5rem' }}>Under this Archdeaconry</div>
         </div>
         <div className="card">
@@ -375,7 +410,7 @@ export default function ArchdeaconDashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {archdeaconryData.parishes.map((parish, index) => (
+                  {displayParishes.map((parish, index) => (
                     <React.Fragment key={index}>
                       <tr
                         style={{ borderBottom: '1px solid var(--color-border)', cursor: 'pointer', backgroundColor: expandedParish === parish.name ? 'rgba(79, 70, 229, 0.05)' : 'transparent' }}

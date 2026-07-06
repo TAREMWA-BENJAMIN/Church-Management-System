@@ -15,8 +15,22 @@ class FinanceRecordController extends Controller
      */
     public function index(Request $request)
     {
-        $records = FinanceRecord::with('parish')
-            ->orderByDesc('date')
+        $user = $request->user();
+        $query = FinanceRecord::with('parish');
+
+        if ($user->isDioceseAdmin()) {
+            $query->whereHas('parish.archdeaconry', function ($q) use ($user) {
+                $q->where('diocese_id', $user->diocese_id);
+            });
+        } elseif ($user->isArchdeaconAdmin()) {
+            $query->whereHas('parish', function ($q) use ($user) {
+                $q->where('archdeaconry_id', $user->archdeaconry_id);
+            });
+        } elseif ($user->isParishAdmin()) {
+            $query->where('parish_id', $user->parish_id);
+        }
+
+        $records = $query->orderByDesc('date')
             ->orderByDesc('created_at')
             ->limit(50)
             ->get()
@@ -49,6 +63,19 @@ class FinanceRecordController extends Controller
             'date'        => ['required', 'date'],
         ]);
 
+        $user = $request->user();
+        $parish = Parish::with('archdeaconry')->findOrFail($validated['parish_id']);
+        
+        $allowed = false;
+        if ($user->isSuperAdmin()) $allowed = true;
+        elseif ($user->isDioceseAdmin() && $parish->archdeaconry->diocese_id == $user->diocese_id) $allowed = true;
+        elseif ($user->isArchdeaconAdmin() && $parish->archdeaconry_id == $user->archdeaconry_id) $allowed = true;
+        elseif ($user->isParishAdmin() && $parish->id == $user->parish_id) $allowed = true;
+
+        if (!$allowed) {
+            abort(403, 'Unauthorized to post finances for this parish.');
+        }
+
         $record = FinanceRecord::create($validated);
 
         // Broadcast to all connected clients
@@ -70,8 +97,21 @@ class FinanceRecordController extends Controller
     /**
      * Return all parishes for the record form dropdown.
      */
-    public function parishes()
+    public function parishes(Request $request)
     {
-        return response()->json(Parish::select('id', 'name')->orderBy('name')->get());
+        $user = $request->user();
+        $query = Parish::select('id', 'name')->orderBy('name');
+
+        if ($user->isDioceseAdmin()) {
+            $query->whereHas('archdeaconry', function ($q) use ($user) {
+                $q->where('diocese_id', $user->diocese_id);
+            });
+        } elseif ($user->isArchdeaconAdmin()) {
+            $query->where('archdeaconry_id', $user->archdeaconry_id);
+        } elseif ($user->isParishAdmin()) {
+            $query->where('id', $user->parish_id);
+        }
+
+        return response()->json($query->get());
     }
 }

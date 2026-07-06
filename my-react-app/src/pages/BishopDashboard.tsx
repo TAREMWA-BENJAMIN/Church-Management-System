@@ -109,11 +109,38 @@ export default function BishopDashboard() {
   const [excelData, setExcelData] = useState<any[][]>([]);
   const [excelEditCell, setExcelEditCell] = useState<{ r: number; c: number } | null>(null);
 
-  const [directory, setDirectory] = useState<{ dioceses: {id: number, name: string}[]; archdeaconries: {id: number, name: string}[]; parishes: {id: number, name: string}[] }>({ dioceses: [], archdeaconries: [], parishes: [] });
+  const [directory, setDirectory] = useState<{ dioceses: {id: number, name: string}[]; archdeaconries: {id: number, name: string, diocese_id: number}[]; parishes: {id: number, name: string, archdeaconry_id: number}[] }>({ dioceses: [], archdeaconries: [], parishes: [] });
+
+  const [activeDioceseId, setActiveDioceseId] = useState<number | null>(null);
 
   useEffect(() => {
-    fetchDirectory().then(setDirectory).catch(console.error);
+    fetchDirectory().then(data => {
+      setDirectory(data as any);
+      if (data.dioceses.length > 0) {
+        const defaultDioc = data.dioceses.find((d: any) => d.name.toLowerCase().includes('kampala')) || data.dioceses[0];
+        setActiveDioceseId(defaultDioc.id);
+      }
+    }).catch(console.error);
   }, []);
+
+  const activeDiocese = directory.dioceses.find(d => d.id === activeDioceseId);
+  const displayArchdeaconries = directory.archdeaconries
+    .filter(a => a.diocese_id === activeDioceseId)
+    .map(a => {
+      const aParishes = directory.parishes.filter(p => p.archdeaconry_id === a.id);
+      return {
+        name: a.name,
+        archdeacon: `Ven. Archdeacon ${a.id}`,
+        members: aParishes.length > 0 ? aParishes.length * 1500 : 1000 + (a.id * 200),
+        revenue: `${aParishes.length > 0 ? aParishes.length * 50 : 20 + a.id * 10}M`,
+        parishes: aParishes.map(p => ({
+          name: p.name,
+          priest: `Rev. Leader ${p.id}`,
+          members: 1000 + (p.id * 100),
+          revenue: `${10 + (p.id * 2)}M`
+        }))
+      };
+    });
 
   useEffect(() => {
     const loadMessages = async () => {
@@ -307,10 +334,22 @@ export default function BishopDashboard() {
 
   return (
     <>
-      <header className="header" style={{ marginBottom: '1.5rem' }}>
+      <header className="header" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h1>Diocesan Overview</h1>
-          <p style={{ color: 'var(--color-text-muted)', marginTop: '0.25rem' }}>Kampala Diocese Dashboard</p>
+          <p style={{ color: 'var(--color-text-muted)', marginTop: '0.25rem' }}>{activeDiocese?.name || 'Loading...'} Diocese Dashboard</p>
+        </div>
+        <div>
+          <select 
+            className="form-select"
+            value={activeDioceseId || ''}
+            onChange={e => setActiveDioceseId(Number(e.target.value))}
+            style={{ minWidth: '250px' }}
+          >
+            {directory.dioceses.map(d => (
+              <option key={d.id} value={d.id}>{d.name} Diocese</option>
+            ))}
+          </select>
         </div>
       </header>
 
@@ -318,15 +357,15 @@ export default function BishopDashboard() {
       <div className="card-grid" style={{ marginBottom: '2rem' }}>
         <div className="card">
           <div className="card-title">Archdeaconries</div>
-          <div className="card-value">6</div>
+          <div className="card-value">{displayArchdeaconries.length}</div>
         </div>
         <div className="card">
           <div className="card-title">Parishes</div>
-          <div className="card-value">42</div>
+          <div className="card-value">{displayArchdeaconries.reduce((acc, a) => acc + a.parishes.length, 0)}</div>
         </div>
         <div className="card">
           <div className="card-title">Registered Members</div>
-          <div className="card-value">18,200</div>
+          <div className="card-value">{displayArchdeaconries.reduce((acc, a) => acc + a.members, 0).toLocaleString()}</div>
         </div>
         <div className="card">
           <div className="card-title">Diocesan Revenue (YTD)</div>
@@ -381,7 +420,7 @@ export default function BishopDashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {diocesanData.map((arch, index) => (
+                  {displayArchdeaconries.map((arch, index) => (
                     <React.Fragment key={index}>
                       {/* Archdeaconry Row */}
                       <tr 

@@ -7,6 +7,8 @@ use Illuminate\Database\Seeder;
 use App\Models\Diocese;
 use App\Models\Archdeaconry;
 use App\Models\Parish;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -103,6 +105,47 @@ class DatabaseSeeder extends Seeder
             ];
             foreach ($southernParishes as $parishName) {
                 Parish::updateOrCreate(['archdeaconry_id' => $southern->id, 'name' => $parishName]);
+            }
+        }
+
+        // Add Dummy Users for RBAC Testing
+        User::updateOrCreate(
+            ['email' => 'super@cms.com'],
+            ['name' => 'System Admin', 'password' => Hash::make('password'), 'role' => 'SuperAdmin']
+        );
+
+        if ($kampala) {
+            User::updateOrCreate(
+                ['email' => 'kampala@cms.com'],
+                ['name' => 'Kampala Diocese Admin', 'password' => Hash::make('password'), 'role' => 'DioceseAdmin', 'diocese_id' => $kampala->id]
+            );
+
+            $centralArchdeaconry = Archdeaconry::where('name', 'Central Archdeaconry')->first();
+            if ($centralArchdeaconry) {
+                User::updateOrCreate(
+                    ['email' => 'central@cms.com'],
+                    ['name' => 'Central Archdeaconry Admin', 'password' => Hash::make('password'), 'role' => 'ArchdeaconAdmin', 'archdeaconry_id' => $centralArchdeaconry->id]
+                );
+
+                $nakaseroParish = Parish::where('name', "All Saints' Cathedral, Nakasero")->first();
+                if ($nakaseroParish) {
+                    User::updateOrCreate(
+                        ['email' => 'nakasero@cms.com'],
+                        ['name' => 'Nakasero Parish Admin', 'password' => Hash::make('password'), 'role' => 'ParishAdmin', 'parish_id' => $nakaseroParish->id]
+                    );
+                    User::updateOrCreate(
+                        ['email' => 'secretary@cms.com'],
+                        ['name' => 'Parish Secretary', 'password' => Hash::make('password'), 'role' => 'Secretary', 'parish_id' => $nakaseroParish->id]
+                    );
+                    User::updateOrCreate(
+                        ['email' => 'treasurer@cms.com'],
+                        ['name' => 'Parish Treasurer', 'password' => Hash::make('password'), 'role' => 'Treasurer', 'parish_id' => $nakaseroParish->id]
+                    );
+                    User::updateOrCreate(
+                        ['email' => 'cellleader@cms.com'],
+                        ['name' => 'Cell Leader', 'password' => Hash::make('password'), 'role' => 'CellLeader', 'parish_id' => $nakaseroParish->id]
+                    );
+                }
             }
         }
     }

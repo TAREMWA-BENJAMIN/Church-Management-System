@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import './index.css';
 
 import LoginPage from './pages/LoginPage';
@@ -17,18 +17,36 @@ import CertificatesPage from './pages/CertificatesPage';
 import SettingsPage from './pages/SettingsPage';
 import ArchdeaconDashboard from './pages/ArchdeaconDashboard';
 
-type Role = 'Archbishop' | 'Bishop' | 'Archdeacon' | 'Priest' | 'Secretary' | 'Treasurer' | 'CellLeader';
+type Role = 'SuperAdmin' | 'DioceseAdmin' | 'ArchdeaconAdmin' | 'ParishAdmin' | 'Archbishop' | 'Bishop' | 'Archdeacon' | 'Priest' | 'Secretary' | 'Treasurer' | 'CellLeader';
 type ModuleTab = 'Dashboard' | 'Hierarchy' | 'Members' | 'Finances' | 'Certificates' | 'Settings';
 
 function DashboardLayout() {
-  const [currentRole, setCurrentRole] = useState<Role>('Archbishop');
+  const navigate = useNavigate();
+  const userStr = localStorage.getItem('user');
+  const user = userStr ? JSON.parse(userStr) : null;
+  const currentRole = user?.role as Role || 'Priest';
+  
   const [activeTab, setActiveTab] = useState<ModuleTab>('Dashboard');
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  const handleLogout = () => {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
 
   const renderDashboard = () => {
     switch (currentRole) {
+      case 'SuperAdmin':
       case 'Archbishop': return <ArchbishopDashboard />;
+      case 'DioceseAdmin':
       case 'Bishop': return <BishopDashboard />;
+      case 'ArchdeaconAdmin':
       case 'Archdeacon': return <ArchdeaconDashboard />;
+      case 'ParishAdmin':
       case 'Priest': return <PriestDashboard />;
       case 'Secretary': return <SecretaryDashboard />;
       case 'Treasurer': return <TreasurerDashboard />;
@@ -50,16 +68,7 @@ function DashboardLayout() {
   };
 
   const getProfileName = () => {
-    switch (currentRole) {
-      case 'Archbishop': return 'Stephen K. (Archbishop)';
-      case 'Bishop': return 'James W. (Bishop)';
-      case 'Archdeacon': return 'Robert K. (Archdeacon)';
-      case 'Priest': return 'Rev. John D. (Priest)';
-      case 'Secretary': return 'Mary S. (Secretary)';
-      case 'Treasurer': return 'Peter T. (Treasurer)';
-      case 'CellLeader': return 'David C. (Cell Leader)';
-      default: return '';
-    }
+    return user?.name || 'User';
   };
 
   const tabs: ModuleTab[] = ['Dashboard', 'Hierarchy', 'Members', 'Finances', 'Certificates', 'Settings'];
@@ -86,25 +95,11 @@ function DashboardLayout() {
           ))}
         </nav>
 
-        {/* Demo Role Switcher */}
-        <div style={{ marginTop: 'auto', padding: '1rem', background: 'rgba(0,0,0,0.03)', borderRadius: '8px' }}>
-          <p style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Demo Role Switcher</p>
-          <select 
-            value={currentRole} 
-            onChange={(e) => {
-              setCurrentRole(e.target.value as Role);
-              setActiveTab('Dashboard'); // reset to dashboard on role change
-            }}
-            style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--color-border)', fontFamily: 'inherit' }}
-          >
-            <option value="Archbishop">Archbishop</option>
-            <option value="Bishop">Bishop</option>
-            <option value="Archdeacon">Archdeacon</option>
-            <option value="Priest">Priest</option>
-            <option value="Secretary">Secretary</option>
-            <option value="Treasurer">Treasurer</option>
-            <option value="CellLeader">Cell Leader</option>
-          </select>
+        {/* Logout Button */}
+        <div style={{ marginTop: 'auto', padding: '1rem' }}>
+          <button onClick={handleLogout} className="btn" style={{ width: '100%', padding: '0.5rem', background: 'var(--color-bg)', border: '1px solid var(--color-border)' }}>
+            Logout
+          </button>
         </div>
       </aside>
 
