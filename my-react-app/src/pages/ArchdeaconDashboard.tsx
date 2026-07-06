@@ -349,8 +349,8 @@ export default function ArchdeaconDashboard() {
           <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: '0.5rem' }}>Under this Archdeaconry</div>
         </div>
         <div className="card">
-          <div className="card-title">Total Members</div>
-          <div className="card-value">{totalMembers.toLocaleString()}</div>
+          <div className="card-title">Parishes</div>
+          <div className="card-value">{archdeaconryData.parishes.length}</div>
         </div>
         <div className="card">
           <div className="card-title">Unread Messages</div>

@@ -2,87 +2,28 @@ import React, { useState, useEffect, useRef } from 'react';
 import CertificatesPage from './CertificatesPage';
 import { fetchCommunications, sendCommunication, markAsRead, fetchDirectory } from '../services/api';
 
-// Mock Data for Kampala Diocese
-const diocesanData = [
-  {
-    name: "Central Archdeaconry",
-    members: 5200,
-    revenue: "300M",
-    archdeacon: "Ven. Robert K.",
-    parishes: [
-      { name: "All Saints Cathedral Parish", members: 2100, revenue: "150M", priest: "Rev. Simon P." },
-      { name: "St. John's Parish", members: 3100, revenue: "150M", priest: "Rev. Arthur T." }
-    ]
-  },
-  {
-    name: "Eastern Archdeaconry",
-    members: 10200,
-    revenue: "550M",
-    archdeacon: "Ven. Michael S.",
-    parishes: [
-      { name: "St. Paul's Parish", members: 4000, revenue: "200M", priest: "Rev. John D." },
-      { name: "St. Luke's Parish", members: 6200, revenue: "350M", priest: "Rev. Paul M." }
-    ]
-  },
-  {
-    name: "Northern Archdeaconry",
-    members: 2800,
-    revenue: "120M",
-    archdeacon: "Ven. Samuel B.",
-    parishes: []
-  }
-];
+// Messages are now fetched from the backend.
 
-interface Attachment {
+export interface Attachment {
   name: string;
   type: 'pdf' | 'excel' | 'photo';
   size: string;
   contentId?: string;
-  fileUrl?: string;
+  fileUrl?: string; // Client-side loaded image or file data URL
 }
 
-interface Message {
+export interface Message {
   id: string;
   from: string;
-  fromRole: 'Archbishop' | 'Bishop' | 'Priest' | 'Archdeaconry';
+  fromRole: 'Archbishop' | 'Bishop' | 'Priest' | 'Archdeaconry' | 'Diocese';
   fromDiocese?: string;
-  to: string;
+  to: string; // e.g. "Kampala Diocese", "All Dioceses", "Archbishop"
   subject: string;
   body: string;
   date: string;
   read: boolean;
   attachments: Attachment[];
 }
-
-const initialBishopMessages: Message[] = [
-  {
-    id: 'msg-bishop-1',
-    from: 'Central Archdeaconry (Ven. Robert K.)',
-    fromRole: 'Archdeaconry',
-    to: 'Kampala Diocese',
-    subject: 'Central Archdeaconry Q2 Accounts',
-    body: 'Dear Bishop James W.,\n\nPlease find attached our Central Archdeaconry financial report for Q2. We have managed to see growth in cell-giving collections. We look forward to presenting these details in the upcoming Synod.\n\nBlessings,\nVen. Robert K.',
-    date: '2026-06-29T14:22:00.000Z',
-    read: false,
-    attachments: [
-      { name: 'Central_Archdeaconry_Q2.xlsx', type: 'excel', size: '18 KB', contentId: 'central_q2_fin' }
-    ]
-  },
-  {
-    id: 'msg-bishop-2',
-    from: 'Eastern Archdeaconry (Ven. Michael S.)',
-    fromRole: 'Archdeaconry',
-    to: 'Kampala Diocese',
-    subject: 'Proposal for New Parish - St. Peter\'s',
-    body: 'Greetings in Christ Jesus.\n\nOur Archdeaconry council has approved the feasibility analysis for upgrading the St. Peter\'s congregation to full parish status. Attached is the project layout details (PDF) and the photo of the designated site.\n\nWe request your blessing and review.\n\nIn Service,\nVen. Michael S.',
-    date: '2026-06-27T11:05:00.000Z',
-    read: true,
-    attachments: [
-      { name: 'St_Peters_Upgrade_Proposal.pdf', type: 'pdf', size: '2.5 MB', contentId: 'st_peters_proposal' },
-      { name: 'Proposed_Parish_Site.jpg', type: 'photo', size: '1.4 MB', contentId: 'st_peters_site' }
-    ]
-  }
-];
 
 export default function BishopDashboard() {
   const [activeTab, setActiveTab] = useState<'overview' | 'comms' | 'certificates'>('overview');
@@ -144,8 +85,12 @@ export default function BishopDashboard() {
 
   useEffect(() => {
     const loadMessages = async () => {
+      const userStr = localStorage.getItem('user');
+      const user = userStr ? JSON.parse(userStr) : null;
+      const dioceseId = user?.diocese_id || activeDioceseId || 1;
+
       try {
-        const data = await fetchCommunications('App\\Models\\Diocese', 1, commsView);
+        const data = await fetchCommunications('App\\Models\\Diocese', dioceseId, commsView);
         const formattedMessages: Message[] = data.map((c: any) => ({
           id: c.id.toString(),
           from: c.sender?.name || 'Unknown',
@@ -165,9 +110,7 @@ export default function BishopDashboard() {
     loadMessages();
   }, [commsView]);
 
-  const saveMessages = (updated: Message[]) => {
-    setMessages(updated);
-  };
+  // Replaced saveMessages with direct fetch API calls
 
   const toggleArchdeaconry = (name: string) => {
     if (expandedArchdeaconry === name) {
@@ -273,10 +216,14 @@ export default function BishopDashboard() {
       receiverId = parseInt(composeTo.replace('a-', ''));
     }
 
+    const userStr = localStorage.getItem('user');
+    const user = userStr ? JSON.parse(userStr) : null;
+    const dioceseId = user?.diocese_id || activeDioceseId || 1;
+
     try {
       await sendCommunication({
         sender_type: 'App\\Models\\Diocese',
-        sender_id: 1, // Mock Diocese Kampala
+        sender_id: dioceseId,
         receiver_type: receiverType,
         receiver_id: receiverId,
         subject: composeSubject,

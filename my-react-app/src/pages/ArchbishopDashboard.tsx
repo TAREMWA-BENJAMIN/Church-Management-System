@@ -1,55 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import CertificatesPage from './CertificatesPage';
-import { fetchDirectory } from '../services/api';
+import { fetchDirectory, fetchCommunications, sendCommunication, markAsRead } from '../services/api';
 
-// Mock Data structure for the hierarchy
-const diocesesData = [
-  {
-    name: "Kampala Diocese",
-    members: 15400,
-    revenue: "850M",
-    archdeaconries: [
-      {
-        name: "Central Archdeaconry",
-        members: 5200,
-        revenue: "300M",
-        parishes: [
-          { name: "All Saints Cathedral Parish", members: 2100, revenue: "150M" },
-          { name: "St. John's Parish", members: 3100, revenue: "150M" }
-        ]
-      },
-      {
-        name: "Eastern Archdeaconry",
-        members: 10200,
-        revenue: "550M",
-        parishes: [
-          { name: "St. Paul's Parish", members: 4000, revenue: "200M" },
-          { name: "St. Luke's Parish", members: 6200, revenue: "350M" }
-        ]
-      }
-    ]
-  },
-  {
-    name: "Namirembe Diocese",
-    members: 22000,
-    revenue: "1.2B",
-    archdeaconries: [
-      {
-        name: "Namirembe Archdeaconry",
-        members: 12000,
-        revenue: "700M",
-        parishes: [
-          { name: "St. Paul's Cathedral", members: 8000, revenue: "500M" }
-        ]
-      }
-    ]
-  },
-  { name: "Ankole Diocese", members: 9500, revenue: "210M", archdeaconries: [] },
-  { name: "Busoga Diocese", members: 11200, revenue: "180M", archdeaconries: [] },
-  { name: "Karamoja Diocese", members: 3400, revenue: "45M", archdeaconries: [] }
-];
+// Messages are now fetched from the backend.
 
-interface Attachment {
+export interface Attachment {
   name: string;
   type: 'pdf' | 'excel' | 'photo';
   size: string;
@@ -57,10 +12,10 @@ interface Attachment {
   fileUrl?: string; // Client-side loaded image or file data URL
 }
 
-interface Message {
+export interface Message {
   id: string;
   from: string;
-  fromRole: 'Archbishop' | 'Bishop' | 'Priest' | 'Archdeaconry';
+  fromRole: 'Archbishop' | 'Bishop' | 'Priest' | 'Archdeaconry' | 'Diocese';
   fromDiocese?: string;
   to: string; // e.g. "Kampala Diocese", "All Dioceses", "Archbishop"
   subject: string;
@@ -69,65 +24,6 @@ interface Message {
   read: boolean;
   attachments: Attachment[];
 }
-
-const initialMessages: Message[] = [
-  {
-    id: 'msg-1',
-    from: 'Bishop James W. (Kampala)',
-    fromRole: 'Bishop',
-    fromDiocese: 'Kampala Diocese',
-    to: 'Archbishop',
-    subject: 'Q2 Diocesan Financial Reports & Synod Minutes',
-    body: 'Dear Archbishop,\n\nWe have successfully concluded our Q2 Diocesan council meeting. Please find attached the comprehensive financial spreadsheet and the minutes from our latest Synod session.\n\nWe look forward to your guidance on our proposed expansion.\n\nYours in Christ,\nBishop James W.',
-    date: '2026-07-01T10:15:00.000Z',
-    read: false,
-    attachments: [
-      { name: 'Kampala_Q2_Financials.xlsx', type: 'excel', size: '24 KB', contentId: 'kampala_q2_fin' },
-      { name: 'Kampala_Synod_Minutes.pdf', type: 'pdf', size: '1.2 MB', contentId: 'kampala_synod_min' }
-    ]
-  },
-  {
-    id: 'msg-2',
-    from: 'Bishop Wilberforce K. (Namirembe)',
-    fromRole: 'Bishop',
-    fromDiocese: 'Namirembe Diocese',
-    to: 'Archbishop',
-    subject: 'Cathedral Expansion Construction Plans & Photos',
-    body: 'Greetings Archbishop Stephen K.,\n\nThe renovations and expansion of St. Paul\'s Cathedral Namirembe are progressing well. Attached are the architectural blueprint details (PDF) and a photo of the current construction phase.\n\nWe request your blessing and a tentative date for visiting the project.\n\nBlessings,\nBishop Wilberforce K.',
-    date: '2026-06-30T16:30:00.000Z',
-    read: true,
-    attachments: [
-      { name: 'Namirembe_Expansion_Blueprint.pdf', type: 'pdf', size: '4.5 MB', contentId: 'namirembe_blueprint' },
-      { name: 'Namirembe_Construction_Site.jpg', type: 'photo', size: '2.1 MB', contentId: 'namirembe_site' }
-    ]
-  },
-  {
-    id: 'msg-3',
-    from: 'Bishop Sheldon M. (Ankole)',
-    fromRole: 'Bishop',
-    fromDiocese: 'Ankole Diocese',
-    to: 'Archbishop',
-    subject: 'Photos from the Diocesan Youth Rally 2026',
-    body: 'Praise God Archbishop!\n\nThe Diocesan Youth Rally was a massive success, with over 3,000 young people attending. I am sending you a couple of photos showing the worship session and the community outreach. The full written report will follow soon.\n\nIn His Service,\nBishop Sheldon M.',
-    date: '2026-06-28T09:00:00.000Z',
-    read: true,
-    attachments: [
-      { name: 'Worship_Session.png', type: 'photo', size: '1.8 MB', contentId: 'ankole_worship' },
-      { name: 'Outreach_Group.png', type: 'photo', size: '2.4 MB', contentId: 'ankole_outreach' }
-    ]
-  },
-  {
-    id: 'msg-4',
-    from: 'Archbishop Stephen K.',
-    fromRole: 'Archbishop',
-    to: 'Kampala Diocese',
-    subject: 'Archbishop\'s Memo: Synod Reports Submission',
-    body: 'Reminder to Kampala Diocese:\n\nThe deadline for submitting synod reports is approaching. Please ensure all financial annexes are attached.',
-    date: '2026-06-24T14:00:00.000Z',
-    read: true,
-    attachments: []
-  }
-];
 
 export default function ArchbishopDashboard() {
   const [activeTab, setActiveTab] = useState<'hierarchy' | 'comms' | 'certificates'>('hierarchy');
@@ -162,25 +58,33 @@ export default function ArchbishopDashboard() {
   }, []);
 
   useEffect(() => {
-    const stored = localStorage.getItem('cms_messages');
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        setMessages(parsed);
-      } catch (e) {
-        localStorage.setItem('cms_messages', JSON.stringify(initialMessages));
-        setMessages(initialMessages);
-      }
-    } else {
-      localStorage.setItem('cms_messages', JSON.stringify(initialMessages));
-      setMessages(initialMessages);
-    }
-  }, []);
+    const loadMessages = async () => {
+      const userStr = localStorage.getItem('user');
+      const user = userStr ? JSON.parse(userStr) : null;
+      if (!user) return;
 
-  const saveMessages = (updated: Message[]) => {
-    setMessages(updated);
-    localStorage.setItem('cms_messages', JSON.stringify(updated));
-  };
+      try {
+        const data = await fetchCommunications('App\\Models\\User', user.id, commsView);
+        const formattedMessages: Message[] = data.map((c: any) => ({
+          id: c.id.toString(),
+          from: c.sender?.name || 'Unknown',
+          fromRole: 'Diocese',
+          to: c.receiver?.name || 'Unknown',
+          subject: c.subject,
+          body: c.message,
+          date: c.created_at,
+          read: c.is_read,
+          attachments: []
+        }));
+        setMessages(formattedMessages);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    loadMessages();
+  }, [commsView]);
+
+  // Replaced unused saveMessages with direct fetch/api calls
 
   const toggleDiocese = (name: string) => {
     if (expandedDiocese === name) {
@@ -201,13 +105,16 @@ export default function ArchbishopDashboard() {
   };
 
   // Mark message as read
-  const handleSelectMessage = (msg: Message) => {
+  const handleSelectMessage = async (msg: Message) => {
     setSelectedMessage(msg);
     setShowCompose(false);
     setActivePreview(null);
-    if (!msg.read && msg.to === 'Archbishop') {
-      const updated = messages.map(m => m.id === msg.id ? { ...m, read: true } : m);
-      saveMessages(updated);
+    if (!msg.read && commsView === 'inbox') {
+      try {
+        await markAsRead(parseInt(msg.id));
+        const updated = messages.map(m => m.id === msg.id ? { ...m, read: true } : m);
+        setMessages(updated);
+      } catch(e) { console.error(e); }
     }
   };
 
@@ -285,37 +192,46 @@ export default function ArchbishopDashboard() {
   };
 
   // Submit Compose Email
-  const handleSendEmail = (e: React.FormEvent) => {
+  const handleSendEmail = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!composeSubject.trim() || !composeBody.trim()) return;
 
-    const newMessage: Message = {
-      id: `msg-${Date.now()}`,
-      from: 'Archbishop Stephen K.',
-      fromRole: 'Archbishop',
-      to: composeTo,
-      subject: composeSubject,
-      body: composeBody,
-      date: new Date().toISOString(),
-      read: true,
-      attachments: attachedFiles.map(file => ({
-        name: file.name,
-        type: file.type,
-        size: file.size,
-        fileUrl: file.fileUrl
-      }))
-    };
+    let receiverType = 'App\\Models\\Diocese';
+    let receiverId = 1;
 
-    saveMessages([newMessage, ...messages]);
+    if (composeTo !== 'All Dioceses') {
+      const targetDioc = directory.dioceses.find(d => d.id.toString() === composeTo);
+      if (targetDioc) {
+        receiverId = targetDioc.id;
+      }
+    }
 
-    // Reset Form
-    setComposeSubject('');
-    setComposeBody('');
-    setAttachedFiles([]);
-    setShowCompose(false);
-    setSelectedMessage(newMessage);
-    setCommsView('sent');
-    alert(`Message successfully sent to ${composeTo}!`);
+    const userStr = localStorage.getItem('user');
+    const user = userStr ? JSON.parse(userStr) : null;
+    if (!user) return;
+
+    try {
+      await sendCommunication({
+        sender_type: 'App\\Models\\User',
+        sender_id: user.id,
+        receiver_type: receiverType,
+        receiver_id: receiverId,
+        subject: composeSubject,
+        message: composeBody,
+      });
+
+      setComposeSubject('');
+      setComposeBody('');
+      setAttachedFiles([]);
+      setShowCompose(false);
+      setCommsView('sent');
+      
+      const recipientName = composeTo === 'All Dioceses' ? 'All Dioceses' : directory.dioceses.find(d => d.id.toString() === composeTo)?.name;
+      alert(`Message successfully sent to ${recipientName}!`);
+    } catch(err) {
+      console.error(err);
+      alert('Failed to send message');
+    }
   };
 
   // Open rich attachment preview
@@ -613,8 +529,8 @@ export default function ArchbishopDashboard() {
                     className="form-select"
                   >
                     <option value="All Dioceses">All Dioceses (General Circular)</option>
-                    {diocesesData.map(d => (
-                      <option key={d.name} value={d.name}>{d.name}</option>
+                    {directory.dioceses.map(d => (
+                      <option key={d.id} value={d.id}>{d.name} Diocese</option>
                     ))}
                   </select>
                 </div>
