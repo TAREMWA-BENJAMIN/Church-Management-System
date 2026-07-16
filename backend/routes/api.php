@@ -6,6 +6,7 @@ use App\Http\Controllers\CommunicationController;
 use App\Http\Controllers\DirectoryController;
 use App\Http\Controllers\FinanceRecordController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UserController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -19,6 +20,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/parishes', [DirectoryController::class, 'parishes']);
         Route::get('/directorates', [DirectoryController::class, 'directorates']);
     });
+
+    Route::apiResource('/users', UserController::class);
 
     Route::get('/communications', [CommunicationController::class, 'index']);
     Route::post('/communications', [CommunicationController::class, 'store']);

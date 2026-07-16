@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->string('role')->default('SuperAdmin');
+            $table->string('phone_number')->nullable();
             $table->foreignId('diocese_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('archdeaconry_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('parish_id')->nullable()->constrained()->nullOnDelete();
