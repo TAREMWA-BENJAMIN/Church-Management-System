@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
         $dioceses = [
             ['name' => 'Ankole', 'bishop_name' => 'Fred Sheldon Mwesigwa'],
             ['name' => 'Bukedi', 'bishop_name' => 'Samuel Egesa'],
+            ['name' => 'Bunyoro-Kitara', 'bishop_name' => 'Samuel Kahuma'],
             ['name' => 'Busoga', 'bishop_name' => 'Paul Naimanhye'],
             ['name' => 'Central Buganda', 'bishop_name' => 'Michael Lubowa'],
             ['name' => 'Central Busoga', 'bishop_name' => 'Patrick Wakula'],
@@ -148,5 +149,7 @@ class DatabaseSeeder extends Seeder
                 }
             }
         }
+
+        $this->call(DirectorateSeeder::class);
     }
 }

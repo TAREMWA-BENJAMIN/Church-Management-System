@@ -13,8 +13,10 @@ return new class extends Migration
     {
         Schema::create('finance_records', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('parish_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('parish_id')->nullable()->constrained('parishes')->onDelete('cascade');
+            $table->foreignId('directorate_id')->nullable()->constrained('directorates')->onDelete('cascade');
             $table->enum('type', ['income', 'expenditure']);
+            $table->foreignId('recorded_by')->constrained('users')->onDelete('cascade');
             $table->string('category'); // e.g., 'tithe', 'givings', 'donations', 'salaries', etc.
             $table->decimal('amount', 15, 2);
             $table->text('description')->nullable();

@@ -17,6 +17,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/dioceses', [DirectoryController::class, 'dioceses']);
         Route::get('/archdeaconries', [DirectoryController::class, 'archdeaconries']);
         Route::get('/parishes', [DirectoryController::class, 'parishes']);
+        Route::get('/directorates', [DirectoryController::class, 'directorates']);
     });
 
     Route::get('/communications', [CommunicationController::class, 'index']);

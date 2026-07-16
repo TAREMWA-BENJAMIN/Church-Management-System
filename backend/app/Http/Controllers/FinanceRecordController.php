@@ -16,7 +16,7 @@ class FinanceRecordController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        $query = FinanceRecord::with('parish');
+        $query = FinanceRecord::with(['parish', 'directorate']);
 
         if ($user->isDioceseAdmin()) {
             $query->whereHas('parish.archdeaconry', function ($q) use ($user) {
@@ -36,14 +36,16 @@ class FinanceRecordController extends Controller
             ->get()
             ->map(fn ($r) => [
                 'id'          => $r->id,
-                'parish_id'   => $r->parish_id,
-                'parish_name' => $r->parish?->name ?? 'N/A',
-                'type'        => $r->type,
-                'category'    => $r->category,
-                'amount'      => (float) $r->amount,
-                'description' => $r->description,
-                'date'        => $r->date,
-                'created_at'  => $r->created_at?->toIso8601String(),
+                'parish_id'      => $r->parish_id,
+                'directorate_id' => $r->directorate_id,
+                'parish_name'    => $r->parish?->name ?? 'N/A',
+                'directorate_name' => $r->directorate?->name ?? 'N/A',
+                'type'           => $r->type,
+                'category'       => $r->category,
+                'amount'         => (float) $r->amount,
+                'description'    => $r->description,
+                'date'           => $r->date,
+                'created_at'     => $r->created_at?->toIso8601String(),
             ]);
 
         return response()->json($records);
@@ -55,25 +57,37 @@ class FinanceRecordController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'parish_id'   => ['required', 'integer', 'exists:parishes,id'],
-            'type'        => ['required', Rule::in(['income', 'expenditure'])],
-            'category'    => ['required', 'string', 'max:100'],
+            'parish_id'      => ['nullable', 'integer', 'exists:parishes,id'],
+            'directorate_id' => ['nullable', 'integer', 'exists:directorates,id'],
+            'type'           => ['required', Rule::in(['income', 'expenditure'])],
+            'category'       => ['required', 'string', 'max:100'],
             'amount'      => ['required', 'numeric', 'min:0'],
             'description' => ['nullable', 'string', 'max:500'],
             'date'        => ['required', 'date'],
         ]);
 
         $user = $request->user();
-        $parish = Parish::with('archdeaconry')->findOrFail($validated['parish_id']);
-        
         $allowed = false;
-        if ($user->isSuperAdmin()) $allowed = true;
-        elseif ($user->isDioceseAdmin() && $parish->archdeaconry->diocese_id == $user->diocese_id) $allowed = true;
-        elseif ($user->isArchdeaconAdmin() && $parish->archdeaconry_id == $user->archdeaconry_id) $allowed = true;
-        elseif ($user->isParishAdmin() && $parish->id == $user->parish_id) $allowed = true;
+        
+        // Append user to validated if missing recorded_by
+        $validated['recorded_by'] = $user->id;
 
-        if (!$allowed) {
-            abort(403, 'Unauthorized to post finances for this parish.');
+        if (!empty($validated['parish_id'])) {
+            $parish = Parish::with('archdeaconry')->findOrFail($validated['parish_id']);
+            if ($user->isSuperAdmin()) $allowed = true;
+            elseif ($user->isDioceseAdmin() && $parish->archdeaconry->diocese_id == $user->diocese_id) $allowed = true;
+            elseif ($user->isArchdeaconAdmin() && $parish->archdeaconry_id == $user->archdeaconry_id) $allowed = true;
+            elseif ($user->isParishAdmin() && $parish->id == $user->parish_id) $allowed = true;
+
+            if (!$allowed) abort(403, 'Unauthorized to post finances for this parish.');
+        } elseif (!empty($validated['directorate_id'])) {
+            $directorate = \App\Models\Directorate::findOrFail($validated['directorate_id']);
+            if ($user->isSuperAdmin() || $user->role === 'Archbishop') $allowed = true;
+            elseif ($user->isDioceseAdmin() && $directorate->diocese_id == $user->diocese_id) $allowed = true;
+
+            if (!$allowed) abort(403, 'Unauthorized to post finances for this directorate.');
+        } else {
+            abort(422, 'Must specify parish_id or directorate_id.');
         }
 
         $record = FinanceRecord::create($validated);
@@ -82,15 +96,17 @@ class FinanceRecordController extends Controller
         broadcast(new FinanceRecordCreated($record))->toOthers();
 
         return response()->json([
-            'id'          => $record->id,
-            'parish_id'   => $record->parish_id,
-            'parish_name' => $record->parish?->name ?? 'N/A',
-            'type'        => $record->type,
-            'category'    => $record->category,
-            'amount'      => (float) $record->amount,
-            'description' => $record->description,
-            'date'        => $record->date,
-            'created_at'  => $record->created_at?->toIso8601String(),
+            'id'             => $record->id,
+            'parish_id'      => $record->parish_id,
+            'directorate_id' => $record->directorate_id,
+            'parish_name'    => $record->parish?->name ?? 'N/A',
+            'directorate_name' => $record->directorate?->name ?? 'N/A',
+            'type'           => $record->type,
+            'category'       => $record->category,
+            'amount'         => (float) $record->amount,
+            'description'    => $record->description,
+            'date'           => $record->date,
+            'created_at'     => $record->created_at?->toIso8601String(),
         ], 201);
     }
 

@@ -72,6 +72,11 @@ class User extends Authenticatable
         return $this->role === 'SuperAdmin';
     }
 
+    public function canAccessFullDirectory()
+    {
+        return in_array($this->role, ['SuperAdmin', 'Archbishop', 'Bishop']);
+    }
+
     public function isDioceseAdmin()
     {
         return $this->role === 'DioceseAdmin';
