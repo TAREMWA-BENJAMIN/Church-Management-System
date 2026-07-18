@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import CertificatesPage from './CertificatesPage';
-import { fetchCommunications, sendCommunication, markAsRead, fetchDirectory } from '../services/api';
+import { fetchCommunications, sendCommunication, markAsRead, fetchDirectory, fetchUsersByRole } from '../services/api';
 
 // Messages are now fetched from the backend.
 
@@ -23,6 +23,8 @@ export interface Message {
   date: string;
   read: boolean;
   attachments: Attachment[];
+  senderType?: string;
+  senderId?: number;
 }
 
 export default function BishopDashboard() {
@@ -38,7 +40,7 @@ export default function BishopDashboard() {
   const [filterType, setFilterType] = useState<'all' | 'pdf' | 'excel' | 'photo'>('all');
 
   // Compose Form State
-  const [composeTo, setComposeTo] = useState<string>('Archbishop');
+  const [composeTo, setComposeTo] = useState<string>('');
   const [composeSubject, setComposeSubject] = useState('');
   const [composeBody, setComposeBody] = useState('');
   const [attachedFiles, setAttachedFiles] = useState<{ name: string; type: 'pdf' | 'excel' | 'photo'; size: string; fileUrl?: string }[]>([]);
@@ -51,6 +53,7 @@ export default function BishopDashboard() {
   const [excelEditCell, setExcelEditCell] = useState<{ r: number; c: number } | null>(null);
 
   const [directory, setDirectory] = useState<{ dioceses: {id: number, name: string}[]; archdeaconries: {id: number, name: string, diocese_id: number}[]; parishes: {id: number, name: string, archdeaconry_id: number}[] }>({ dioceses: [], archdeaconries: [], parishes: [] });
+  const [archbishopUsers, setArchbishopUsers] = useState<{ id: number; name: string }[]>([]);
 
   const [activeDioceseId, setActiveDioceseId] = useState<number | null>(null);
 
@@ -62,6 +65,14 @@ export default function BishopDashboard() {
         setActiveDioceseId(defaultDioc.id);
       }
     }).catch(console.error);
+
+    // Fetch Archbishop/SuperAdmin users to allow upward communication
+    fetchUsersByRole(['SuperAdmin', 'Archbishop']).then((users: any[]) => {
+      console.log('[BishopDashboard] Archbishop-level users:', users);
+      setArchbishopUsers(users);
+    }).catch(err => {
+      console.error('[BishopDashboard] Failed to fetch archbishop users:', err);
+    });
   }, []);
 
   const activeDiocese = directory.dioceses.find(d => d.id === activeDioceseId);
@@ -100,7 +111,9 @@ export default function BishopDashboard() {
           body: c.message,
           date: c.created_at,
           read: c.is_read,
-          attachments: []
+          attachments: [],
+          senderType: c.sender_type,
+          senderId: c.sender_id
         }));
         setMessages(formattedMessages);
       } catch (err) {
@@ -153,6 +166,21 @@ export default function BishopDashboard() {
 
     return true;
   });
+
+  const handleReply = (msg: Message) => {
+    if (!msg.senderType || !msg.senderId) return;
+    
+    let toValue = msg.senderId.toString();
+    if (msg.senderType === 'App\\Models\\User') toValue = `arch-${msg.senderId}`;
+    else if (msg.senderType === 'App\\Models\\Diocese') toValue = `d-${msg.senderId}`;
+    else if (msg.senderType === 'App\\Models\\Archdeaconry') toValue = `a-${msg.senderId}`;
+    else if (msg.senderType === 'App\\Models\\Parish') toValue = `p-${msg.senderId}`;
+
+    setComposeTo(toValue);
+    setComposeSubject(msg.subject.startsWith('Re:') ? msg.subject : `Re: ${msg.subject}`);
+    setComposeBody(`\n\n--- Original Message ---\nFrom: ${msg.from}\nDate: ${new Date(msg.date).toLocaleString()}\n\n${msg.body}`);
+    setShowCompose(true);
+  };
 
   // Handle local file selection for attachment
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -208,12 +236,18 @@ export default function BishopDashboard() {
     let receiverType = 'App\\Models\\Parish';
     let receiverId = parseInt(composeTo);
 
-    if (composeTo.startsWith('d-')) {
+    if (composeTo.startsWith('arch-')) {
+      receiverType = 'App\\Models\\User';
+      receiverId = parseInt(composeTo.replace('arch-', ''));
+    } else if (composeTo.startsWith('d-')) {
       receiverType = 'App\\Models\\Diocese';
       receiverId = parseInt(composeTo.replace('d-', ''));
     } else if (composeTo.startsWith('a-')) {
       receiverType = 'App\\Models\\Archdeaconry';
       receiverId = parseInt(composeTo.replace('a-', ''));
+    } else if (composeTo.startsWith('p-')) {
+      receiverType = 'App\\Models\\Parish';
+      receiverId = parseInt(composeTo.replace('p-', ''));
     }
 
     const userStr = localStorage.getItem('user');
@@ -465,7 +499,16 @@ export default function BishopDashboard() {
               <button 
                 className="btn btn-primary" 
                 style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.875rem', padding: '0.4rem 0.8rem' }}
-                onClick={() => setShowCompose(true)}
+                onClick={() => {
+                  setShowCompose(true);
+                  // Default to Archbishop (upward) when opening compose
+                  if (archbishopUsers.length > 0) {
+                    setComposeTo(`arch-${archbishopUsers[0].id}`);
+                  } else {
+                    const firstArch = directory.archdeaconries?.[0];
+                    if (firstArch) setComposeTo(`a-${firstArch.id}`);
+                  }
+                }}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <path d="M12 5v14M5 12h14"/>
@@ -548,21 +591,30 @@ export default function BishopDashboard() {
                     onChange={(e) => setComposeTo(e.target.value)}
                     className="form-select"
                   >
-                    <optgroup label="Archdeaconries (Downward — Primary)">
+                    <option value="" disabled>— Select Recipient —</option>
+                    <optgroup label="⬆ Archbishop (Upward)">
+                      {archbishopUsers.map(u => (
+                        <option key={`arch-${u.id}`} value={`arch-${u.id}`}>{u.name} (Archbishop)</option>
+                      ))}
+                      {archbishopUsers.length === 0 && (
+                        <option disabled>No Archbishop found</option>
+                      )}
+                    </optgroup>
+                    <optgroup label="⬇ Archdeaconries (Downward)">
                       {directory.archdeaconries?.map(a => (
                         <option key={`a-${a.id}`} value={`a-${a.id}`}>{a.name}</option>
                       ))}
                     </optgroup>
-                    <optgroup label="Parishes">
+                    <optgroup label="⬇ Parishes (Downward)">
                       {directory.parishes.map(p => (
-                        <option key={`p-${p.id}`} value={p.id}>{p.name}</option>
+                        <option key={`p-${p.id}`} value={`p-${p.id}`}>{p.name}</option>
                       ))}
                     </optgroup>
-                    <optgroup label="Dioceses">
-                      {directory.dioceses.map(d => (
-                        <option key={`d-${d.id}`} value={`d-${d.id}`}>{d.name}</option>
-                      ))}
-                    </optgroup>
+                    {composeTo && composeTo.startsWith('d-') && (
+                      <optgroup label="Reply Context">
+                        <option value={composeTo} hidden>{selectedMessage?.from || 'Reply Recipient'}</option>
+                      </optgroup>
+                    )}
                   </select>
                 </div>
 
@@ -656,7 +708,12 @@ export default function BishopDashboard() {
                 <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '1rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
                     <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--color-primary)' }}>{selectedMessage.subject}</h2>
-                    <span className="date-badge">{new Date(selectedMessage.date).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</span>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                      <button className="btn" style={{ fontSize: '0.8rem', padding: '0.3rem 0.6rem', border: '1px solid var(--color-border)', background: 'var(--color-surface)' }} onClick={() => handleReply(selectedMessage)}>
+                        ↩ Reply
+                      </button>
+                      <span className="date-badge">{new Date(selectedMessage.date).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</span>
+                    </div>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem', fontSize: '0.875rem' }}>
                     <div>

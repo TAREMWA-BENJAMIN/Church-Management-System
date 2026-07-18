@@ -24,7 +24,6 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
-        'phone_number',
         'diocese_id',
         'archdeaconry_id',
         'parish_id',

@@ -54,6 +54,8 @@ interface Message {
   date: string;
   read: boolean;
   attachments: Attachment[];
+  senderType?: string;
+  senderId?: number;
 }
 
 const mockArchdeaconMessages: Message[] = [
@@ -171,6 +173,8 @@ export default function ArchdeaconDashboard() {
           date: c.created_at,
           read: c.is_read,
           attachments: [],
+          senderType: c.sender_type,
+          senderId: c.sender_id
         }));
         // Merge backend messages with rich mock data (mock first for demo richness)
         setMessages([...mockArchdeaconMessages, ...formattedMessages]);
@@ -217,6 +221,21 @@ export default function ArchdeaconDashboard() {
     return true;
   });
 
+  const handleReply = (msg: Message) => {
+    if (!msg.senderType || !msg.senderId) return;
+    
+    let toValue = msg.senderId.toString();
+    if (msg.senderType === 'App\\Models\\User') toValue = `arch-${msg.senderId}`;
+    else if (msg.senderType === 'App\\Models\\Diocese') toValue = `d-${msg.senderId}`;
+    else if (msg.senderType === 'App\\Models\\Archdeaconry') toValue = `a-${msg.senderId}`;
+    else if (msg.senderType === 'App\\Models\\Parish') toValue = `p-${msg.senderId}`;
+
+    setComposeTo(toValue);
+    setComposeSubject(msg.subject.startsWith('Re:') ? msg.subject : `Re: ${msg.subject}`);
+    setComposeBody(`\n\n--- Original Message ---\nFrom: ${msg.from}\nDate: ${new Date(msg.date).toLocaleString()}\n\n${msg.body}`);
+    setShowCompose(true);
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
@@ -258,6 +277,12 @@ export default function ArchdeaconDashboard() {
     if (composeTo.startsWith('d-')) {
       receiverType = 'App\\Models\\Diocese';
       receiverId = parseInt(composeTo.replace('d-', ''));
+    } else if (composeTo.startsWith('arch-')) {
+      receiverType = 'App\\Models\\User';
+      receiverId = parseInt(composeTo.replace('arch-', ''));
+    } else if (composeTo.startsWith('a-')) {
+      receiverType = 'App\\Models\\Archdeaconry';
+      receiverId = parseInt(composeTo.replace('a-', ''));
     }
 
     try {
@@ -650,6 +675,11 @@ export default function ArchdeaconDashboard() {
                         <option key={`d-${d.id}`} value={`d-${d.id}`}>{d.name}</option>
                       ))}
                     </optgroup>
+                    {composeTo && (composeTo.startsWith('arch-') || composeTo.startsWith('a-')) && (
+                      <optgroup label="Reply Context">
+                        <option value={composeTo} hidden>{selectedMessage?.from || 'Reply Recipient'}</option>
+                      </optgroup>
+                    )}
                   </select>
                 </div>
 
@@ -727,7 +757,12 @@ export default function ArchdeaconDashboard() {
                 <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '1rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
                     <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--color-primary)' }}>{selectedMessage.subject}</h2>
-                    <span className="date-badge">{new Date(selectedMessage.date).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</span>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                      <button className="btn" style={{ fontSize: '0.8rem', padding: '0.3rem 0.6rem', border: '1px solid var(--color-border)', background: 'var(--color-surface)' }} onClick={() => handleReply(selectedMessage)}>
+                        ↩ Reply
+                      </button>
+                      <span className="date-badge">{new Date(selectedMessage.date).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</span>
+                    </div>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem', fontSize: '0.875rem' }}>
                     <div>

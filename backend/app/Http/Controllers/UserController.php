@@ -11,8 +11,16 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $query = User::query()
-            ->select('id', 'name', 'email', 'role', 'phone_number', 'diocese_id', 'archdeaconry_id', 'parish_id')
+            ->select('id', 'name', 'email', 'role', 'diocese_id', 'archdeaconry_id', 'parish_id')
             ->orderBy('name');
+
+        if ($request->has('role')) {
+            $roleInput = $request->query('role');
+            \Log::info('UserController@index role query param received:', ['role' => $roleInput]);
+            
+            $roles = is_array($roleInput) ? $roleInput : explode(',', $roleInput);
+            $query->whereIn('role', $roles);
+        }
 
         return response()->json($query->get());
     }
@@ -35,7 +43,6 @@ class UserController extends Controller
                 'Deacon',
                 'Lay Reader',
             ])],
-            'phone_number' => ['nullable', 'string', 'max:20'],
             'diocese_id' => ['nullable', 'integer'],
             'archdeaconry_id' => ['nullable', 'integer'],
             'parish_id' => ['nullable', 'integer'],
@@ -43,12 +50,12 @@ class UserController extends Controller
 
         $user = User::create($data);
 
-        return response()->json($user->only(['id', 'name', 'email', 'role', 'phone_number', 'diocese_id', 'archdeaconry_id', 'parish_id']), 201);
+        return response()->json($user->only(['id', 'name', 'email', 'role', 'diocese_id', 'archdeaconry_id', 'parish_id']), 201);
     }
 
     public function show(User $user)
     {
-        return response()->json($user->only(['id', 'name', 'email', 'role', 'phone_number', 'diocese_id', 'archdeaconry_id', 'parish_id']));
+        return response()->json($user->only(['id', 'name', 'email', 'role', 'diocese_id', 'archdeaconry_id', 'parish_id']));
     }
 
     public function update(Request $request, User $user)
@@ -69,7 +76,6 @@ class UserController extends Controller
                 'Deacon',
                 'Lay Reader',
             ])],
-            'phone_number' => ['nullable', 'string', 'max:20'],
             'diocese_id' => ['nullable', 'integer'],
             'archdeaconry_id' => ['nullable', 'integer'],
             'parish_id' => ['nullable', 'integer'],
@@ -78,7 +84,7 @@ class UserController extends Controller
         $user->fill($data);
         $user->save();
 
-        return response()->json($user->only(['id', 'name', 'email', 'role', 'phone_number', 'diocese_id', 'archdeaconry_id', 'parish_id']));
+        return response()->json($user->only(['id', 'name', 'email', 'role', 'diocese_id', 'archdeaconry_id', 'parish_id']));
     }
 
     public function destroy(User $user)

@@ -23,6 +23,8 @@ export interface Message {
   date: string;
   read: boolean;
   attachments: Attachment[];
+  senderType?: string;
+  senderId?: number;
 }
 
 export default function ArchbishopDashboard() {
@@ -74,7 +76,9 @@ export default function ArchbishopDashboard() {
           body: c.message,
           date: c.created_at,
           read: c.is_read,
-          attachments: []
+          attachments: [],
+          senderType: c.sender_type,
+          senderId: c.sender_id
         }));
         setMessages(formattedMessages);
       } catch (err) {
@@ -120,13 +124,6 @@ export default function ArchbishopDashboard() {
 
   // Filter messages
   const filteredMessages = messages.filter(msg => {
-    // Role matching
-    const isDirectionMatch = commsView === 'inbox' 
-      ? msg.to === 'Archbishop' 
-      : msg.fromRole === 'Archbishop';
-
-    if (!isDirectionMatch) return false;
-
     // Search query matching
     const matchesSearch = 
       msg.subject.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -143,6 +140,20 @@ export default function ArchbishopDashboard() {
 
     return true;
   });
+
+  const handleReply = (msg: Message) => {
+    if (!msg.senderType || !msg.senderId) return;
+    
+    let toValue = msg.senderId.toString();
+    if (msg.senderType === 'App\\Models\\User') toValue = `arch-${msg.senderId}`;
+    else if (msg.senderType === 'App\\Models\\Archdeaconry') toValue = `a-${msg.senderId}`;
+    else if (msg.senderType === 'App\\Models\\Parish') toValue = `p-${msg.senderId}`;
+
+    setComposeTo(toValue);
+    setComposeSubject(msg.subject.startsWith('Re:') ? msg.subject : `Re: ${msg.subject}`);
+    setComposeBody(`\n\n--- Original Message ---\nFrom: ${msg.from}\nDate: ${new Date(msg.date).toLocaleString()}\n\n${msg.body}`);
+    setShowCompose(true);
+  };
 
   // Handle local file selection for attachment
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -200,9 +211,18 @@ export default function ArchbishopDashboard() {
     let receiverId = 1;
 
     if (composeTo !== 'All Dioceses') {
-      const targetDioc = directory.dioceses.find(d => d.id.toString() === composeTo);
-      if (targetDioc) {
-        receiverId = targetDioc.id;
+      if (composeTo.startsWith('arch-')) {
+        receiverType = 'App\\Models\\User';
+        receiverId = parseInt(composeTo.replace('arch-', ''));
+      } else if (composeTo.startsWith('a-')) {
+        receiverType = 'App\\Models\\Archdeaconry';
+        receiverId = parseInt(composeTo.replace('a-', ''));
+      } else if (composeTo.startsWith('p-')) {
+        receiverType = 'App\\Models\\Parish';
+        receiverId = parseInt(composeTo.replace('p-', ''));
+      } else {
+        receiverType = 'App\\Models\\Diocese';
+        receiverId = parseInt(composeTo);
       }
     }
 
@@ -373,7 +393,7 @@ export default function ArchbishopDashboard() {
                           onClick={(e) => {
                             e.stopPropagation();
                             setActiveTab('comms');
-                            setComposeTo(diocese.name);
+                            setComposeTo(diocese.id.toString());
                             setShowCompose(true);
                           }}
                         >
@@ -532,6 +552,9 @@ export default function ArchbishopDashboard() {
                     {directory.dioceses.map(d => (
                       <option key={d.id} value={d.id}>{d.name} Diocese</option>
                     ))}
+                    {composeTo && !directory.dioceses.find(d => d.id.toString() === composeTo) && composeTo !== 'All Dioceses' && (
+                      <option value={composeTo} hidden>{selectedMessage?.from || 'Reply Recipient'}</option>
+                    )}
                   </select>
                 </div>
 
@@ -626,7 +649,12 @@ export default function ArchbishopDashboard() {
                 <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '1rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
                     <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--color-primary)' }}>{selectedMessage.subject}</h2>
-                    <span className="date-badge">{new Date(selectedMessage.date).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</span>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                      <button className="btn" style={{ fontSize: '0.8rem', padding: '0.3rem 0.6rem', border: '1px solid var(--color-border)', background: 'var(--color-surface)' }} onClick={() => handleReply(selectedMessage)}>
+                        ↩ Reply
+                      </button>
+                      <span className="date-badge">{new Date(selectedMessage.date).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</span>
+                    </div>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem', fontSize: '0.875rem' }}>
                     <div>

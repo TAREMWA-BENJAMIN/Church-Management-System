@@ -23,6 +23,18 @@ export async function fetchUsers() {
   return response.json();
 }
 
+export async function fetchUsersByRole(roles: string[]) {
+  // Encode each role individually but keep the comma separator unencoded so Laravel can split on it
+  const roleParam = roles.map(r => encodeURIComponent(r)).join(',');
+  const response = await fetch(`${API_BASE_URL}/users?role=${roleParam}`, {
+    headers: authHeaders(),
+  });
+  if (!response.ok) {
+    throw new Error('Failed to fetch users by role');
+  }
+  return response.json();
+}
+
 export async function createUser(data: any) {
   const response = await fetch(`${API_BASE_URL}/users`, {
     method: 'POST',
