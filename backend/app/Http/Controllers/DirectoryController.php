@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Diocese;
 use App\Models\Parish;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Http\Request;
 
 class DirectoryController extends Controller
@@ -72,6 +73,11 @@ class DirectoryController extends Controller
 
     public function directorates(Request $request)
     {
+        // If migrations haven't been run yet, return empty array instead of throwing
+        if (!Schema::hasTable('directorates')) {
+            return response()->json([]);
+        }
+
         $user = $request->user();
         $query = \App\Models\Directorate::select('id', 'name', 'diocese_id')->with('diocese');
 

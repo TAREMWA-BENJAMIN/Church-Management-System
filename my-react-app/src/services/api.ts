@@ -113,19 +113,90 @@ export async function markAsRead(id: number) {
 }
 
 export async function fetchDirectory() {
-  const [diocesesRes, archdeaconriesRes, parishesRes] = await Promise.all([
+  const [diocesesRes, archdeaconriesRes, parishesRes, directoratesRes] = await Promise.all([
     fetch(`${API_BASE_URL}/directory/dioceses`, { headers: authHeaders() }),
     fetch(`${API_BASE_URL}/directory/archdeaconries`, { headers: authHeaders() }),
     fetch(`${API_BASE_URL}/directory/parishes`, { headers: authHeaders() }),
+    fetch(`${API_BASE_URL}/directory/directorates`, { headers: authHeaders() }),
   ]);
 
-  if (!diocesesRes.ok || !archdeaconriesRes.ok || !parishesRes.ok) {
+  if (!diocesesRes.ok || !archdeaconriesRes.ok || !parishesRes.ok || !directoratesRes.ok) {
     throw new Error('Failed to fetch directory');
   }
 
   const dioceses = await diocesesRes.json();
   const archdeaconries = await archdeaconriesRes.json();
   const parishes = await parishesRes.json();
+  const directorates = await directoratesRes.json();
 
-  return { dioceses, archdeaconries, parishes };
+  return { dioceses, archdeaconries, parishes, directorates };
+}
+
+export async function fetchDirectorates() {
+  const response = await fetch(`${API_BASE_URL}/directory/directorates`, {
+    headers: authHeaders(),
+  });
+  if (!response.ok) {
+    throw new Error('Failed to fetch directorates');
+  }
+  return response.json();
+}
+
+export async function adminFetchDirectorates() {
+  const response = await fetch(`${API_BASE_URL}/directorates`, {
+    headers: authHeaders(),
+  });
+  if (!response.ok) {
+    let body = await safeJson(response);
+    throw new Error(body?.message || 'Failed to fetch directorates');
+  }
+  return response.json();
+}
+
+export async function adminCreateDirectorate(data: any) {
+  const res = await fetch(`${API_BASE_URL}/directorates`, {
+    method: 'POST',
+    headers: authHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const body = await safeJson(res);
+    const msg = body?.message || (body?.errors ? Object.values(body.errors).flat().join(' ') : null) || 'Failed to create directorate';
+    throw new Error(msg);
+  }
+  return res.json();
+}
+
+export async function adminUpdateDirectorate(id: number, data: any) {
+  const res = await fetch(`${API_BASE_URL}/directorates/${id}`, {
+    method: 'PUT',
+    headers: authHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const body = await safeJson(res);
+    const msg = body?.message || (body?.errors ? Object.values(body.errors).flat().join(' ') : null) || 'Failed to update directorate';
+    throw new Error(msg);
+  }
+  return res.json();
+}
+
+export async function adminDeleteDirectorate(id: number) {
+  const res = await fetch(`${API_BASE_URL}/directorates/${id}`, {
+    method: 'DELETE',
+    headers: authHeaders(),
+  });
+  if (!res.ok) {
+    const body = await safeJson(res);
+    throw new Error(body?.message || 'Failed to delete directorate');
+  }
+  return true;
+}
+
+async function safeJson(res: Response) {
+  try {
+    return await res.json();
+  } catch {
+    return null;
+  }
 }

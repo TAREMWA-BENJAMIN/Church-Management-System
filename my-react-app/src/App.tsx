@@ -16,9 +16,10 @@ import FinancesPage from './pages/FinancesPage';
 import CertificatesPage from './pages/CertificatesPage';
 import SettingsPage from './pages/SettingsPage';
 import ArchdeaconDashboard from './pages/ArchdeaconDashboard';
+import DirectoratesPage from './pages/DirectoratesPage';
 
 type Role = 'SuperAdmin' | 'DioceseAdmin' | 'ArchdeaconAdmin' | 'ParishAdmin' | 'Archbishop' | 'Bishop' | 'Archdeacon' | 'Priest' | 'Secretary' | 'Treasurer' | 'CellLeader';
-type ModuleTab = 'Dashboard' | 'Hierarchy' | 'Members' | 'Finances' | 'Certificates' | 'Settings';
+type ModuleTab = 'Dashboard' | 'Hierarchy' | 'Members' | 'Finances' | 'Certificates' | 'Settings' | 'Directorates';
 
 function DashboardLayout() {
   const navigate = useNavigate();
@@ -60,6 +61,7 @@ function DashboardLayout() {
       case 'Dashboard': return renderDashboard();
       case 'Hierarchy': return <HierarchyPage />;
       case 'Members': return <MembersPage />;
+      case 'Directorates': return <DirectoratesPage />;
       case 'Finances': return <FinancesPage />;
       case 'Certificates': return <CertificatesPage />;
       case 'Settings': return <SettingsPage />;
@@ -71,7 +73,12 @@ function DashboardLayout() {
     return user?.name || 'User';
   };
 
-  const tabs: ModuleTab[] = ['Dashboard', 'Hierarchy', 'Members', 'Finances', 'Certificates', 'Settings'];
+  const tabs: ModuleTab[] = ['Dashboard', 'Hierarchy', 'Members', 'Finances', 'Certificates'];
+  // show directorates for elevated roles
+  if (['SuperAdmin', 'DioceseAdmin', 'Archbishop'].includes(currentRole as any)) {
+    tabs.push('Directorates');
+  }
+  tabs.push('Settings');
 
   return (
     <div className="app-container">

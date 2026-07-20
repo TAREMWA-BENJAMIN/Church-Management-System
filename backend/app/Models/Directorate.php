@@ -13,6 +13,8 @@ class Directorate extends Model
         'name',
         'description',
         'diocese_id',
+        'is_active',
+        'revenue',
     ];
 
     public function diocese()

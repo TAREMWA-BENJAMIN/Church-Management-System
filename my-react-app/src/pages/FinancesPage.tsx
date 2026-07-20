@@ -17,6 +17,7 @@ type FinanceRecord = {
 };
 
 type Parish = { id: number; name: string };
+type Directorate = { id: number; name: string };
 
 const API = 'http://localhost:8000/api';
 
@@ -32,6 +33,7 @@ const CATEGORIES = ['Tithe', 'Offering', 'Donation', 'Building Fund', 'Salary', 
 export default function FinancesPage() {
   const [records, setRecords] = useState<FinanceRecord[]>([]);
   const [parishes, setParishes] = useState<Parish[]>([]);
+  const [directorates, setDirectorates] = useState<Directorate[]>([]);
   const [loading, setLoading] = useState(true);
   const [connected, setConnected] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -39,6 +41,7 @@ export default function FinancesPage() {
   const [liveCount, setLiveCount] = useState(0);
   const [form, setForm] = useState({
     parish_id: '',
+    directorate_id: '',
     type: 'income' as 'income' | 'expenditure',
     category: 'Tithe',
     amount: '',
@@ -53,13 +56,15 @@ export default function FinancesPage() {
   useEffect(() => {
     (async () => {
       try {
-        const [recRes, parRes] = await Promise.all([
+        const [recRes, parRes, dirRes] = await Promise.all([
           fetch(`${API}/finances`),
           fetch(`${API}/finances/parishes`),
+          fetch(`${API}/directory/directorates`),
         ]);
-        const [recs, pars] = await Promise.all([recRes.json(), parRes.json()]);
+        const [recs, pars, dirs] = await Promise.all([recRes.json(), parRes.json(), dirRes.json()]);
         setRecords(recs);
         setParishes(pars);
+        setDirectorates(dirs);
         if (pars.length > 0) setForm(f => ({ ...f, parish_id: String(pars[0].id) }));
       } catch {
         // silent – demo mode will still show sample data
@@ -103,10 +108,20 @@ export default function FinancesPage() {
     setSubmitting(true);
     setError(null);
     try {
+      const payload: any = {
+        type: form.type,
+        category: form.category,
+        amount: parseFloat(form.amount),
+        description: form.description,
+        date: form.date,
+      };
+      if (form.parish_id) payload.parish_id = Number(form.parish_id);
+      if (form.directorate_id) payload.directorate_id = Number(form.directorate_id);
+
       const res = await fetch(`${API}/finances`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({ ...form, parish_id: Number(form.parish_id), amount: parseFloat(form.amount) }),
+        body: JSON.stringify(payload),
       });
       if (!res.ok) {
         const err = await res.json();
@@ -200,10 +215,17 @@ export default function FinancesPage() {
           )}
           <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
-              <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-text-muted)', textTransform: 'uppercase' }}>Parish</label>
-              <select id="form-parish" value={form.parish_id} onChange={e => setForm(f => ({ ...f, parish_id: e.target.value }))} required style={inputStyle}>
-                {parishes.length === 0 && <option value="">— no parishes yet —</option>}
+              <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-text-muted)', textTransform: 'uppercase' }}>Parish (optional)</label>
+              <select id="form-parish" value={form.parish_id} onChange={e => setForm(f => ({ ...f, parish_id: e.target.value }))} style={inputStyle}>
+                <option value="">— select parish (or choose directorate) —</option>
                 {parishes.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+              </select>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
+              <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-text-muted)', textTransform: 'uppercase' }}>Directorate (optional)</label>
+              <select id="form-directorate" value={form.directorate_id} onChange={e => setForm(f => ({ ...f, directorate_id: e.target.value }))} style={inputStyle}>
+                <option value="">— select directorate (optional) —</option>
+                {directorates.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
               </select>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
