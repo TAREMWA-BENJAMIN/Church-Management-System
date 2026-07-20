@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { createUser, deleteUser, fetchUsers, updateUser } from '../services/api';
+import { createUser, deleteUser, fetchDirectorates, fetchUsers, updateUser } from '../services/api';
 
-type Member = { id: number; name: string; role: string; email: string; phone_number?: string; parish?: string; status?: 'Active' | 'Inactive' };
+type Member = { id: number; name: string; role: string; email: string; phone_number?: string; parish?: string; directorate_id?: number; directorate?: { id: number; name: string }; status?: 'Active' | 'Inactive' };
 
 const roleOptions = [
   'SuperAdmin',
@@ -15,6 +15,8 @@ const roleOptions = [
   'Assistant Priest',
   'Deacon',
   'Lay Reader',
+  'DirectorateAdmin',
+  'DirectorateManager',
 ];
 
 export default function MembersPage() {
@@ -23,10 +25,13 @@ export default function MembersPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState({ name: '', email: '', role: 'Parish Priest', phone_number: '' });
+  const [directorates, setDirectorates] = useState<{ id: number; name: string }[]>([]);
+  const [directorateId, setDirectorateId] = useState<number | ''>('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     loadMembers();
+    loadDirectorates();
   }, []);
 
   const loadMembers = async () => {
@@ -41,10 +46,20 @@ export default function MembersPage() {
     }
   };
 
+  const loadDirectorates = async () => {
+    try {
+      const data = await fetchDirectorates();
+      setDirectorates(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const filteredMembers = members.filter(m => m.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
   const resetForm = () => {
     setForm({ name: '', email: '', role: 'Parish Priest', phone_number: '' });
+    setDirectorateId('');
     setEditingId(null);
     setShowForm(false);
   };
@@ -54,6 +69,7 @@ export default function MembersPage() {
     try {
       const payload = {
         ...form,
+        directorate_id: directorateId === '' ? null : directorateId,
       };
 
       if (editingId) {
@@ -78,6 +94,7 @@ export default function MembersPage() {
       role: member.role,
       phone_number: member.phone_number || '',
     });
+    setDirectorateId(member.directorate_id || '');
     setShowForm(true);
   };
 
@@ -131,6 +148,13 @@ export default function MembersPage() {
                 {roleOptions.map(option => <option key={option} value={option}>{option}</option>)}
               </select>
             </div>
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.35rem', fontWeight: 500 }}>Directorate</label>
+              <select value={directorateId} onChange={e => setDirectorateId(e.target.value === '' ? '' : Number(e.target.value))} style={inputStyle}>
+                <option value="">None</option>
+                {directorates.map(dir => <option key={dir.id} value={dir.id}>{dir.name}</option>)}
+              </select>
+            </div>
             <div style={{ display: 'flex', alignItems: 'end' }}>
               <button className="btn btn-primary" type="submit">{editingId ? 'Save Changes' : 'Create Member'}</button>
             </div>
@@ -175,6 +199,7 @@ export default function MembersPage() {
                   <td style={{ padding: '1rem 1.5rem', fontWeight: 500 }}>{member.name}</td>
                   <td style={{ padding: '1rem 1.5rem', color: 'var(--color-text-muted)' }}>{member.role}</td>
                   <td style={{ padding: '1rem 1.5rem', color: 'var(--color-text-muted)' }}>{member.email}</td>
+                  <td style={{ padding: '1rem 1.5rem', color: 'var(--color-text-muted)' }}>{member.directorate?.name ?? '—'}</td>
                   <td style={{ padding: '1rem 1.5rem', color: 'var(--color-text-muted)' }}>{member.phone_number || '—'}</td>
                   <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
                     <button className="btn" style={{ padding: '0.25rem 0.5rem', color: 'var(--color-primary)', background: 'transparent', marginRight: '0.5rem', fontSize: '0.875rem' }} onClick={() => handleEdit(member)}>Edit</button>

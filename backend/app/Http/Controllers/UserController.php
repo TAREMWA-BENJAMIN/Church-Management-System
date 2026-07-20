@@ -11,7 +11,8 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $query = User::query()
-            ->select('id', 'name', 'email', 'role', 'diocese_id', 'archdeaconry_id', 'parish_id')
+            ->select('id', 'name', 'email', 'role', 'diocese_id', 'archdeaconry_id', 'parish_id', 'directorate_id')
+            ->with('directorate:id,name')
             ->orderBy('name');
 
         if ($request->has('role')) {
@@ -42,20 +43,23 @@ class UserController extends Controller
                 'Assistant Priest',
                 'Deacon',
                 'Lay Reader',
+                'DirectorateAdmin',
+                'DirectorateManager',
             ])],
             'diocese_id' => ['nullable', 'integer'],
             'archdeaconry_id' => ['nullable', 'integer'],
             'parish_id' => ['nullable', 'integer'],
+            'directorate_id' => ['nullable', 'integer', 'exists:directorates,id'],
         ]);
 
         $user = User::create($data);
 
-        return response()->json($user->only(['id', 'name', 'email', 'role', 'diocese_id', 'archdeaconry_id', 'parish_id']), 201);
+        return response()->json($user->only(['id', 'name', 'email', 'role', 'diocese_id', 'archdeaconry_id', 'parish_id', 'directorate_id']), 201);
     }
 
     public function show(User $user)
     {
-        return response()->json($user->only(['id', 'name', 'email', 'role', 'diocese_id', 'archdeaconry_id', 'parish_id']));
+        return response()->json($user->only(['id', 'name', 'email', 'role', 'diocese_id', 'archdeaconry_id', 'parish_id', 'directorate_id']));
     }
 
     public function update(Request $request, User $user)
@@ -75,16 +79,19 @@ class UserController extends Controller
                 'Assistant Priest',
                 'Deacon',
                 'Lay Reader',
+                'DirectorateAdmin',
+                'DirectorateManager',
             ])],
             'diocese_id' => ['nullable', 'integer'],
             'archdeaconry_id' => ['nullable', 'integer'],
             'parish_id' => ['nullable', 'integer'],
+            'directorate_id' => ['nullable', 'integer', 'exists:directorates,id'],
         ]);
 
         $user->fill($data);
         $user->save();
 
-        return response()->json($user->only(['id', 'name', 'email', 'role', 'diocese_id', 'archdeaconry_id', 'parish_id']));
+        return response()->json($user->only(['id', 'name', 'email', 'role', 'diocese_id', 'archdeaconry_id', 'parish_id', 'directorate_id']));
     }
 
     public function destroy(User $user)

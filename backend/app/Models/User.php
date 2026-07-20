@@ -27,6 +27,7 @@ class User extends Authenticatable
         'diocese_id',
         'archdeaconry_id',
         'parish_id',
+        'directorate_id',
     ];
 
     /**
@@ -67,6 +68,11 @@ class User extends Authenticatable
         return $this->belongsTo(Parish::class);
     }
 
+    public function directorate()
+    {
+        return $this->belongsTo(Directorate::class);
+    }
+
     public function isSuperAdmin()
     {
         return $this->role === 'SuperAdmin';
@@ -85,6 +91,11 @@ class User extends Authenticatable
     public function isArchdeaconAdmin()
     {
         return $this->role === 'ArchdeaconAdmin';
+    }
+
+    public function isDirectorateAdmin()
+    {
+        return in_array($this->role, ['DirectorateAdmin', 'DirectorateManager']);
     }
 
     public function isParishAdmin()

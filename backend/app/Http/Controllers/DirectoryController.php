@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Archdeaconry;
 use App\Models\Diocese;
+use App\Models\Directorate;
 use App\Models\Parish;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Http\Request;
@@ -81,15 +83,30 @@ class DirectoryController extends Controller
         $user = $request->user();
         $query = \App\Models\Directorate::select('id', 'name', 'diocese_id')->with('diocese');
 
-        // Note: For now, if $user->isDioceseAdmin(), they can see their diocese's directorates + provincial ones (diocese_id null).
-        // If they are SuperAdmin or Archbishop, they see all.
+        // Super admins and provincial leaders can see every directorate.
+        if ($user->canAccessFullDirectory()) {
+            return response()->json($query->get());
+        }
+
         if ($user->isDioceseAdmin()) {
             $query->where(function ($q) use ($user) {
                 $q->where('diocese_id', $user->diocese_id)
                   ->orWhereNull('diocese_id');
             });
+
+            return response()->json($query->get());
         }
 
-        return response()->json($query->get());
+        if ($user->isDirectorateAdmin()) {
+            if ($user->directorate_id) {
+                $query->where('id', $user->directorate_id);
+            } else {
+                $query->whereRaw('1 = 0');
+            }
+
+            return response()->json($query->get());
+        }
+
+        return response()->json([]);
     }
 }
