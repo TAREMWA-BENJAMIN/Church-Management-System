@@ -8,11 +8,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -23,11 +24,6 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role',
-        'diocese_id',
-        'archdeaconry_id',
-        'parish_id',
-        'directorate_id',
     ];
 
     /**
@@ -53,53 +49,8 @@ class User extends Authenticatable
         ];
     }
 
-    public function diocese()
+    public function roleAssignments()
     {
-        return $this->belongsTo(Diocese::class);
-    }
-
-    public function archdeaconry()
-    {
-        return $this->belongsTo(Archdeaconry::class);
-    }
-
-    public function parish()
-    {
-        return $this->belongsTo(Parish::class);
-    }
-
-    public function directorate()
-    {
-        return $this->belongsTo(Directorate::class);
-    }
-
-    public function isSuperAdmin()
-    {
-        return $this->role === 'SuperAdmin';
-    }
-
-    public function canAccessFullDirectory()
-    {
-        return in_array($this->role, ['SuperAdmin', 'Archbishop', 'Bishop']);
-    }
-
-    public function isDioceseAdmin()
-    {
-        return $this->role === 'DioceseAdmin';
-    }
-
-    public function isArchdeaconAdmin()
-    {
-        return $this->role === 'ArchdeaconAdmin';
-    }
-
-    public function isDirectorateAdmin()
-    {
-        return in_array($this->role, ['DirectorateAdmin', 'DirectorateManager']);
-    }
-
-    public function isParishAdmin()
-    {
-        return in_array($this->role, ['ParishAdmin', 'Priest', 'Secretary', 'Treasurer', 'CellLeader']);
+        return $this->hasMany(RoleAssignment::class);
     }
 }

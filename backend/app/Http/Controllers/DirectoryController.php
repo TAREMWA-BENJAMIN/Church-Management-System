@@ -28,6 +28,11 @@ class DirectoryController extends Controller
             $query->whereHas('archdeaconries.parishes', function ($q) use ($user) {
                 $q->where('id', $user->parish_id);
             });
+        } elseif ($user->isDirectorateAdmin() && $user->directorate_id) {
+            $directorate = \App\Models\Directorate::find($user->directorate_id);
+            if ($directorate && $directorate->diocese_id) {
+                $query->where('id', $directorate->diocese_id);
+            }
         }
 
         return response()->json($query->get());
@@ -48,6 +53,13 @@ class DirectoryController extends Controller
             $query->where('archdeaconry_id', $user->archdeaconry_id);
         } elseif ($user->isParishAdmin()) {
             $query->where('id', $user->parish_id);
+        } elseif ($user->isDirectorateAdmin() && $user->directorate_id) {
+            $directorate = \App\Models\Directorate::find($user->directorate_id);
+            if ($directorate && $directorate->diocese_id) {
+                $query->whereHas('archdeaconry', function ($q) use ($directorate) {
+                    $q->where('diocese_id', $directorate->diocese_id);
+                });
+            }
         }
 
         return response()->json($query->get());
@@ -68,6 +80,11 @@ class DirectoryController extends Controller
             $query->whereHas('parishes', function ($q) use ($user) {
                 $q->where('id', $user->parish_id);
             });
+        } elseif ($user->isDirectorateAdmin() && $user->directorate_id) {
+            $directorate = \App\Models\Directorate::find($user->directorate_id);
+            if ($directorate && $directorate->diocese_id) {
+                $query->where('diocese_id', $directorate->diocese_id);
+            }
         }
 
         return response()->json($query->get());

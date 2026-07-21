@@ -28,6 +28,8 @@ class FinanceRecordController extends Controller
             });
         } elseif ($user->isParishAdmin()) {
             $query->where('parish_id', $user->parish_id);
+        } elseif ($user->isDirectorateAdmin()) {
+            $query->where('directorate_id', $user->directorate_id);
         }
 
         $records = $query->orderByDesc('date')
@@ -91,6 +93,7 @@ class FinanceRecordController extends Controller
         }
 
         $record = FinanceRecord::create($validated);
+        $record->load(['parish', 'directorate']);
 
         // Broadcast to all connected clients
         broadcast(new FinanceRecordCreated($record))->toOthers();
@@ -126,6 +129,13 @@ class FinanceRecordController extends Controller
             $query->where('archdeaconry_id', $user->archdeaconry_id);
         } elseif ($user->isParishAdmin()) {
             $query->where('id', $user->parish_id);
+        } elseif ($user->isDirectorateAdmin() && $user->directorate_id) {
+            $directorate = \App\Models\Directorate::find($user->directorate_id);
+            if ($directorate && $directorate->diocese_id) {
+                $query->whereHas('archdeaconry', function ($q) use ($directorate) {
+                    $q->where('diocese_id', $directorate->diocese_id);
+                });
+            }
         }
 
         return response()->json($query->get());
