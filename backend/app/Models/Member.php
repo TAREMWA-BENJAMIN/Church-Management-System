@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\HasOrganizationUnitSecurity;
 
 class Member extends Model
 {
-    use HasFactory;
+    use HasFactory, HasOrganizationUnitSecurity;
 
     protected $fillable = [
         'organization_unit_id',

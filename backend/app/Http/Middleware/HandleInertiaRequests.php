@@ -33,6 +33,8 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'auth' => [
                 'user' => $request->user(),
+                'is_super_admin' => $request->user() ? $request->user()->is_super_admin : false,
+                'allowed_unit_ids' => $request->user() ? $request->user()->getAllowedOrganizationUnitIds() : [],
             ],
         ];
     }

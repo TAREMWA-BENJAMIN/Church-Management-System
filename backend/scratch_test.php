@@ -1,7 +1,11 @@
 <?php
-$request = Illuminate\Http\Request::create('/directorates', 'GET');
-$request->headers->set('X-Inertia', 'true');
-$ctrl = new App\Http\Controllers\DirectorateController();
-$res = $ctrl->index();
-$content = $res->toResponse($request)->getContent();
-echo $content;
+
+$types = App\Models\OrganizationUnitType::all();
+$dirCount = App\Models\OrganizationUnit::whereHas('type', function ($q) { $q->where('name', 'Directorate'); })->count();
+$financeCount = App\Models\FinanceRecord::count();
+
+echo json_encode([
+    'types' => $types->pluck('name')->toArray(),
+    'directorates_count' => $dirCount,
+    'finance_count' => $financeCount
+]);

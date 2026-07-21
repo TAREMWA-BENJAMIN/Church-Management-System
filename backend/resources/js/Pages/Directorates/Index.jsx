@@ -1,10 +1,41 @@
-import React from 'react';
+import React, { useState } from 'react';
 import AppLayout from '@/Layouts/AppLayout';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, useForm, router, usePage } from '@inertiajs/react';
 import DataTable from '@/Components/DataTable';
-import { BuildingOfficeIcon, UsersIcon } from '@heroicons/react/24/outline';
+import FormDialog from '@/Components/FormDialog';
+import { BuildingOfficeIcon, UsersIcon, PlusIcon } from '@heroicons/react/24/outline';
 
-export default function DirectoratesIndex({ directorates }) {
+export default function DirectoratesIndex({ directorates, directorateType, units }) {
+    const { auth } = usePage().props;
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+    const { data, setData, post, processing, errors, reset, clearErrors } = useForm({
+        name: '',
+        organization_unit_type_id: directorateType?.id || '',
+        parent_id: ''
+    });
+
+    const openAddDialog = () => {
+        clearErrors();
+        setData({
+            name: '',
+            organization_unit_type_id: directorateType?.id || '',
+            parent_id: ''
+        });
+        setIsDialogOpen(true);
+    };
+
+    const submit = (e) => {
+        e.preventDefault();
+        post(route('organization.store'), {
+            onSuccess: () => {
+                setIsDialogOpen(false);
+                reset();
+            },
+            preserveScroll: true
+        });
+    };
+
     const columns = [
         { 
             header: 'Directorate Name', 
@@ -69,15 +100,75 @@ export default function DirectoratesIndex({ directorates }) {
 
                     {/* Data Table */}
                     <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl shadow-lg">
-                        <div className="mb-6">
-                            <h3 className="text-xl font-bold text-white">Directorate Units</h3>
-                            <p className="text-sm text-gray-400 mt-1">Read-only overview of all specialized directorates.</p>
+                        <div className="mb-6 flex justify-between items-start">
+                            <div>
+                                <h3 className="text-xl font-bold text-white">Directorate Units</h3>
+                                <p className="text-sm text-gray-400 mt-1">Overview of all specialized directorates.</p>
+                            </div>
+                            {(auth.is_super_admin || units.length > 0) && (
+                                <button 
+                                    onClick={openAddDialog}
+                                    className="inline-flex items-center gap-x-2 rounded-md bg-purple-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-purple-500 transition-colors"
+                                >
+                                    <PlusIcon className="-ml-0.5 h-5 w-5" aria-hidden="true" />
+                                    Add Directorate
+                                </button>
+                            )}
                         </div>
                         
                         <DataTable columns={columns} data={directorates} />
                     </div>
                 </div>
             </div>
+
+            <FormDialog isOpen={isDialogOpen} onClose={() => setIsDialogOpen(false)} title="Add New Directorate">
+                <form className="space-y-4" onSubmit={submit}>
+                    <div>
+                        <label className="block text-sm font-medium leading-6 text-gray-300">Directorate Name</label>
+                        <div className="mt-1">
+                            <input 
+                                type="text" 
+                                value={data.name}
+                                onChange={e => setData('name', e.target.value)}
+                                className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-purple-500 sm:text-sm sm:leading-6" 
+                            />
+                            {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name}</p>}
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium leading-6 text-gray-300">Reports To (Parent Unit)</label>
+                        <div className="mt-1">
+                            <select 
+                                value={data.parent_id}
+                                onChange={e => setData('parent_id', e.target.value)}
+                                className="block w-full rounded-md border-0 bg-gray-800 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-purple-500 sm:text-sm sm:leading-6"
+                            >
+                                <option value="">None (Top Level)</option>
+                                {units.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
+                            </select>
+                            {errors.parent_id && <p className="mt-1 text-sm text-red-500">{errors.parent_id}</p>}
+                        </div>
+                    </div>
+
+                    <div className="mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
+                        <button 
+                            type="submit" 
+                            disabled={processing}
+                            className="inline-flex w-full justify-center rounded-md bg-purple-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-purple-500 sm:col-start-2 disabled:opacity-50 transition-colors" 
+                        >
+                            {processing ? 'Saving...' : 'Save Directorate'}
+                        </button>
+                        <button 
+                            type="button" 
+                            className="mt-3 inline-flex w-full justify-center rounded-md bg-white/10 px-3 py-2 text-sm font-semibold text-white shadow-sm ring-1 ring-inset ring-white/20 hover:bg-white/20 sm:col-start-1 sm:mt-0 transition-colors" 
+                            onClick={() => setIsDialogOpen(false)}
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </FormDialog>
         </AppLayout>
     );
 }

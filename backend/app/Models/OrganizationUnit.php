@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\HasOrganizationUnitSecurity;
 
 class OrganizationUnit extends Model
 {
+    use HasOrganizationUnitSecurity;
+
     protected $fillable = ['name', 'organization_unit_type_id', 'parent_id'];
 
     public function type()

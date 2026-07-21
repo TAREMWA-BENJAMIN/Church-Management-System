@@ -22,7 +22,7 @@ export default function Sidebar() {
         { name: 'People (Staff/Leaders)', href: route('people.index'), icon: AcademicCapIcon, current: url.startsWith('/people') },
         { name: 'Institutions', href: '#', icon: BuildingOfficeIcon, current: url.startsWith('/institutions') },
         { name: 'Directorates', href: route('directorates.index'), icon: BriefcaseIcon, current: url.startsWith('/directorates') },
-        { name: 'Finance', href: '#', icon: BanknotesIcon, current: url.startsWith('/finance') },
+        { name: 'Finance', href: route('finance.index'), icon: BanknotesIcon, current: url.startsWith('/finance') },
         { name: 'Assets', href: '#', icon: ArchiveBoxIcon, current: url.startsWith('/assets') },
         { name: 'Reports', href: '#', icon: ChartPieIcon, current: url.startsWith('/reports') },
         { name: 'Roles', href: route('roles.index'), icon: Cog6ToothIcon, current: url.startsWith('/roles') },
