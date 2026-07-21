@@ -18,10 +18,10 @@ export default function Sidebar() {
     const navigation = [
         { name: 'Dashboard', href: route('dashboard'), icon: HomeIcon, current: url.startsWith('/dashboard') },
         { name: 'Organization', href: route('organization.index'), icon: BuildingOfficeIcon, current: url.startsWith('/organization') },
-        { name: 'People', href: route('people.index'), icon: UsersIcon, current: url.startsWith('/people') },
-        { name: 'Leadership', href: '#', icon: AcademicCapIcon, current: url.startsWith('/leadership') },
+        { name: 'Members', href: route('members.index'), icon: UsersIcon, current: url.startsWith('/members') },
+        { name: 'People (Staff/Leaders)', href: route('people.index'), icon: AcademicCapIcon, current: url.startsWith('/people') },
         { name: 'Institutions', href: '#', icon: BuildingOfficeIcon, current: url.startsWith('/institutions') },
-        { name: 'Directorates', href: '#', icon: BriefcaseIcon, current: url.startsWith('/directorates') },
+        { name: 'Directorates', href: route('directorates.index'), icon: BriefcaseIcon, current: url.startsWith('/directorates') },
         { name: 'Finance', href: '#', icon: BanknotesIcon, current: url.startsWith('/finance') },
         { name: 'Assets', href: '#', icon: ArchiveBoxIcon, current: url.startsWith('/assets') },
         { name: 'Reports', href: '#', icon: ChartPieIcon, current: url.startsWith('/reports') },

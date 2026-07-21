@@ -26,6 +26,9 @@ Route::middleware('auth')->group(function () {
     Route::resource('organization', \App\Http\Controllers\OrganizationUnitController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('roles', \App\Http\Controllers\RoleController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('people', \App\Http\Controllers\UserController::class)->only(['index', 'store', 'update', 'destroy']);
+    Route::resource('members', \App\Http\Controllers\MemberController::class)->only(['index', 'store', 'update', 'destroy']);
+    Route::get('/directorates', [\App\Http\Controllers\DirectorateController::class, 'index'])->name('directorates.index');
+    Route::resource('finance', \App\Http\Controllers\FinanceRecordController::class)->only(['index', 'store', 'update', 'destroy']);
 });
 
 require __DIR__.'/auth.php';

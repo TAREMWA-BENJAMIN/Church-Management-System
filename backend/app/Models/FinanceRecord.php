@@ -10,23 +10,27 @@ class FinanceRecord extends Model
     use HasFactory;
 
     protected $fillable = [
-        'parish_id',
-        'directorate_id',
+        'organization_unit_id',
         'type',
+        'recorded_by',
         'category',
         'amount',
         'description',
-        'date',
-        'recorded_by'
+        'date'
     ];
 
-    public function parish()
+    protected $casts = [
+        'date' => 'date',
+        'amount' => 'decimal:2',
+    ];
+
+    public function organizationUnit()
     {
-        return $this->belongsTo(Parish::class);
+        return $this->belongsTo(OrganizationUnit::class);
     }
 
-    public function directorate()
+    public function recorder()
     {
-        return $this->belongsTo(Directorate::class);
+        return $this->belongsTo(User::class, 'recorded_by');
     }
 }
