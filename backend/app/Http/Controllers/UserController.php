@@ -3,101 +3,121 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\OrganizationUnit;
+use App\Models\RoleAssignment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
+use Inertia\Inertia;
 use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        $query = User::query()
-            ->select('id', 'name', 'email', 'role', 'diocese_id', 'archdeaconry_id', 'parish_id', 'directorate_id')
-            ->with('directorate:id,name')
-            ->orderBy('name');
+        // Get users with their role assignments, including the related Role and Organization Unit
+        $users = User::with(['roleAssignments.role', 'roleAssignments.organizationUnit'])->get();
+        $roles = Role::all();
+        $units = OrganizationUnit::all();
 
-        if ($request->has('role')) {
-            $roleInput = $request->query('role');
-            \Log::info('UserController@index role query param received:', ['role' => $roleInput]);
-            
-            $roles = is_array($roleInput) ? $roleInput : explode(',', $roleInput);
-            $query->whereIn('role', $roles);
-        }
-
-        return response()->json($query->get());
+        return Inertia::render('People/Index', [
+            'users' => $users,
+            'roles' => $roles,
+            'units' => $units
+        ]);
     }
 
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['nullable', 'email', 'unique:users,email'],
-            'role' => ['required', 'string', Rule::in([
-                'SuperAdmin',
-                'Archbishop',
-                'Bishop',
-                'Assistant Bishop',
-                'Archdeacon',
-                'Canon',
-                'Dean',
-                'Parish Priest',
-                'Assistant Priest',
-                'Deacon',
-                'Lay Reader',
-                'DirectorateAdmin',
-                'DirectorateManager',
-            ])],
-            'diocese_id' => ['nullable', 'integer'],
-            'archdeaconry_id' => ['nullable', 'integer'],
-            'parish_id' => ['nullable', 'integer'],
-            'directorate_id' => ['nullable', 'integer', 'exists:directorates,id'],
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8',
+            'assignments' => 'nullable|array',
+            'assignments.*.role_id' => 'required|exists:roles,id',
+            'assignments.*.organization_unit_id' => 'required|exists:organization_units,id',
         ]);
 
-        $user = User::create($data);
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+        ]);
 
-        return response()->json($user->only(['id', 'name', 'email', 'role', 'diocese_id', 'archdeaconry_id', 'parish_id', 'directorate_id']), 201);
-    }
+        if (isset($validated['assignments'])) {
+            foreach ($validated['assignments'] as $assignment) {
+                RoleAssignment::create([
+                    'user_id' => $user->id,
+                    'role_id' => $assignment['role_id'],
+                    'organization_unit_id' => $assignment['organization_unit_id'],
+                ]);
+                
+                // Also assign the role to the user directly via Spatie (if needed for global checks)
+                $role = Role::find($assignment['role_id']);
+                if ($role) {
+                    $user->assignRole($role);
+                }
+            }
+        }
 
-    public function show(User $user)
-    {
-        return response()->json($user->only(['id', 'name', 'email', 'role', 'diocese_id', 'archdeaconry_id', 'parish_id', 'directorate_id']));
+        return redirect()->back()->with('success', 'User created successfully.');
     }
 
     public function update(Request $request, User $user)
     {
-        $data = $request->validate([
-            'name' => ['sometimes', 'required', 'string', 'max:255'],
-            'email' => ['sometimes', 'nullable', 'email', Rule::unique('users')->ignore($user->id)],
-            'role' => ['sometimes', 'required', 'string', Rule::in([
-                'SuperAdmin',
-                'Archbishop',
-                'Bishop',
-                'Assistant Bishop',
-                'Archdeacon',
-                'Canon',
-                'Dean',
-                'Parish Priest',
-                'Assistant Priest',
-                'Deacon',
-                'Lay Reader',
-                'DirectorateAdmin',
-                'DirectorateManager',
-            ])],
-            'diocese_id' => ['nullable', 'integer'],
-            'archdeaconry_id' => ['nullable', 'integer'],
-            'parish_id' => ['nullable', 'integer'],
-            'directorate_id' => ['nullable', 'integer', 'exists:directorates,id'],
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
+            'password' => 'nullable|string|min:8',
+            'assignments' => 'nullable|array',
+            'assignments.*.role_id' => 'required|exists:roles,id',
+            'assignments.*.organization_unit_id' => 'required|exists:organization_units,id',
         ]);
 
-        $user->fill($data);
-        $user->save();
+        $updateData = [
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+        ];
 
-        return response()->json($user->only(['id', 'name', 'email', 'role', 'diocese_id', 'archdeaconry_id', 'parish_id', 'directorate_id']));
+        if (!empty($validated['password'])) {
+            $updateData['password'] = Hash::make($validated['password']);
+        }
+
+        $user->update($updateData);
+
+        // Sync assignments
+        $user->roleAssignments()->delete(); // Clear old assignments
+        
+        // Clear spatie roles
+        $user->syncRoles([]);
+
+        if (isset($validated['assignments'])) {
+            foreach ($validated['assignments'] as $assignment) {
+                RoleAssignment::create([
+                    'user_id' => $user->id,
+                    'role_id' => $assignment['role_id'],
+                    'organization_unit_id' => $assignment['organization_unit_id'],
+                ]);
+                
+                // Assign spatie role
+                $role = Role::find($assignment['role_id']);
+                if ($role) {
+                    $user->assignRole($role);
+                }
+            }
+        }
+
+        return redirect()->back()->with('success', 'User updated successfully.');
     }
 
     public function destroy(User $user)
     {
+        // Don't allow deleting the super admin
+        if ($user->email === 'admin@church.org') {
+            return redirect()->back()->with('error', 'Cannot delete the system administrator.');
+        }
+        
         $user->delete();
-
-        return response()->json(['message' => 'User deleted successfully']);
+        return redirect()->back()->with('success', 'User deleted successfully.');
     }
 }

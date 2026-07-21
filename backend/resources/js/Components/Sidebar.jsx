@@ -18,7 +18,7 @@ export default function Sidebar() {
     const navigation = [
         { name: 'Dashboard', href: route('dashboard'), icon: HomeIcon, current: url.startsWith('/dashboard') },
         { name: 'Organization', href: route('organization.index'), icon: BuildingOfficeIcon, current: url.startsWith('/organization') },
-        { name: 'People', href: '#', icon: UsersIcon, current: url.startsWith('/people') },
+        { name: 'People', href: route('people.index'), icon: UsersIcon, current: url.startsWith('/people') },
         { name: 'Leadership', href: '#', icon: AcademicCapIcon, current: url.startsWith('/leadership') },
         { name: 'Institutions', href: '#', icon: BuildingOfficeIcon, current: url.startsWith('/institutions') },
         { name: 'Directorates', href: '#', icon: BriefcaseIcon, current: url.startsWith('/directorates') },

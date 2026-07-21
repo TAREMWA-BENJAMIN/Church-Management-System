@@ -25,6 +25,7 @@ Route::middleware('auth')->group(function () {
     
     Route::resource('organization', \App\Http\Controllers\OrganizationUnitController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('roles', \App\Http\Controllers\RoleController::class)->only(['index', 'store', 'update', 'destroy']);
+    Route::resource('people', \App\Http\Controllers\UserController::class)->only(['index', 'store', 'update', 'destroy']);
 });
 
 require __DIR__.'/auth.php';
