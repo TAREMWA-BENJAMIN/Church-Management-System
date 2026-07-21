@@ -6,7 +6,7 @@ import {
     UsersIcon, 
     AcademicCapIcon, 
     BanknotesIcon, 
-    ChartBarIcon, 
+    ChartPieIcon, 
     Cog6ToothIcon, 
     ArchiveBoxIcon, 
     BriefcaseIcon 
@@ -24,8 +24,8 @@ export default function Sidebar() {
         { name: 'Directorates', href: '#', icon: BriefcaseIcon, current: url.startsWith('/directorates') },
         { name: 'Finance', href: '#', icon: BanknotesIcon, current: url.startsWith('/finance') },
         { name: 'Assets', href: '#', icon: ArchiveBoxIcon, current: url.startsWith('/assets') },
-        { name: 'Reports', href: '#', icon: ChartBarIcon, current: url.startsWith('/reports') },
-        { name: 'Settings', href: '#', icon: Cog6ToothIcon, current: url.startsWith('/settings') },
+        { name: 'Reports', href: '#', icon: ChartPieIcon, current: url.startsWith('/reports') },
+        { name: 'Roles', href: route('roles.index'), icon: Cog6ToothIcon, current: url.startsWith('/roles') },
     ];
 
     function classNames(...classes) {
