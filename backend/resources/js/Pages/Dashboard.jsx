@@ -7,12 +7,12 @@ import {
     BanknotesIcon 
 } from '@heroicons/react/24/outline';
 
-export default function Dashboard() {
-    const stats = [
-        { name: 'Dioceses', value: '39', icon: BuildingLibraryIcon },
-        { name: 'Total Members', value: '4.2M', icon: UsersIcon },
-        { name: 'Total Priests', value: '12,500', icon: AcademicCapIcon },
-        { name: 'Total Revenue', value: 'UGX 1.2B', icon: BanknotesIcon },
+export default function Dashboard({ stats }) {
+    const statCards = [
+        { name: 'Dioceses & Units', value: stats?.dioceses || 0, icon: BuildingLibraryIcon },
+        { name: 'Total Members', value: stats?.members || 0, icon: UsersIcon },
+        { name: 'Total Staff', value: stats?.staff || 0, icon: AcademicCapIcon },
+        { name: 'Total Revenue', value: `UGX ${stats?.revenue || 0}`, icon: BanknotesIcon },
     ];
 
     return (
@@ -24,7 +24,7 @@ export default function Dashboard() {
             <div className="py-6">
                 <div className="mx-auto max-w-7xl">
                     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                        {stats.map((stat) => (
+                        {statCards.map((stat) => (
                             <div
                                 key={stat.name}
                                 className="relative overflow-hidden rounded-2xl bg-white/5 border border-white/10 p-6 backdrop-blur-xl shadow-lg transition-transform duration-300 hover:-translate-y-1 hover:bg-white/10 hover:shadow-purple-900/20"
