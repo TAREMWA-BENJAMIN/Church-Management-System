@@ -3,7 +3,7 @@ import AppLayout from '@/Layouts/AppLayout';
 import { Head, useForm, router } from '@inertiajs/react';
 import { Tree } from 'react-arborist';
 import DataTable from '@/Components/DataTable';
-import { FolderIcon, DocumentIcon, PlusIcon, PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { FolderIcon, DocumentIcon, PlusIcon, PencilSquareIcon, TrashIcon, ChevronRightIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 import FormDialog from '@/Components/FormDialog';
 
 export default function OrganizationIndex({ units, types }) {
@@ -24,7 +24,7 @@ export default function OrganizationIndex({ units, types }) {
         const roots = [];
 
         units.forEach(unit => {
-            map[unit.id] = { ...unit, children: [] };
+            map[unit.id] = { ...unit, id: String(unit.id), children: [] };
         });
 
         units.forEach(unit => {
@@ -34,20 +34,27 @@ export default function OrganizationIndex({ units, types }) {
                 roots.push(map[unit.id]);
             }
         });
+        
+        // Remove empty children arrays so they are treated as leaf nodes
+        Object.values(map).forEach(node => {
+            if (node.children.length === 0) {
+                delete node.children;
+            }
+        });
 
         return roots;
     }, [units]);
 
     const currentChildren = useMemo(() => {
         if (!selectedUnitId) return treeData;
-        const unit = units.find(u => u.id === selectedUnitId);
+        const unit = units.find(u => String(u.id) === String(selectedUnitId));
         if (!unit) return treeData;
-        return units.filter(u => u.parent_id === selectedUnitId);
+        return units.filter(u => String(u.parent_id) === String(selectedUnitId));
     }, [selectedUnitId, units, treeData]);
 
     const selectedUnitName = useMemo(() => {
         if (!selectedUnitId) return "Root (Church of Uganda)";
-        return units.find(u => u.id === selectedUnitId)?.name || "Unknown";
+        return units.find(u => String(u.id) === String(selectedUnitId))?.name || "Unknown";
     }, [selectedUnitId, units]);
 
     const Node = ({ node, style, dragHandle }) => {
@@ -55,18 +62,41 @@ export default function OrganizationIndex({ units, types }) {
             <div 
                 style={style} 
                 ref={dragHandle} 
-                className={`flex items-center gap-2 cursor-pointer transition-colors px-2 py-1 rounded-md ${node.isSelected ? 'bg-purple-900/50 text-white' : 'text-gray-300 hover:bg-gray-800'}`}
-                onClick={() => {
-                    node.toggleSelected();
-                    setSelectedUnitId(node.data.id);
-                }}
+                className={`flex items-center gap-1 transition-colors px-1 py-1 rounded-md ${node.isSelected ? 'bg-purple-900/50 text-white' : 'text-gray-300 hover:bg-gray-800'}`}
             >
-                {node.isLeaf ? (
-                    <DocumentIcon className="h-4 w-4 text-gray-500" />
-                ) : (
-                    <FolderIcon className="h-4 w-4 text-purple-400" />
-                )}
-                <span className="text-sm font-medium">{node.data.name}</span>
+                {/* Expand/Collapse Caret */}
+                <div 
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        if (!node.isLeaf) {
+                            node.toggle();
+                        }
+                    }}
+                    className={`cursor-pointer p-0.5 rounded hover:bg-white/10 ${node.isLeaf ? 'invisible' : ''}`}
+                >
+                    {node.isOpen ? (
+                        <ChevronDownIcon className="h-4 w-4 text-gray-400" />
+                    ) : (
+                        <ChevronRightIcon className="h-4 w-4 text-gray-400" />
+                    )}
+                </div>
+
+                {/* Folder/Document Icon & Name */}
+                <div 
+                    className="flex items-center gap-2 cursor-pointer flex-1"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        node.toggleSelected();
+                        setSelectedUnitId(node.data.id);
+                    }}
+                >
+                    {node.isLeaf ? (
+                        <DocumentIcon className="h-4 w-4 text-gray-500" />
+                    ) : (
+                        <FolderIcon className="h-4 w-4 text-purple-400" />
+                    )}
+                    <span className="text-sm font-medium">{node.data.name}</span>
+                </div>
             </div>
         );
     };
@@ -166,7 +196,7 @@ export default function OrganizationIndex({ units, types }) {
                                 height={600}
                                 rowHeight={32}
                                 indent={24}
-                                openByDefault={true}
+                                openByDefault={false}
                             >
                                 {Node}
                             </Tree>
