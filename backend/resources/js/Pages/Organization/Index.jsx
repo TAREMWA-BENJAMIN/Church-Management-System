@@ -175,10 +175,10 @@ export default function OrganizationIndex({ units, types }) {
         <AppLayout header={<h2 className="text-xl font-semibold leading-tight text-gray-200">Organization Hierarchy</h2>}>
             <Head title="Organizations" />
 
-            <div className="py-6 h-[calc(100vh-10rem)]">
-                <div className="mx-auto max-w-7xl h-full flex gap-6">
+            <div className="py-6 lg:h-[calc(100vh-10rem)]">
+                <div className="mx-auto max-w-7xl flex flex-col lg:flex-row lg:h-full gap-6 px-4 sm:px-6 lg:px-8">
                     {/* Left Panel: Tree View */}
-                    <div className="w-1/3 bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-xl shadow-lg flex flex-col">
+                    <div className="w-full lg:w-1/3 min-h-[300px] lg:min-h-0 bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-xl shadow-lg flex flex-col">
                         <div className="flex justify-between items-center mb-4 pb-2 border-b border-gray-700">
                             <h3 className="text-lg font-semibold text-white">Structure</h3>
                             <button 
@@ -204,8 +204,8 @@ export default function OrganizationIndex({ units, types }) {
                     </div>
 
                     {/* Right Panel: Data Table & Details */}
-                    <div className="w-2/3 bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl shadow-lg flex flex-col">
-                        <div className="mb-6 flex justify-between items-start">
+                    <div className="w-full lg:w-2/3 min-h-[400px] lg:min-h-0 bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg flex flex-col">
+                        <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                             <div>
                                 <h3 className="text-xl font-bold text-white">{selectedUnitName}</h3>
                                 <p className="text-sm text-gray-400 mt-1">Viewing sub-units and details</p>

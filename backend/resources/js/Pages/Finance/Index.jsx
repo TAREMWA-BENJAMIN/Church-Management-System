@@ -140,8 +140,8 @@ export default function FinanceIndex({ records, units }) {
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     
                     {/* Metrics Dashboard */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-                        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl shadow-lg relative overflow-hidden">
+                    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
+                        <div className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg relative overflow-hidden">
                             <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-green-500/10 blur-2xl"></div>
                             <dt className="text-sm font-medium text-gray-400 truncate flex items-center gap-2">
                                 <ArrowTrendingUpIcon className="h-4 w-4 text-green-400" /> Total Income
@@ -151,7 +151,7 @@ export default function FinanceIndex({ records, units }) {
                             </dd>
                         </div>
                         
-                        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl shadow-lg relative overflow-hidden">
+                        <div className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg relative overflow-hidden">
                             <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-red-500/10 blur-2xl"></div>
                             <dt className="text-sm font-medium text-gray-400 truncate flex items-center gap-2">
                                 <ArrowTrendingDownIcon className="h-4 w-4 text-red-400" /> Total Expenditure
@@ -161,7 +161,7 @@ export default function FinanceIndex({ records, units }) {
                             </dd>
                         </div>
 
-                        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl shadow-lg relative overflow-hidden">
+                        <div className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg relative overflow-hidden">
                             <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-blue-500/10 blur-2xl"></div>
                             <dt className="text-sm font-medium text-gray-400 truncate flex items-center gap-2">
                                 <BanknotesIcon className="h-4 w-4 text-blue-400" /> Net Balance
@@ -172,8 +172,8 @@ export default function FinanceIndex({ records, units }) {
                         </div>
                     </div>
 
-                    <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl shadow-lg">
-                        <div className="mb-6 flex justify-between items-start">
+                    <div className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg">
+                        <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                             <div>
                                 <h3 className="text-xl font-bold text-white">Financial Ledger</h3>
                                 <p className="text-sm text-gray-400 mt-1">Track all income and expenditures across the organization.</p>
@@ -181,7 +181,7 @@ export default function FinanceIndex({ records, units }) {
                             {units.length > 0 && (
                                 <button 
                                     onClick={openAddDialog}
-                                    className="inline-flex items-center gap-x-2 rounded-md bg-purple-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-purple-500 transition-colors"
+                                    className="w-full sm:w-auto inline-flex items-center justify-center gap-x-2 rounded-md bg-purple-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-purple-500 transition-colors"
                                 >
                                     <PlusIcon className="-ml-0.5 h-5 w-5" aria-hidden="true" />
                                     Add Transaction

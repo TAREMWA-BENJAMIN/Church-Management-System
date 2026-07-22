@@ -38,7 +38,7 @@ export default function Sidebar() {
     }
 
     return (
-        <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 px-6 ring-1 ring-white/10 h-screen w-64 fixed">
+        <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 px-6 ring-1 ring-white/10 h-full w-full">
             <div className="flex h-16 shrink-0 items-center">
                 <ApplicationLogo className="h-8 w-auto fill-current text-white" />
                 <span className="ml-3 text-white font-bold text-xl tracking-wide">Church ERP</span>

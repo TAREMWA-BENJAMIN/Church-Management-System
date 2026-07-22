@@ -121,17 +121,17 @@ export default function MembersIndex({ members, units }) {
         <AppLayout header={<h2 className="text-xl font-semibold leading-tight text-gray-200">Congregation Directory</h2>}>
             <Head title="Members" />
 
-            <div className="py-6">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl shadow-lg">
-                        <div className="mb-6 flex justify-between items-start">
+            <div className="py-4">
+                <div className="mx-auto max-w-7xl">
+                    <div className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg">
+                        <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                             <div>
                                 <h3 className="text-xl font-bold text-white">Members</h3>
                                 <p className="text-sm text-gray-400 mt-1">Manage everyday congregation members across all parishes.</p>
                             </div>
                             <button 
                                 onClick={openAddDialog}
-                                className="inline-flex items-center gap-x-2 rounded-md bg-purple-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-purple-500 transition-colors"
+                                className="w-full sm:w-auto inline-flex items-center justify-center gap-x-2 rounded-md bg-purple-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-purple-500 transition-colors"
                             >
                                 <PlusIcon className="-ml-0.5 h-5 w-5" aria-hidden="true" />
                                 Add Member

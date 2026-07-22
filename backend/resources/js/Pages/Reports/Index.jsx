@@ -24,18 +24,22 @@ export default function ReportsIndex({ units, reportType, filters, reportData })
             const income = reportData.filter(r => r.type === 'income').reduce((sum, r) => sum + parseFloat(r.amount), 0);
             const expenditure = reportData.filter(r => r.type === 'expenditure').reduce((sum, r) => sum + parseFloat(r.amount), 0);
             return (
-                <div className="grid grid-cols-3 gap-4 border border-white/10 p-4 rounded-xl mb-6 bg-white/5">
-                    <div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 border border-white/10 p-4 rounded-xl mb-6 bg-white/5">
+                    <div className="flex sm:block justify-between items-center sm:items-start border-b sm:border-b-0 border-white/10 pb-3 sm:pb-0">
                         <div className="text-xs text-gray-400">Total Income</div>
-                        <div className="text-lg font-bold text-green-400">{new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(income)}</div>
+                        <div className="text-base sm:text-lg font-bold text-green-400 mt-0 sm:mt-1">
+                            {new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(income)}
+                        </div>
                     </div>
-                    <div>
+                    <div className="flex sm:block justify-between items-center sm:items-start border-b sm:border-b-0 border-white/10 pb-3 sm:pb-0">
                         <div className="text-xs text-gray-400">Total Expenditure</div>
-                        <div className="text-lg font-bold text-red-400">{new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(expenditure)}</div>
+                        <div className="text-base sm:text-lg font-bold text-red-400 mt-0 sm:mt-1">
+                            {new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(expenditure)}
+                        </div>
                     </div>
-                    <div>
+                    <div className="flex sm:block justify-between items-center sm:items-start">
                         <div className="text-xs text-gray-400">Net Balance</div>
-                        <div className={`text-lg font-bold ${income - expenditure >= 0 ? 'text-white' : 'text-red-400'}`}>
+                        <div className={`text-base sm:text-lg font-bold mt-0 sm:mt-1 ${income - expenditure >= 0 ? 'text-white' : 'text-red-400'}`}>
                             {new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(income - expenditure)}
                         </div>
                     </div>
@@ -123,18 +127,18 @@ export default function ReportsIndex({ units, reportType, filters, reportData })
                 }
             `}} />
 
-            <div className="py-6 no-print">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl shadow-lg">
+            <div className="py-4 no-print">
+                <div className="mx-auto max-w-7xl">
+                    <div className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg">
                         
                         {/* Tab Selectors */}
-                        <div className="border-b border-white/10 pb-5 flex flex-wrap gap-4 items-center justify-between">
-                            <div className="flex space-x-4">
+                        <div className="border-b border-white/10 pb-4 flex flex-col sm:flex-row gap-3 sm:gap-4 sm:items-center sm:justify-between">
+                            <div className="flex flex-wrap gap-2">
                                 {['finance', 'assets', 'institutions'].map((type) => (
                                     <button
                                         key={type}
                                         onClick={() => handleTypeChange(type)}
-                                        className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors capitalize ${
+                                        className={`px-3 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-colors capitalize ${
                                             reportType === type 
                                                 ? 'bg-purple-600 text-white' 
                                                 : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10'
@@ -147,7 +151,7 @@ export default function ReportsIndex({ units, reportType, filters, reportData })
 
                             <button
                                 onClick={printReport}
-                                className="inline-flex items-center gap-x-2 rounded-md bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 transition-colors"
+                                className="w-full sm:w-auto inline-flex items-center justify-center gap-x-2 rounded-md bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 transition-colors"
                             >
                                 <PrinterIcon className="h-5 w-5" />
                                 Print / Save PDF
@@ -193,7 +197,7 @@ export default function ReportsIndex({ units, reportType, filters, reportData })
                         </form>
 
                         {/* On-screen Preview Frame */}
-                        <div className="border border-white/10 rounded-xl p-6 bg-white/5">
+                        <div className="border border-white/10 rounded-xl p-4 sm:p-6 bg-white/5">
                             <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
                                 <ChartBarIcon className="h-5 w-5 text-purple-400" /> Report Preview
                             </h3>
