@@ -20,7 +20,7 @@ export default function Sidebar() {
         { name: 'Organization', href: route('organization.index'), icon: BuildingOfficeIcon, current: url.startsWith('/organization') },
         { name: 'Members', href: route('members.index'), icon: UsersIcon, current: url.startsWith('/members') },
         { name: 'People (Staff/Leaders)', href: route('people.index'), icon: AcademicCapIcon, current: url.startsWith('/people') },
-        { name: 'Institutions', href: '#', icon: BuildingOfficeIcon, current: url.startsWith('/institutions') },
+        { name: 'Institutions', href: route('institutions.index'), icon: BuildingOfficeIcon, current: url.startsWith('/institutions') },
         { name: 'Directorates', href: route('directorates.index'), icon: BriefcaseIcon, current: url.startsWith('/directorates') },
         { name: 'Finance', href: route('finance.index'), icon: BanknotesIcon, current: url.startsWith('/finance') },
         { name: 'Assets', href: route('assets.index'), icon: BriefcaseIcon, current: url.startsWith('/assets') },

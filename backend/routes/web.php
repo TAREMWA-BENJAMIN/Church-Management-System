@@ -30,6 +30,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/directorates', [\App\Http\Controllers\DirectorateController::class, 'index'])->name('directorates.index');
     Route::resource('finance', \App\Http\Controllers\FinanceRecordController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('assets', \App\Http\Controllers\AssetController::class);
+    Route::resource('institutions', \App\Http\Controllers\InstitutionController::class);
 });
 
 require __DIR__.'/auth.php';
