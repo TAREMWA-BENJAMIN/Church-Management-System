@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import AppLayout from '@/Layouts/AppLayout';
 import { Head, Link, useForm, router, usePage } from '@inertiajs/react';
-import DataTable from '@/Components/DataTable';
 import FormDialog from '@/Components/FormDialog';
-import { BuildingOfficeIcon, UsersIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { BuildingOfficeIcon, UsersIcon, PlusIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 
 export default function DirectoratesIndex({ directorates, directorateType, units }) {
     const { auth } = usePage().props;
@@ -36,88 +35,109 @@ export default function DirectoratesIndex({ directorates, directorateType, units
         });
     };
 
-    const columns = [
-        { 
-            header: 'Directorate Name', 
-            accessor: (row) => (
-                <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-purple-500/10 ring-1 ring-purple-500/20">
-                        <BuildingOfficeIcon className="h-5 w-5 text-purple-400" />
-                    </div>
-                    <div>
-                        <div className="font-semibold text-white">{row.name}</div>
-                        <div className="text-xs text-gray-400">Reports to: {row.parent?.name || 'N/A'}</div>
-                    </div>
-                </div>
-            ) 
-        },
-        { 
-            header: 'Assigned Staff', 
-            accessor: (row) => (
-                <div className="flex items-center gap-2">
-                    <UsersIcon className="h-4 w-4 text-gray-400" />
-                    <span className="text-gray-300">
-                        {row.role_assignments?.length || 0} Members
-                    </span>
-                </div>
-            ) 
-        },
-        { 
-            header: 'Actions', 
-            accessor: (row) => (
-                <Link 
-                    href={route('organization.index')} 
-                    className="text-sm font-semibold leading-6 text-purple-400 hover:text-purple-300 transition-colors"
-                >
-                    Manage in Tree <span aria-hidden="true">&rarr;</span>
-                </Link>
-            ) 
-        }
+    // A palette of accent colors for each directorate card
+    const accents = [
+        { bg: 'bg-purple-500/15', icon: 'text-purple-400', ring: 'ring-purple-500/20', glow: 'bg-purple-500/10' },
+        { bg: 'bg-blue-500/15',   icon: 'text-blue-400',   ring: 'ring-blue-500/20',   glow: 'bg-blue-500/10' },
+        { bg: 'bg-indigo-500/15', icon: 'text-indigo-400', ring: 'ring-indigo-500/20', glow: 'bg-indigo-500/10' },
+        { bg: 'bg-violet-500/15', icon: 'text-violet-400', ring: 'ring-violet-500/20', glow: 'bg-violet-500/10' },
+        { bg: 'bg-cyan-500/15',   icon: 'text-cyan-400',   ring: 'ring-cyan-500/20',   glow: 'bg-cyan-500/10' },
+        { bg: 'bg-emerald-500/15',icon: 'text-emerald-400',ring: 'ring-emerald-500/20',glow: 'bg-emerald-500/10' },
     ];
 
     return (
         <AppLayout header={<h2 className="text-xl font-semibold leading-tight text-gray-200">Directorates Dashboard</h2>}>
             <Head title="Directorates" />
 
-            <div className="py-6">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    {/* Summary Metrics */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-                        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl shadow-lg relative overflow-hidden">
-                            <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-purple-500/10 blur-2xl"></div>
-                            <dt className="text-sm font-medium text-gray-400 truncate">Total Directorates</dt>
-                            <dd className="mt-2 text-3xl font-semibold tracking-tight text-white">{directorates.length}</dd>
+            <div className="py-4">
+                <div className="mx-auto max-w-7xl">
+
+                    {/* ── Summary Metrics ── */}
+                    <div className="grid grid-cols-2 gap-4 mb-6">
+                        <div className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg relative overflow-hidden">
+                            <div className="absolute top-0 right-0 -mr-6 -mt-6 w-24 h-24 rounded-full bg-purple-500/10 blur-2xl" />
+                            <dt className="text-xs sm:text-sm font-medium text-gray-400">Total Directorates</dt>
+                            <dd className="mt-2 text-3xl font-bold text-white">{directorates.length}</dd>
                         </div>
-                        
-                        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl shadow-lg relative overflow-hidden">
-                            <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-blue-500/10 blur-2xl"></div>
-                            <dt className="text-sm font-medium text-gray-400 truncate">Total Assigned Staff</dt>
-                            <dd className="mt-2 text-3xl font-semibold tracking-tight text-white">
+                        <div className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg relative overflow-hidden">
+                            <div className="absolute top-0 right-0 -mr-6 -mt-6 w-24 h-24 rounded-full bg-blue-500/10 blur-2xl" />
+                            <dt className="text-xs sm:text-sm font-medium text-gray-400">Assigned Staff</dt>
+                            <dd className="mt-2 text-3xl font-bold text-white">
                                 {directorates.reduce((acc, curr) => acc + (curr.role_assignments?.length || 0), 0)}
                             </dd>
                         </div>
                     </div>
 
-                    {/* Data Table */}
-                    <div className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg">
-                        <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                            <div>
-                                <h3 className="text-xl font-bold text-white">Directorate Units</h3>
-                                <p className="text-sm text-gray-400 mt-1">Overview of all specialized directorates.</p>
-                            </div>
-                            {(auth.is_super_admin || units.length > 0) && (
-                                <button 
-                                    onClick={openAddDialog}
-                                    className="w-full sm:w-auto inline-flex items-center justify-center gap-x-2 rounded-md bg-purple-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-purple-500 transition-colors"
-                                >
-                                    <PlusIcon className="-ml-0.5 h-5 w-5" aria-hidden="true" />
-                                    Add Directorate
-                                </button>
-                            )}
+                    {/* ── Header ── */}
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+                        <div>
+                            <h3 className="text-lg font-bold text-white">Directorate Units</h3>
+                            <p className="text-sm text-gray-400 mt-0.5">Overview of all specialized directorates.</p>
                         </div>
-                        
-                        <DataTable columns={columns} data={directorates} />
+                        {(auth.is_super_admin || units.length > 0) && (
+                            <button
+                                onClick={openAddDialog}
+                                className="w-full sm:w-auto inline-flex items-center justify-center gap-x-2 rounded-xl bg-purple-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-purple-500 transition-colors"
+                            >
+                                <PlusIcon className="h-4 w-4" />
+                                Add Directorate
+                            </button>
+                        )}
                     </div>
+
+                    {/* ── Directorate Cards ── */}
+                    {directorates.length === 0 ? (
+                        <div className="text-center py-16 text-gray-500">
+                            <BuildingOfficeIcon className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                            <p className="text-sm">No directorates found.</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-3">
+                            {directorates.map((dir, index) => {
+                                const accent = accents[index % accents.length];
+                                return (
+                                    <div
+                                        key={dir.id}
+                                        className="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-xl shadow-sm hover:bg-white/[0.08] transition-all duration-200"
+                                    >
+                                        <div className="flex items-start gap-4">
+                                            {/* Icon */}
+                                            <div className={`shrink-0 flex h-11 w-11 items-center justify-center rounded-xl ${accent.bg} ring-1 ${accent.ring}`}>
+                                                <BuildingOfficeIcon className={`h-5 w-5 ${accent.icon}`} />
+                                            </div>
+
+                                            {/* Content */}
+                                            <div className="flex-1 min-w-0">
+                                                <p className="font-bold text-white text-base leading-tight truncate">
+                                                    {dir.name}
+                                                </p>
+                                                <p className="text-xs text-gray-500 mt-0.5 truncate">
+                                                    Reports to: <span className="text-gray-400">{dir.parent?.name || 'Top Level'}</span>
+                                                </p>
+
+                                                {/* Staff badge */}
+                                                <div className="flex items-center gap-1.5 mt-2.5">
+                                                    <UsersIcon className="h-3.5 w-3.5 text-gray-500" />
+                                                    <span className="text-xs text-gray-400">
+                                                        {dir.role_assignments?.length || 0} staff assigned
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            {/* Action arrow */}
+                                            <Link
+                                                href={route('organization.index')}
+                                                className="shrink-0 flex items-center gap-1 text-xs font-semibold text-purple-400 hover:text-purple-300 transition-colors mt-0.5"
+                                            >
+                                                <span className="hidden sm:inline">Manage</span>
+                                                <ArrowRightIcon className="h-4 w-4" />
+                                            </Link>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
                 </div>
             </div>
 
