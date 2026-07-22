@@ -50,7 +50,10 @@ class User extends Authenticatable
         $currentParentIds = $parentIds;
 
         while (!empty($currentParentIds)) {
-            $childrenIds = \App\Models\OrganizationUnit::whereIn('parent_id', $currentParentIds)->pluck('id')->toArray();
+            $childrenIds = \App\Models\OrganizationUnit::withoutGlobalScope('organizationUnitSecurity')
+                                ->whereIn('parent_id', $currentParentIds)
+                                ->pluck('id')
+                                ->toArray();
             if (empty($childrenIds)) {
                 break;
             }

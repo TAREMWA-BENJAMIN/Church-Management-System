@@ -13,20 +13,24 @@ import {
 } from '@heroicons/react/24/outline'; // We will need to install heroicons
 
 export default function Sidebar() {
-    const { url } = usePage();
+    const { url, props } = usePage();
+    const { auth } = props;
+    
+    const isSuperAdmin = auth?.is_super_admin;
+    const hasRole = (role) => auth?.roles?.includes(role) || isSuperAdmin;
 
     const navigation = [
-        { name: 'Dashboard', href: route('dashboard'), icon: HomeIcon, current: url.startsWith('/dashboard') },
-        { name: 'Organization', href: route('organization.index'), icon: BuildingOfficeIcon, current: url.startsWith('/organization') },
-        { name: 'Members', href: route('members.index'), icon: UsersIcon, current: url.startsWith('/members') },
-        { name: 'People (Staff/Leaders)', href: route('people.index'), icon: AcademicCapIcon, current: url.startsWith('/people') },
-        { name: 'Institutions', href: route('institutions.index'), icon: BuildingOfficeIcon, current: url.startsWith('/institutions') },
-        { name: 'Directorates', href: route('directorates.index'), icon: BriefcaseIcon, current: url.startsWith('/directorates') },
-        { name: 'Finance', href: route('finance.index'), icon: BanknotesIcon, current: url.startsWith('/finance') },
-        { name: 'Assets', href: route('assets.index'), icon: BriefcaseIcon, current: url.startsWith('/assets') },
-        { name: 'Reports', href: route('reports.index'), icon: ChartPieIcon, current: url.startsWith('/reports') },
-        { name: 'Roles', href: route('roles.index'), icon: Cog6ToothIcon, current: url.startsWith('/roles') },
-    ];
+        { name: 'Dashboard', href: route('dashboard'), icon: HomeIcon, current: url.startsWith('/dashboard'), show: true },
+        { name: 'Organization', href: route('organization.index'), icon: BuildingOfficeIcon, current: url.startsWith('/organization'), show: isSuperAdmin },
+        { name: 'Members', href: route('members.index'), icon: UsersIcon, current: url.startsWith('/members'), show: isSuperAdmin },
+        { name: 'People (Staff/Leaders)', href: route('people.index'), icon: AcademicCapIcon, current: url.startsWith('/people'), show: isSuperAdmin },
+        { name: 'Institutions', href: route('institutions.index'), icon: BuildingOfficeIcon, current: url.startsWith('/institutions'), show: isSuperAdmin },
+        { name: 'Directorates', href: route('directorates.index'), icon: BriefcaseIcon, current: url.startsWith('/directorates'), show: isSuperAdmin },
+        { name: 'Finance', href: route('finance.index'), icon: BanknotesIcon, current: url.startsWith('/finance'), show: hasRole('Treasurer') || isSuperAdmin },
+        { name: 'Assets', href: route('assets.index'), icon: BriefcaseIcon, current: url.startsWith('/assets'), show: isSuperAdmin },
+        { name: 'Reports', href: route('reports.index'), icon: ChartPieIcon, current: url.startsWith('/reports'), show: hasRole('Treasurer') || isSuperAdmin },
+        { name: 'Roles', href: route('roles.index'), icon: Cog6ToothIcon, current: url.startsWith('/roles'), show: isSuperAdmin },
+    ].filter(item => item.show !== false);
 
     function classNames(...classes) {
         return classes.filter(Boolean).join(' ')
