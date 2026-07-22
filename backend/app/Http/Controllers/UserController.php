@@ -63,11 +63,11 @@ class UserController extends Controller
         return redirect()->back()->with('success', 'User created successfully.');
     }
 
-    public function update(Request $request, User $user)
+    public function update(Request $request, User $person)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($person->id)],
             'password' => 'nullable|string|min:8',
             'assignments' => 'nullable|array',
             'assignments.*.role_id' => 'required|exists:roles,id',
@@ -83,18 +83,18 @@ class UserController extends Controller
             $updateData['password'] = Hash::make($validated['password']);
         }
 
-        $user->update($updateData);
+        $person->update($updateData);
 
         // Sync assignments
-        $user->roleAssignments()->delete(); // Clear old assignments
+        $person->roleAssignments()->delete(); // Clear old assignments
         
         // Clear spatie roles
-        $user->syncRoles([]);
+        $person->syncRoles([]);
 
         if (isset($validated['assignments'])) {
             foreach ($validated['assignments'] as $assignment) {
                 RoleAssignment::create([
-                    'user_id' => $user->id,
+                    'user_id' => $person->id,
                     'role_id' => $assignment['role_id'],
                     'organization_unit_id' => $assignment['organization_unit_id'],
                 ]);
@@ -102,7 +102,7 @@ class UserController extends Controller
                 // Assign spatie role
                 $role = Role::find($assignment['role_id']);
                 if ($role) {
-                    $user->assignRole($role);
+                    $person->assignRole($role);
                 }
             }
         }
@@ -110,14 +110,14 @@ class UserController extends Controller
         return redirect()->back()->with('success', 'User updated successfully.');
     }
 
-    public function destroy(User $user)
+    public function destroy(User $person)
     {
         // Don't allow deleting the super admin
-        if ($user->email === 'admin@church.org') {
+        if ($person->email === 'admin@church.org') {
             return redirect()->back()->with('error', 'Cannot delete the system administrator.');
         }
         
-        $user->delete();
+        $person->delete();
         return redirect()->back()->with('success', 'User deleted successfully.');
     }
 }

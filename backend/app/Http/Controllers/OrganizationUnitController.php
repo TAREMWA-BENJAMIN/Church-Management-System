@@ -33,7 +33,7 @@ class OrganizationUnitController extends Controller
         return redirect()->back()->with('success', 'Organization unit created.');
     }
 
-    public function update(Request $request, OrganizationUnit $organizationUnit)
+    public function update(Request $request, OrganizationUnit $organization)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -41,15 +41,15 @@ class OrganizationUnitController extends Controller
             'parent_id' => 'nullable|exists:organization_units,id'
         ]);
 
-        $organizationUnit->update($validated);
+        $organization->update($validated);
 
         return redirect()->back()->with('success', 'Organization unit updated.');
     }
 
-    public function destroy(OrganizationUnit $organizationUnit)
+    public function destroy(OrganizationUnit $organization)
     {
         // Children will be deleted automatically due to cascadeOnDelete in migration
-        $organizationUnit->delete();
+        $organization->delete();
 
         return redirect()->back()->with('success', 'Organization unit deleted.');
     }
