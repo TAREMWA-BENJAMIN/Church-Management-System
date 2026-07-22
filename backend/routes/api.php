@@ -32,5 +32,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/finances', [FinanceRecordController::class, 'store']);
     Route::get('/finances/parishes', [FinanceRecordController::class, 'parishes']);
     // Directorates (admin CRUD)
-    Route::apiResource('/directorates', \App\Http\Controllers\API\DirectorateController::class)->except(['create','edit']);
+    Route::apiResource('/directorates', \App\Http\Controllers\API\DirectorateController::class)->except(['create','edit'])->names('api.directorates');
 });
