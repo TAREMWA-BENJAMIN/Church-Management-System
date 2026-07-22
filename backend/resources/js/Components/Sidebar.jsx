@@ -18,17 +18,18 @@ export default function Sidebar() {
     
     const isSuperAdmin = auth?.is_super_admin;
     const hasRole = (role) => auth?.roles?.includes(role) || isSuperAdmin;
+    const isLeader = auth?.roles?.length > 0 || isSuperAdmin;
 
     const navigation = [
         { name: 'Dashboard', href: route('dashboard'), icon: HomeIcon, current: url.startsWith('/dashboard'), show: true },
-        { name: 'Organization', href: route('organization.index'), icon: BuildingOfficeIcon, current: url.startsWith('/organization'), show: isSuperAdmin },
-        { name: 'Members', href: route('members.index'), icon: UsersIcon, current: url.startsWith('/members'), show: isSuperAdmin },
-        { name: 'People (Staff/Leaders)', href: route('people.index'), icon: AcademicCapIcon, current: url.startsWith('/people'), show: isSuperAdmin },
-        { name: 'Institutions', href: route('institutions.index'), icon: BuildingOfficeIcon, current: url.startsWith('/institutions'), show: isSuperAdmin },
-        { name: 'Directorates', href: route('directorates.index'), icon: BriefcaseIcon, current: url.startsWith('/directorates'), show: isSuperAdmin },
-        { name: 'Finance', href: route('finance.index'), icon: BanknotesIcon, current: url.startsWith('/finance'), show: hasRole('Treasurer') || isSuperAdmin },
-        { name: 'Assets', href: route('assets.index'), icon: BriefcaseIcon, current: url.startsWith('/assets'), show: isSuperAdmin },
-        { name: 'Reports', href: route('reports.index'), icon: ChartPieIcon, current: url.startsWith('/reports'), show: hasRole('Treasurer') || isSuperAdmin },
+        { name: 'Organization', href: route('organization.index'), icon: BuildingOfficeIcon, current: url.startsWith('/organization'), show: isLeader },
+        { name: 'Members', href: route('members.index'), icon: UsersIcon, current: url.startsWith('/members'), show: isLeader },
+        { name: 'People (Staff/Leaders)', href: route('people.index'), icon: AcademicCapIcon, current: url.startsWith('/people'), show: isLeader },
+        { name: 'Institutions', href: route('institutions.index'), icon: BuildingOfficeIcon, current: url.startsWith('/institutions'), show: isLeader },
+        { name: 'Directorates', href: route('directorates.index'), icon: BriefcaseIcon, current: url.startsWith('/directorates'), show: isLeader },
+        { name: 'Finance', href: route('finance.index'), icon: BanknotesIcon, current: url.startsWith('/finance'), show: isLeader },
+        { name: 'Assets', href: route('assets.index'), icon: BriefcaseIcon, current: url.startsWith('/assets'), show: isLeader },
+        { name: 'Reports', href: route('reports.index'), icon: ChartPieIcon, current: url.startsWith('/reports'), show: isLeader },
         { name: 'Roles', href: route('roles.index'), icon: Cog6ToothIcon, current: url.startsWith('/roles'), show: isSuperAdmin },
     ].filter(item => item.show !== false);
 

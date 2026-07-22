@@ -9,11 +9,14 @@ import {
 
 export default function Dashboard({ stats }) {
     const statCards = [
-        { name: 'Dioceses & Units', value: stats?.dioceses || 0, icon: BuildingLibraryIcon },
-        { name: 'Total Members', value: stats?.members || 0, icon: UsersIcon },
-        { name: 'Total Staff', value: stats?.staff || 0, icon: AcademicCapIcon },
-        { name: 'Total Revenue', value: `UGX ${stats?.revenue || 0}`, icon: BanknotesIcon },
-    ];
+        { name: 'Provinces', value: stats?.provinces, icon: BuildingLibraryIcon, show: stats?.provinces !== undefined },
+        { name: 'Dioceses', value: stats?.dioceses, icon: BuildingLibraryIcon, show: stats?.dioceses !== undefined },
+        { name: 'Archdeaconries', value: stats?.archdeaconries, icon: BuildingLibraryIcon, show: stats?.archdeaconries !== undefined },
+        { name: 'Parishes', value: stats?.parishes, icon: BuildingLibraryIcon, show: stats?.parishes !== undefined },
+        { name: 'Total Members', value: stats?.members || 0, icon: UsersIcon, show: true },
+        { name: 'Total Staff', value: stats?.staff || 0, icon: AcademicCapIcon, show: true },
+        { name: 'Total Revenue', value: `UGX ${stats?.revenue || 0}`, icon: BanknotesIcon, show: true },
+    ].filter(item => item.show);
 
     return (
         <AppLayout

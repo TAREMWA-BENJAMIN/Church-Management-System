@@ -6,6 +6,7 @@ use App\Models\OrganizationUnit;
 use App\Models\Member;
 use App\Models\FinanceRecord;
 use App\Models\User;
+use App\Models\OrganizationUnitType;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
@@ -16,41 +17,44 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
-        // 1. Dioceses / Sub-Units Count
-        // If super admin, count all Dioceses. If not, count sub-units of the user's units.
-        $dioceseType = \App\Models\OrganizationUnitType::where('name', 'Diocese')->first();
-        if ($user->is_super_admin) {
-            $diocesesCount = OrganizationUnit::where('organization_unit_type_id', $dioceseType?->id)->count();
-        } else {
-            // Standard users only see units they have access to.
-            $diocesesCount = OrganizationUnit::count();
+        $stats = [];
+
+        // 1. Dynamic Organization Unit Counts (Automatically scoped by security trait)
+        $unitCounts = OrganizationUnit::selectRaw('organization_unit_type_id, count(*) as count')
+            ->groupBy('organization_unit_type_id')
+            ->get();
+            
+        $types = OrganizationUnitType::all()->keyBy('id');
+        
+        foreach ($unitCounts as $uc) {
+            $type = $types->get($uc->organization_unit_type_id);
+            if ($type) {
+                $name = $type->name;
+                // Simple pluralization
+                $plural = str_ends_with($name, 'y') ? substr($name, 0, -1) . 'ies' : $name . 's';
+                
+                $stats[strtolower($plural)] = $uc->count;
+            }
         }
 
-        // 2. Members Count
-        $membersCount = Member::count();
+        // 2. Members Count (Automatically scoped)
+        $stats['members'] = Member::count();
 
         // 3. Staff / Priests Count
-        // Filter users who have role assignments in the user's allowed units, or all if super admin
         if ($user->is_super_admin) {
-            $staffCount = User::count();
+            $stats['staff'] = User::count();
         } else {
             $allowedUnitIds = $user->getAllowedOrganizationUnitIds();
-            $staffCount = User::whereHas('roleAssignments', function($q) use ($allowedUnitIds) {
+            $stats['staff'] = User::whereHas('roleAssignments', function($q) use ($allowedUnitIds) {
                 $q->whereIn('organization_unit_id', $allowedUnitIds);
             })->count();
         }
 
-        // 4. Total Revenue (Income)
-        $totalRevenue = FinanceRecord::where('type', 'income')->sum('amount');
+        // 4. Total Revenue (Income) (Automatically scoped)
+        $stats['revenue'] = number_format(FinanceRecord::where('type', 'income')->sum('amount'));
 
-        // Formatted values for the dashboard
         return Inertia::render('Dashboard', [
-            'stats' => [
-                'dioceses' => $diocesesCount,
-                'members' => $membersCount,
-                'staff' => $staffCount,
-                'revenue' => number_format($totalRevenue),
-            ]
+            'stats' => $stats
         ]);
     }
 }
