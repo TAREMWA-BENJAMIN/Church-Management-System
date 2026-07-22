@@ -31,6 +31,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('finance', \App\Http\Controllers\FinanceRecordController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('assets', \App\Http\Controllers\AssetController::class);
     Route::resource('institutions', \App\Http\Controllers\InstitutionController::class);
+    Route::get('/reports', [\App\Http\Controllers\ReportController::class, 'index'])->name('reports.index');
 });
 
 require __DIR__.'/auth.php';

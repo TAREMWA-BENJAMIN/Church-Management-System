@@ -24,7 +24,7 @@ export default function Sidebar() {
         { name: 'Directorates', href: route('directorates.index'), icon: BriefcaseIcon, current: url.startsWith('/directorates') },
         { name: 'Finance', href: route('finance.index'), icon: BanknotesIcon, current: url.startsWith('/finance') },
         { name: 'Assets', href: route('assets.index'), icon: BriefcaseIcon, current: url.startsWith('/assets') },
-        { name: 'Reports', href: '#', icon: ChartPieIcon, current: url.startsWith('/reports') },
+        { name: 'Reports', href: route('reports.index'), icon: ChartPieIcon, current: url.startsWith('/reports') },
         { name: 'Roles', href: route('roles.index'), icon: Cog6ToothIcon, current: url.startsWith('/roles') },
     ];
 
