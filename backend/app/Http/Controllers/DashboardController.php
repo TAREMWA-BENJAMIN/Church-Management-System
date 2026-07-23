@@ -30,8 +30,14 @@ class DashboardController extends Controller
             $type = $types->get($uc->organization_unit_type_id);
             if ($type) {
                 $name = $type->name;
-                // Simple pluralization
-                $plural = str_ends_with($name, 'y') ? substr($name, 0, -1) . 'ies' : $name . 's';
+                // Better pluralization
+                if (str_ends_with($name, 'y')) {
+                    $plural = substr($name, 0, -1) . 'ies';
+                } elseif (str_ends_with($name, 'h') || str_ends_with($name, 's')) {
+                    $plural = $name . 'es';
+                } else {
+                    $plural = $name . 's';
+                }
                 
                 $stats[strtolower($plural)] = $uc->count;
             }

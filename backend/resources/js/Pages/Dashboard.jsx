@@ -9,7 +9,6 @@ import {
 
 export default function Dashboard({ stats }) {
     const statCards = [
-        { name: 'Provinces', value: stats?.provinces, icon: BuildingLibraryIcon, show: stats?.provinces !== undefined },
         { name: 'Dioceses', value: stats?.dioceses, icon: BuildingLibraryIcon, show: stats?.dioceses !== undefined },
         { name: 'Archdeaconries', value: stats?.archdeaconries, icon: BuildingLibraryIcon, show: stats?.archdeaconries !== undefined },
         { name: 'Parishes', value: stats?.parishes, icon: BuildingLibraryIcon, show: stats?.parishes !== undefined },
