@@ -11,13 +11,14 @@ import {
     BriefcaseIcon, ArchiveBoxIcon,
     ChartPieIcon, Cog6ToothIcon,
     BuildingLibraryIcon, ChevronRightIcon,
-    SunIcon, MoonIcon
+    SunIcon, MoonIcon, EnvelopeIcon
 } from '@heroicons/react/24/outline';
 import {
     HomeIcon as HomeIconSolid,
     UsersIcon as UsersIconSolid,
     BanknotesIcon as BanknotesIconSolid,
     ChartBarIcon as ChartBarIconSolid,
+    EnvelopeIcon as EnvelopeIconSolid,
 } from '@heroicons/react/24/solid';
 import ApplicationLogo from '@/Components/ApplicationLogo';
 
@@ -29,9 +30,10 @@ export default function AppLayout({ header, children }) {
     const [moreSheetOpen, setMoreSheetOpen] = useState(false);
     const [isDark, setIsDark] = useState(() => {
         if (typeof window !== 'undefined') {
-            return localStorage.getItem('theme') !== 'light';
+            // Default is LIGHT mode — only go dark if user explicitly chose dark
+            return localStorage.getItem('theme') === 'dark';
         }
-        return true;
+        return false;
     });
 
     useEffect(() => {
@@ -46,6 +48,7 @@ export default function AppLayout({ header, children }) {
 
     const isSuperAdmin = auth?.is_super_admin;
     const isLeader = auth?.roles?.length > 0 || isSuperAdmin;
+    const unreadCount = props?.unreadMessageCount ?? 0;
 
     // Bottom nav — the 4 primary tabs
     const bottomNav = [
@@ -55,20 +58,7 @@ export default function AppLayout({ header, children }) {
             icon: HomeIcon,
             activeIcon: HomeIconSolid,
             active: url.startsWith('/dashboard'),
-        },
-        {
-            name: 'Members',
-            href: route('members.index'),
-            icon: UsersIcon,
-            activeIcon: UsersIconSolid,
-            active: url.startsWith('/members'),
-        },
-        {
-            name: 'Finance',
-            href: route('finance.index'),
-            icon: BanknotesIcon,
-            activeIcon: BanknotesIconSolid,
-            active: url.startsWith('/finance'),
+            badge: null,
         },
         {
             name: 'Reports',
@@ -76,12 +66,30 @@ export default function AppLayout({ header, children }) {
             icon: ChartBarIcon,
             activeIcon: ChartBarIconSolid,
             active: url.startsWith('/reports'),
+            badge: null,
+        },
+        {
+            name: 'Finance',
+            href: route('finance.index'),
+            icon: BanknotesIcon,
+            activeIcon: BanknotesIconSolid,
+            active: url.startsWith('/finance'),
+            badge: null,
+        },
+        {
+            name: 'Messages',
+            href: route('communications.index'),
+            icon: EnvelopeIcon,
+            activeIcon: EnvelopeIconSolid,
+            active: url.startsWith('/communications'),
+            badge: unreadCount > 0 ? unreadCount : null,
         },
     ];
 
     // "More" bottom sheet items
     const moreNav = [
         { name: 'Organization', href: route('organization.index'), icon: BuildingOfficeIcon, show: isLeader },
+        { name: 'Members', href: route('members.index'), icon: UsersIcon, show: isLeader },
         { name: 'People (Staff/Leaders)', href: route('people.index'), icon: AcademicCapIcon, show: isLeader },
         { name: 'Institutions', href: route('institutions.index'), icon: BuildingLibraryIcon, show: isLeader },
         { name: 'Directorates', href: route('directorates.index'), icon: BriefcaseIcon, show: isLeader },
@@ -161,19 +169,19 @@ export default function AppLayout({ header, children }) {
                             leaveFrom="translate-y-0"
                             leaveTo="translate-y-full"
                         >
-                            <DialogPanel className="pointer-events-auto w-screen rounded-t-3xl bg-gray-900 border-t border-white/10 shadow-2xl pb-24">
+                            <DialogPanel className="pointer-events-auto w-screen rounded-t-3xl bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-white/10 shadow-2xl pb-24 transition-colors duration-200">
                                 {/* Handle bar */}
                                 <div className="flex justify-center pt-3 pb-1">
-                                    <div className="w-10 h-1 rounded-full bg-gray-600" />
+                                    <div className="w-10 h-1 rounded-full bg-gray-300 dark:bg-gray-600" />
                                 </div>
 
                                 {/* Sheet Header */}
-                                <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
+                                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-white/10">
                                     <div>
-                                        <p className="text-xs font-semibold text-purple-400 uppercase tracking-widest">More Options</p>
-                                        <p className="text-white font-bold text-lg leading-tight">{user.name}</p>
+                                        <p className="text-xs font-semibold text-purple-600 dark:text-purple-400 uppercase tracking-widest">More Options</p>
+                                        <p className="text-gray-900 dark:text-white font-bold text-lg leading-tight">{user.name}</p>
                                     </div>
-                                    <button onClick={() => setMoreSheetOpen(false)} className="p-2 rounded-full bg-white/10 text-gray-400 hover:text-white transition-colors">
+                                    <button onClick={() => setMoreSheetOpen(false)} className="p-2 rounded-full bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
                                         <XMarkIcon className="h-5 w-5" />
                                     </button>
                                 </div>
@@ -187,32 +195,32 @@ export default function AppLayout({ header, children }) {
                                             onClick={() => setMoreSheetOpen(false)}
                                             className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-200 group ${
                                                 url.startsWith('/' + item.name.toLowerCase().split(' ')[0])
-                                                    ? 'bg-purple-600/30 text-purple-300'
-                                                    : 'text-gray-300 hover:bg-white/5 active:bg-white/10'
+                                                    ? 'bg-purple-100 text-purple-700 dark:bg-purple-600/30 dark:text-purple-300'
+                                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 active:bg-gray-200 dark:active:bg-white/10'
                                             }`}
                                         >
                                             <div className={`p-2 rounded-xl ${
                                                 url.startsWith('/' + item.name.toLowerCase().split(' ')[0])
-                                                    ? 'bg-purple-500/30'
-                                                    : 'bg-white/5 group-hover:bg-white/10'
+                                                    ? 'bg-purple-200 dark:bg-purple-500/30 text-purple-700 dark:text-purple-300'
+                                                    : 'bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 group-hover:bg-gray-200 dark:group-hover:bg-white/10 group-hover:text-gray-700 dark:group-hover:text-gray-300'
                                             }`}>
                                                 <item.icon className="h-5 w-5" />
                                             </div>
                                             <span className="flex-1 font-semibold text-sm">{item.name}</span>
-                                            <ChevronRightIcon className="h-4 w-4 text-gray-600 group-hover:text-gray-400 transition-colors" />
+                                            <ChevronRightIcon className="h-4 w-4 text-gray-400 dark:text-gray-600 group-hover:text-gray-600 dark:group-hover:text-gray-400 transition-colors" />
                                         </Link>
                                     ))}
                                 </nav>
 
                                 {/* Logout at bottom */}
-                                <div className="px-4 pt-2 pb-2 border-t border-white/10 mx-4 mt-2">
+                                <div className="px-4 pt-2 pb-2 border-t border-gray-200 dark:border-white/10 mx-4 mt-2">
                                     <Link
                                         href={route('logout')}
                                         method="post"
                                         as="button"
-                                        className="w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl text-red-400 hover:bg-red-500/10 transition-all"
+                                        className="w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all"
                                     >
-                                        <div className="p-2 rounded-xl bg-red-500/10">
+                                        <div className="p-2 rounded-xl bg-red-100 dark:bg-red-500/10">
                                             <XMarkIcon className="h-5 w-5" />
                                         </div>
                                         <span className="font-semibold text-sm">Log Out</span>
@@ -301,7 +309,14 @@ export default function AppLayout({ header, children }) {
                                 {item.active && (
                                     <span className="absolute top-0 left-1/2 -translate-x-1/2 h-0.5 w-8 rounded-full bg-purple-400" />
                                 )}
-                                <Icon className="h-6 w-6" />
+                                <div className="relative">
+                                    <Icon className="h-6 w-6" />
+                                    {item.badge && (
+                                        <span className="absolute -top-1.5 -right-2 inline-flex items-center justify-center rounded-full bg-purple-600 px-1.5 py-0.5 text-[9px] font-bold text-white leading-none">
+                                            {item.badge > 9 ? '9+' : item.badge}
+                                        </span>
+                                    )}
+                                </div>
                                 <span className="text-[10px] font-semibold tracking-wide">{item.name}</span>
                             </Link>
                         );
