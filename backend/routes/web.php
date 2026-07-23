@@ -27,6 +27,16 @@ Route::middleware('auth')->group(function () {
     Route::resource('assets', \App\Http\Controllers\AssetController::class);
     Route::resource('institutions', \App\Http\Controllers\InstitutionController::class);
     Route::get('/reports', [\App\Http\Controllers\ReportController::class, 'index'])->name('reports.index');
+
+    // Communication Module
+    Route::prefix('communications')->group(function () {
+        Route::get('/',              [\App\Http\Controllers\CommunicationController::class, 'index'])->name('communications.index');
+        Route::post('/',             [\App\Http\Controllers\CommunicationController::class, 'store'])->name('communications.store');
+        Route::get('/unread-count',  [\App\Http\Controllers\CommunicationController::class, 'unreadCount'])->name('communications.unreadCount');
+        Route::get('/{id}',          [\App\Http\Controllers\CommunicationController::class, 'show'])->name('communications.show');
+        Route::post('/{id}/reply',   [\App\Http\Controllers\CommunicationController::class, 'reply'])->name('communications.reply');
+        Route::delete('/{id}',       [\App\Http\Controllers\CommunicationController::class, 'destroy'])->name('communications.destroy');
+    });
 });
 
 require __DIR__.'/auth.php';

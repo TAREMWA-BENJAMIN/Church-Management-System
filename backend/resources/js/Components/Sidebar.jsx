@@ -9,8 +9,9 @@ import {
     ChartPieIcon, 
     Cog6ToothIcon, 
     ArchiveBoxIcon, 
-    BriefcaseIcon 
-} from '@heroicons/react/24/outline'; // We will need to install heroicons
+    BriefcaseIcon,
+    EnvelopeIcon
+} from '@heroicons/react/24/outline';
 
 export default function Sidebar() {
     const { url, props } = usePage();
@@ -19,6 +20,7 @@ export default function Sidebar() {
     const isSuperAdmin = auth?.is_super_admin;
     const hasRole = (role) => auth?.roles?.includes(role) || isSuperAdmin;
     const isLeader = auth?.roles?.length > 0 || isSuperAdmin;
+    const unreadCount = props?.unreadMessageCount ?? 0;
 
     const navigation = [
         { name: 'Dashboard', href: route('dashboard'), icon: HomeIcon, current: url.startsWith('/dashboard'), show: true },
@@ -29,6 +31,7 @@ export default function Sidebar() {
         { name: 'Directorates', href: route('directorates.index'), icon: BriefcaseIcon, current: url.startsWith('/directorates'), show: isLeader },
         { name: 'Finance', href: route('finance.index'), icon: BanknotesIcon, current: url.startsWith('/finance'), show: isLeader },
         { name: 'Assets', href: route('assets.index'), icon: BriefcaseIcon, current: url.startsWith('/assets'), show: isLeader },
+        { name: 'Communications', href: route('communications.index'), icon: EnvelopeIcon, current: url.startsWith('/communications'), show: isLeader, badge: unreadCount > 0 ? unreadCount : null },
         { name: 'Reports', href: route('reports.index'), icon: ChartPieIcon, current: url.startsWith('/reports'), show: isLeader },
         { name: 'Roles', href: route('roles.index'), icon: Cog6ToothIcon, current: url.startsWith('/roles'), show: isSuperAdmin },
     ].filter(item => item.show !== false);
@@ -63,6 +66,11 @@ export default function Sidebar() {
                                             aria-hidden="true"
                                         />
                                         {item.name}
+                                        {item.badge && (
+                                            <span className="ml-auto inline-flex items-center justify-center rounded-full bg-purple-600 px-2 py-0.5 text-xs font-bold text-white">
+                                                {item.badge}
+                                            </span>
+                                        )}
                                     </Link>
                                 </li>
                             ))}
