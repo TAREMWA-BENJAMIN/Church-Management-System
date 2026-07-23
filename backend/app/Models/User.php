@@ -28,7 +28,16 @@ class User extends Authenticatable
     ];
 
     /**
-     * Get all allowed organization unit IDs (including descendants) for this user.
+     * Get allowed organization unit IDs for this user.
+     *
+     * Visibility is ONE level deep:
+     *   - Diocese admin sees: Diocese + direct Archdeaconries (NOT individual Parishes)
+     *   - Archdeacon sees:    Archdeaconry + direct Parishes (NOT sub-cells)
+     *   - Parish Priest sees: Parish only
+     *
+     * This ensures financial records only "bubble up" one level.
+     * To report to the Diocese, an Archdeacon must manually record a
+     * consolidated submission at the Diocese level.
      */
     public function getAllowedOrganizationUnitIds(): array
     {
@@ -41,27 +50,13 @@ class User extends Authenticatable
             return [];
         }
 
-        return $this->getDescendantIds($assignedUnitIds);
-    }
+        // Only go ONE level deep: self + direct children only
+        $directChildIds = \App\Models\OrganizationUnit::withoutGlobalScope('organizationUnitSecurity')
+            ->whereIn('parent_id', $assignedUnitIds)
+            ->pluck('id')
+            ->toArray();
 
-    private function getDescendantIds(array $parentIds): array
-    {
-        $allAllowedIds = $parentIds;
-        $currentParentIds = $parentIds;
-
-        while (!empty($currentParentIds)) {
-            $childrenIds = \App\Models\OrganizationUnit::withoutGlobalScope('organizationUnitSecurity')
-                                ->whereIn('parent_id', $currentParentIds)
-                                ->pluck('id')
-                                ->toArray();
-            if (empty($childrenIds)) {
-                break;
-            }
-            $allAllowedIds = array_merge($allAllowedIds, $childrenIds);
-            $currentParentIds = $childrenIds;
-        }
-
-        return array_unique($allAllowedIds);
+        return array_unique(array_merge($assignedUnitIds, $directChildIds));
     }
 
     /**
