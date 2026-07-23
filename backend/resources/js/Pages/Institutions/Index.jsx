@@ -91,8 +91,8 @@ export default function InstitutionsIndex({ institutions, units }) {
                         <BuildingOffice2Icon className="h-5 w-5 text-purple-400" />
                     </div>
                     <div>
-                        <div className="font-semibold text-white">{row.name}</div>
-                        <div className="text-xs text-gray-400">{row.type}</div>
+                        <div className="font-semibold text-gray-900 dark:text-white">{row.name}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">{row.type}</div>
                     </div>
                 </div>
             )
@@ -108,7 +108,7 @@ export default function InstitutionsIndex({ institutions, units }) {
         {
             header: 'Contact Info',
             accessor: (row) => (
-                <div className="space-y-1 text-xs text-gray-300">
+                <div className="space-y-1 text-xs text-gray-600 dark:text-gray-300">
                     {row.contact_phone && (
                         <div className="flex items-center gap-1">
                             <PhoneIcon className="h-3.5 w-3.5 text-gray-400" />
@@ -127,7 +127,7 @@ export default function InstitutionsIndex({ institutions, units }) {
         {
             header: 'Address',
             accessor: (row) => (
-                <div className="flex items-center gap-1 text-xs text-gray-300">
+                <div className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-300">
                     <MapPinIcon className="h-3.5 w-3.5 text-gray-400 shrink-0" />
                     <span className="truncate max-w-[200px]" title={row.address}>{row.address || 'N/A'}</span>
                 </div>
@@ -149,10 +149,10 @@ export default function InstitutionsIndex({ institutions, units }) {
             header: 'Actions',
             accessor: (row) => (
                 <div className="flex gap-3">
-                    <button onClick={(e) => openEditDialog(e, row)} className="text-gray-400 hover:text-white transition-colors" title="Edit">
+                    <button onClick={(e) => openEditDialog(e, row)} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition-colors" title="Edit">
                         <PencilSquareIcon className="h-5 w-5" />
                     </button>
-                    <button onClick={(e) => handleDelete(e, row.id)} className="text-red-400 hover:text-red-300 transition-colors" title="Delete">
+                    <button onClick={(e) => handleDelete(e, row.id)} className="text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition-colors" title="Delete">
                         <TrashIcon className="h-5 w-5" />
                     </button>
                 </div>
@@ -161,7 +161,7 @@ export default function InstitutionsIndex({ institutions, units }) {
     ];
 
     return (
-        <AppLayout header={<h2 className="text-xl font-semibold leading-tight text-gray-200">Church Institutions</h2>}>
+        <AppLayout header={<h2 className="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">Church Institutions</h2>}>
             <Head title="Institutions" />
 
             <div className="py-6">
@@ -169,31 +169,31 @@ export default function InstitutionsIndex({ institutions, units }) {
                     
                     {/* Metrics Cards */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-                        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl shadow-lg relative overflow-hidden">
+                        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-6 backdrop-blur-xl shadow-lg relative overflow-hidden transition-colors duration-200">
                             <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-purple-500/10 blur-2xl"></div>
-                            <dt className="text-sm font-medium text-gray-400 truncate">Total Institutions</dt>
-                            <dd className="mt-2 text-3xl font-semibold tracking-tight text-white">{totalCount}</dd>
+                            <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Total Institutions</dt>
+                            <dd className="mt-2 text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">{totalCount}</dd>
                         </div>
                         
-                        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl shadow-lg relative overflow-hidden">
+                        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-6 backdrop-blur-xl shadow-lg relative overflow-hidden transition-colors duration-200">
                             <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-blue-500/10 blur-2xl"></div>
-                            <dt className="text-sm font-medium text-gray-400 truncate">Schools & Universities</dt>
-                            <dd className="mt-2 text-3xl font-semibold tracking-tight text-white">{schoolsCount}</dd>
+                            <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Schools & Universities</dt>
+                            <dd className="mt-2 text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">{schoolsCount}</dd>
                         </div>
 
-                        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl shadow-lg relative overflow-hidden">
+                        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-6 backdrop-blur-xl shadow-lg relative overflow-hidden transition-colors duration-200">
                             <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-green-500/10 blur-2xl"></div>
-                            <dt className="text-sm font-medium text-gray-400 truncate">Hospitals & Clinics</dt>
-                            <dd className="mt-2 text-3xl font-semibold tracking-tight text-white">{healthCount}</dd>
+                            <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Hospitals & Clinics</dt>
+                            <dd className="mt-2 text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">{healthCount}</dd>
                         </div>
                     </div>
 
                     {/* Data List */}
-                    <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl shadow-lg">
+                    <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-6 backdrop-blur-xl shadow-lg transition-colors duration-200">
                         <div className="mb-6 flex justify-between items-start">
                             <div>
-                                <h3 className="text-xl font-bold text-white">Registered Institutions</h3>
-                                <p className="text-sm text-gray-400 mt-1">Manage and track all Church-affiliated operations.</p>
+                                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Registered Institutions</h3>
+                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage and track all Church-affiliated operations.</p>
                             </div>
                             {units.length > 0 && (
                                 <button

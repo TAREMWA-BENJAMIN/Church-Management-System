@@ -46,7 +46,7 @@ export default function DirectoratesIndex({ directorates, directorateType, units
     ];
 
     return (
-        <AppLayout header={<h2 className="text-xl font-semibold leading-tight text-gray-200">Directorates Dashboard</h2>}>
+        <AppLayout header={<h2 className="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">Directorates Dashboard</h2>}>
             <Head title="Directorates" />
 
             <div className="py-4">
@@ -54,15 +54,15 @@ export default function DirectoratesIndex({ directorates, directorateType, units
 
                     {/* ── Summary Metrics ── */}
                     <div className="grid grid-cols-2 gap-4 mb-6">
-                        <div className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg relative overflow-hidden">
+                        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg relative overflow-hidden transition-colors duration-200">
                             <div className="absolute top-0 right-0 -mr-6 -mt-6 w-24 h-24 rounded-full bg-purple-500/10 blur-2xl" />
-                            <dt className="text-xs sm:text-sm font-medium text-gray-400">Total Directorates</dt>
-                            <dd className="mt-2 text-3xl font-bold text-white">{directorates.length}</dd>
+                            <dt className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">Total Directorates</dt>
+                            <dd className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{directorates.length}</dd>
                         </div>
-                        <div className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg relative overflow-hidden">
+                        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg relative overflow-hidden transition-colors duration-200">
                             <div className="absolute top-0 right-0 -mr-6 -mt-6 w-24 h-24 rounded-full bg-blue-500/10 blur-2xl" />
-                            <dt className="text-xs sm:text-sm font-medium text-gray-400">Assigned Staff</dt>
-                            <dd className="mt-2 text-3xl font-bold text-white">
+                            <dt className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">Assigned Staff</dt>
+                            <dd className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
                                 {directorates.reduce((acc, curr) => acc + (curr.role_assignments?.length || 0), 0)}
                             </dd>
                         </div>
@@ -71,8 +71,8 @@ export default function DirectoratesIndex({ directorates, directorateType, units
                     {/* ── Header ── */}
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
                         <div>
-                            <h3 className="text-lg font-bold text-white">Directorate Units</h3>
-                            <p className="text-sm text-gray-400 mt-0.5">Overview of all specialized directorates.</p>
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Directorate Units</h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Overview of all specialized directorates.</p>
                         </div>
                         {(auth.is_super_admin || units.length > 0) && (
                             <button
@@ -98,7 +98,7 @@ export default function DirectoratesIndex({ directorates, directorateType, units
                                 return (
                                     <div
                                         key={dir.id}
-                                        className="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-xl shadow-sm hover:bg-white/[0.08] transition-all duration-200"
+                                        className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-4 backdrop-blur-xl shadow-sm hover:bg-gray-50 dark:hover:bg-white/[0.08] transition-all duration-200"
                                     >
                                         <div className="flex items-start gap-4">
                                             {/* Icon */}
@@ -108,17 +108,17 @@ export default function DirectoratesIndex({ directorates, directorateType, units
 
                                             {/* Content */}
                                             <div className="flex-1 min-w-0">
-                                                <p className="font-bold text-white text-base leading-tight truncate">
+                                                <p className="font-bold text-gray-900 dark:text-white text-base leading-tight truncate">
                                                     {dir.name}
                                                 </p>
-                                                <p className="text-xs text-gray-500 mt-0.5 truncate">
-                                                    Reports to: <span className="text-gray-400">{dir.parent?.name || 'Top Level'}</span>
+                                                <p className="text-xs text-gray-600 dark:text-gray-500 mt-0.5 truncate">
+                                                    Reports to: <span className="text-gray-700 dark:text-gray-400">{dir.parent?.name || 'Top Level'}</span>
                                                 </p>
 
                                                 {/* Staff badge */}
                                                 <div className="flex items-center gap-1.5 mt-2.5">
-                                                    <UsersIcon className="h-3.5 w-3.5 text-gray-500" />
-                                                    <span className="text-xs text-gray-400">
+                                                    <UsersIcon className="h-3.5 w-3.5 text-gray-600 dark:text-gray-500" />
+                                                    <span className="text-xs text-gray-700 dark:text-gray-400">
                                                         {dir.role_assignments?.length || 0} staff assigned
                                                     </span>
                                                 </div>

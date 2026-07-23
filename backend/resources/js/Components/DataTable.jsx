@@ -20,12 +20,12 @@ export default function DataTable({ columns, data, onRowClick }) {
                 {data.map((row, rowIndex) => (
                     <div
                         key={row.id || rowIndex}
-                        className={`bg-gray-800/70 border border-white/10 rounded-xl p-4 transition-colors ${onRowClick ? 'cursor-pointer active:bg-gray-700' : ''}`}
+                        className={`bg-white dark:bg-gray-800/70 border border-gray-200 dark:border-white/10 rounded-xl p-4 transition-colors duration-200 ${onRowClick ? 'cursor-pointer active:bg-gray-50 dark:active:bg-gray-700' : ''}`}
                         onClick={() => onRowClick && onRowClick(row)}
                     >
                         {dataColumns.map((col, colIndex) => (
-                            <div key={colIndex} className="flex justify-between items-start py-1.5 border-b border-white/5 last:border-0">
-                                <span className="text-xs font-medium text-gray-500 uppercase tracking-wider mr-4 mt-0.5 shrink-0">
+                            <div key={colIndex} className="flex justify-between items-start py-1.5 border-b border-gray-100 dark:border-white/5 last:border-0">
+                                <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mr-4 mt-0.5 shrink-0">
                                     {col.header}
                                 </span>
                                 <span className="text-sm text-right">
@@ -34,7 +34,7 @@ export default function DataTable({ columns, data, onRowClick }) {
                             </div>
                         ))}
                         {actionsColumn && (
-                            <div className="flex justify-end mt-3 pt-2 border-t border-white/10">
+                            <div className="flex justify-end mt-3 pt-2 border-t border-gray-200 dark:border-white/10">
                                 {actionsColumn.accessor(row)}
                             </div>
                         )}
@@ -43,32 +43,32 @@ export default function DataTable({ columns, data, onRowClick }) {
             </div>
 
             {/* ── Desktop table (≥ md) ────────────────────── */}
-            <div className="hidden md:block overflow-x-auto rounded-lg ring-1 ring-white/10">
-                <table className="min-w-full divide-y divide-gray-700">
-                    <thead className="bg-gray-800">
+            <div className="hidden md:block overflow-x-auto rounded-lg ring-1 ring-gray-200 dark:ring-white/10 transition-colors duration-200">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead className="bg-gray-50 dark:bg-gray-800 transition-colors duration-200">
                         <tr>
                             {columns.map((col, index) => (
                                 <th
                                     key={index}
                                     scope="col"
-                                    className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-300 sm:pl-6"
+                                    className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-300 sm:pl-6"
                                 >
                                     {col.header}
                                 </th>
                             ))}
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-700 bg-gray-900/50">
+                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-900/50 transition-colors duration-200">
                         {data.map((row, rowIndex) => (
                             <tr
                                 key={row.id || rowIndex}
-                                className={`transition-colors duration-150 ${onRowClick ? 'cursor-pointer hover:bg-gray-800' : ''}`}
+                                className={`transition-colors duration-150 ${onRowClick ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800' : ''}`}
                                 onClick={() => onRowClick && onRowClick(row)}
                             >
                                 {columns.map((col, colIndex) => (
                                     <td
                                         key={colIndex}
-                                        className="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-300 sm:pl-6"
+                                        className="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-700 dark:text-gray-300 sm:pl-6"
                                     >
                                         {col.accessor(row)}
                                     </td>

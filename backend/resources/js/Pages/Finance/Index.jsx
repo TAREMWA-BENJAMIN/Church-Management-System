@@ -82,7 +82,7 @@ export default function FinanceIndex({ records, units }) {
     const columns = [
         { 
             header: 'Date', 
-            accessor: (row) => <span className="text-gray-300">{new Date(row.date).toLocaleDateString()}</span> 
+            accessor: (row) => <span className="text-gray-600 dark:text-gray-300">{new Date(row.date).toLocaleDateString()}</span> 
         },
         { 
             header: 'Type', 
@@ -99,7 +99,7 @@ export default function FinanceIndex({ records, units }) {
         },
         { 
             header: 'Category', 
-            accessor: (row) => <span className="font-semibold text-white">{row.category}</span> 
+            accessor: (row) => <span className="font-semibold text-gray-900 dark:text-white">{row.category}</span> 
         },
         { 
             header: 'Organization Unit', 
@@ -121,10 +121,10 @@ export default function FinanceIndex({ records, units }) {
             header: 'Actions', 
             accessor: (row) => (
                 <div className="flex gap-3">
-                    <button onClick={(e) => openEditDialog(e, row)} className="text-gray-400 hover:text-white transition-colors" title="Edit">
+                    <button onClick={(e) => openEditDialog(e, row)} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition-colors" title="Edit">
                         <PencilSquareIcon className="h-5 w-5" />
                     </button>
-                    <button onClick={(e) => handleDelete(e, row.id)} className="text-red-400 hover:text-red-300 transition-colors" title="Delete">
+                    <button onClick={(e) => handleDelete(e, row.id)} className="text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition-colors" title="Delete">
                         <TrashIcon className="h-5 w-5" />
                     </button>
                 </div>
@@ -133,7 +133,7 @@ export default function FinanceIndex({ records, units }) {
     ];
 
     return (
-        <AppLayout header={<h2 className="text-xl font-semibold leading-tight text-gray-200">Finance & Revenue</h2>}>
+        <AppLayout header={<h2 className="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">Finance & Revenue</h2>}>
             <Head title="Finance" />
 
             <div className="py-6">
@@ -141,42 +141,42 @@ export default function FinanceIndex({ records, units }) {
                     
                     {/* Metrics Dashboard */}
                     <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
-                        <div className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg relative overflow-hidden">
+                        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg relative overflow-hidden transition-colors duration-200">
                             <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-green-500/10 blur-2xl"></div>
-                            <dt className="text-sm font-medium text-gray-400 truncate flex items-center gap-2">
-                                <ArrowTrendingUpIcon className="h-4 w-4 text-green-400" /> Total Income
+                            <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate flex items-center gap-2">
+                                <ArrowTrendingUpIcon className="h-4 w-4 text-green-500 dark:text-green-400" /> Total Income
                             </dt>
-                            <dd className="mt-2 text-3xl font-semibold tracking-tight text-green-400">
+                            <dd className="mt-2 text-3xl font-semibold tracking-tight text-green-600 dark:text-green-400">
                                 {new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(totalIncome)}
                             </dd>
                         </div>
                         
-                        <div className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg relative overflow-hidden">
+                        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg relative overflow-hidden transition-colors duration-200">
                             <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-red-500/10 blur-2xl"></div>
-                            <dt className="text-sm font-medium text-gray-400 truncate flex items-center gap-2">
-                                <ArrowTrendingDownIcon className="h-4 w-4 text-red-400" /> Total Expenditure
+                            <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate flex items-center gap-2">
+                                <ArrowTrendingDownIcon className="h-4 w-4 text-red-500 dark:text-red-400" /> Total Expenditure
                             </dt>
-                            <dd className="mt-2 text-3xl font-semibold tracking-tight text-red-400">
+                            <dd className="mt-2 text-3xl font-semibold tracking-tight text-red-600 dark:text-red-400">
                                 {new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(totalExpenditure)}
                             </dd>
                         </div>
 
-                        <div className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg relative overflow-hidden">
+                        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg relative overflow-hidden transition-colors duration-200">
                             <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-blue-500/10 blur-2xl"></div>
-                            <dt className="text-sm font-medium text-gray-400 truncate flex items-center gap-2">
-                                <BanknotesIcon className="h-4 w-4 text-blue-400" /> Net Balance
+                            <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate flex items-center gap-2">
+                                <BanknotesIcon className="h-4 w-4 text-blue-500 dark:text-blue-400" /> Net Balance
                             </dt>
-                            <dd className={`mt-2 text-3xl font-semibold tracking-tight ${netBalance >= 0 ? 'text-white' : 'text-red-400'}`}>
+                            <dd className={`mt-2 text-3xl font-semibold tracking-tight ${netBalance >= 0 ? 'text-gray-900 dark:text-white' : 'text-red-600 dark:text-red-400'}`}>
                                 {new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(netBalance)}
                             </dd>
                         </div>
                     </div>
 
-                    <div className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg">
+                    <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg transition-colors duration-200">
                         <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                             <div>
-                                <h3 className="text-xl font-bold text-white">Financial Ledger</h3>
-                                <p className="text-sm text-gray-400 mt-1">Track all income and expenditures across the organization.</p>
+                                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Financial Ledger</h3>
+                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Track all income and expenditures across the organization.</p>
                             </div>
                             {units.length > 0 && (
                                 <button 

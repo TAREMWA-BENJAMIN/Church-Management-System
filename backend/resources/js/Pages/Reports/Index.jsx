@@ -24,22 +24,22 @@ export default function ReportsIndex({ units, reportType, filters, reportData })
             const income = reportData.filter(r => r.type === 'income').reduce((sum, r) => sum + parseFloat(r.amount), 0);
             const expenditure = reportData.filter(r => r.type === 'expenditure').reduce((sum, r) => sum + parseFloat(r.amount), 0);
             return (
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 border border-white/10 p-4 rounded-xl mb-6 bg-white/5">
-                    <div className="flex sm:block justify-between items-center sm:items-start border-b sm:border-b-0 border-white/10 pb-3 sm:pb-0">
-                        <div className="text-xs text-gray-400">Total Income</div>
-                        <div className="text-base sm:text-lg font-bold text-green-400 mt-0 sm:mt-1">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 border border-gray-200 dark:border-white/10 p-4 rounded-xl mb-6 bg-white dark:bg-white/5 transition-colors duration-200">
+                    <div className="flex sm:block justify-between items-center sm:items-start border-b sm:border-b-0 border-gray-200 dark:border-white/10 pb-3 sm:pb-0">
+                        <div className="text-xs text-gray-500 dark:text-gray-400">Total Income</div>
+                        <div className="text-base sm:text-lg font-bold text-green-600 dark:text-green-400 mt-0 sm:mt-1">
                             {new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(income)}
                         </div>
                     </div>
-                    <div className="flex sm:block justify-between items-center sm:items-start border-b sm:border-b-0 border-white/10 pb-3 sm:pb-0">
-                        <div className="text-xs text-gray-400">Total Expenditure</div>
-                        <div className="text-base sm:text-lg font-bold text-red-400 mt-0 sm:mt-1">
+                    <div className="flex sm:block justify-between items-center sm:items-start border-b sm:border-b-0 border-gray-200 dark:border-white/10 pb-3 sm:pb-0">
+                        <div className="text-xs text-gray-500 dark:text-gray-400">Total Expenditure</div>
+                        <div className="text-base sm:text-lg font-bold text-red-600 dark:text-red-400 mt-0 sm:mt-1">
                             {new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(expenditure)}
                         </div>
                     </div>
                     <div className="flex sm:block justify-between items-center sm:items-start">
-                        <div className="text-xs text-gray-400">Net Balance</div>
-                        <div className={`text-base sm:text-lg font-bold mt-0 sm:mt-1 ${income - expenditure >= 0 ? 'text-white' : 'text-red-400'}`}>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">Net Balance</div>
+                        <div className={`text-base sm:text-lg font-bold mt-0 sm:mt-1 ${income - expenditure >= 0 ? 'text-gray-900 dark:text-white' : 'text-red-600 dark:text-red-400'}`}>
                             {new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(income - expenditure)}
                         </div>
                     </div>
@@ -48,23 +48,23 @@ export default function ReportsIndex({ units, reportType, filters, reportData })
         } else if (reportType === 'assets') {
             const totalVal = reportData.reduce((sum, r) => sum + parseFloat(r.value || 0), 0);
             return (
-                <div className="grid grid-cols-2 gap-4 border border-white/10 p-4 rounded-xl mb-6 bg-white/5">
+                <div className="grid grid-cols-2 gap-4 border border-gray-200 dark:border-white/10 p-4 rounded-xl mb-6 bg-white dark:bg-white/5 transition-colors duration-200">
                     <div>
-                        <div className="text-xs text-gray-400">Total Assets Registered</div>
-                        <div className="text-lg font-bold text-white">{reportData.length}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">Total Assets Registered</div>
+                        <div className="text-lg font-bold text-gray-900 dark:text-white">{reportData.length}</div>
                     </div>
                     <div>
-                        <div className="text-xs text-gray-400">Total Estimated Value</div>
-                        <div className="text-lg font-bold text-green-400">{new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(totalVal)}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">Total Estimated Value</div>
+                        <div className="text-lg font-bold text-green-600 dark:text-green-400">{new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(totalVal)}</div>
                     </div>
                 </div>
             );
         } else {
             return (
-                <div className="grid grid-cols-1 gap-4 border border-white/10 p-4 rounded-xl mb-6 bg-white/5">
+                <div className="grid grid-cols-1 gap-4 border border-gray-200 dark:border-white/10 p-4 rounded-xl mb-6 bg-white dark:bg-white/5 transition-colors duration-200">
                     <div>
-                        <div className="text-xs text-gray-400">Total Affiliated Institutions</div>
-                        <div className="text-lg font-bold text-white">{reportData.length}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">Total Affiliated Institutions</div>
+                        <div className="text-lg font-bold text-gray-900 dark:text-white">{reportData.length}</div>
                     </div>
                 </div>
             );
@@ -72,7 +72,7 @@ export default function ReportsIndex({ units, reportType, filters, reportData })
     };
 
     return (
-        <AppLayout header={<h2 className="text-xl font-semibold leading-tight text-gray-200">Reports & Analytics</h2>}>
+        <AppLayout header={<h2 className="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">Reports & Analytics</h2>}>
             <Head title="Reports" />
 
             {/* Print Stylesheet */}
@@ -129,10 +129,10 @@ export default function ReportsIndex({ units, reportType, filters, reportData })
 
             <div className="py-4 no-print">
                 <div className="mx-auto max-w-7xl">
-                    <div className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg">
+                    <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg transition-colors duration-200">
                         
                         {/* Tab Selectors */}
-                        <div className="border-b border-white/10 pb-4 flex flex-col sm:flex-row gap-3 sm:gap-4 sm:items-center sm:justify-between">
+                        <div className="border-b border-gray-200 dark:border-white/10 pb-4 flex flex-col sm:flex-row gap-3 sm:gap-4 sm:items-center sm:justify-between">
                             <div className="flex flex-wrap gap-2">
                                 {['finance', 'assets', 'institutions'].map((type) => (
                                     <button
@@ -141,7 +141,7 @@ export default function ReportsIndex({ units, reportType, filters, reportData })
                                         className={`px-3 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-colors capitalize ${
                                             reportType === type 
                                                 ? 'bg-purple-600 text-white' 
-                                                : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10'
+                                                : 'bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/10'
                                         }`}
                                     >
                                         {type} Report
@@ -159,9 +159,9 @@ export default function ReportsIndex({ units, reportType, filters, reportData })
                         </div>
 
                         {/* Filter Settings Form */}
-                        <form className="grid grid-cols-1 sm:grid-cols-3 gap-6 my-6 p-4 rounded-xl border border-white/10 bg-white/5">
+                        <form className="grid grid-cols-1 sm:grid-cols-3 gap-6 my-6 p-4 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 transition-colors duration-200">
                             <div>
-                                <label className="block text-sm font-medium text-gray-400">Organization Unit</label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-400">Organization Unit</label>
                                 <select
                                     value={filters.unit_id || ''}
                                     onChange={e => handleFilterChange('unit_id', e.target.value)}
@@ -175,7 +175,7 @@ export default function ReportsIndex({ units, reportType, filters, reportData })
                             {reportType === 'finance' && (
                                 <>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-400">Start Date</label>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-400">Start Date</label>
                                         <input
                                             type="date"
                                             value={filters.start_date || ''}
@@ -184,7 +184,7 @@ export default function ReportsIndex({ units, reportType, filters, reportData })
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-400">End Date</label>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-400">End Date</label>
                                         <input
                                             type="date"
                                             value={filters.end_date || ''}
@@ -197,45 +197,45 @@ export default function ReportsIndex({ units, reportType, filters, reportData })
                         </form>
 
                         {/* On-screen Preview Frame */}
-                        <div className="border border-white/10 rounded-xl p-4 sm:p-6 bg-white/5">
-                            <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                        <div className="border border-gray-200 dark:border-white/10 rounded-xl p-4 sm:p-6 bg-white dark:bg-white/5 transition-colors duration-200">
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                                 <ChartBarIcon className="h-5 w-5 text-purple-400" /> Report Preview
                             </h3>
 
                             {getSummary()}
 
                             <div className="overflow-x-auto">
-                                <table className="min-w-full divide-y divide-white/10">
+                                <table className="min-w-full divide-y divide-gray-200 dark:divide-white/10">
                                     <thead>
                                         {reportType === 'finance' && (
                                             <tr>
-                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400">Date</th>
-                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400">Type</th>
-                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400">Category</th>
-                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400">Unit</th>
-                                                <th className="px-4 py-3 text-right text-xs font-semibold text-gray-400">Amount</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400">Date</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400">Type</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400">Category</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400">Unit</th>
+                                                <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-400">Amount</th>
                                             </tr>
                                         )}
                                         {reportType === 'assets' && (
                                             <tr>
-                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400">Asset Name</th>
-                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400">Category</th>
-                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400">Owning Unit</th>
-                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400">Status</th>
-                                                <th className="px-4 py-3 text-right text-xs font-semibold text-gray-400">Value</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400">Asset Name</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400">Category</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400">Owning Unit</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400">Status</th>
+                                                <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-400">Value</th>
                                             </tr>
                                         )}
                                         {reportType === 'institutions' && (
                                             <tr>
-                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400">Institution Name</th>
-                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400">Type</th>
-                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400">Supervising Unit</th>
-                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400">Contact Phone</th>
-                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400">Address</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400">Institution Name</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400">Type</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400">Supervising Unit</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400">Contact Phone</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400">Address</th>
                                             </tr>
                                         )}
                                     </thead>
-                                    <tbody className="divide-y divide-white/10 text-gray-300 text-sm">
+                                    <tbody className="divide-y divide-gray-200 dark:divide-white/10 text-gray-700 dark:text-gray-300 text-sm">
                                         {reportData.length === 0 ? (
                                             <tr>
                                                 <td colSpan={5} className="px-4 py-8 text-center text-gray-500">No records found matching filters.</td>
@@ -249,25 +249,25 @@ export default function ReportsIndex({ units, reportType, filters, reportData })
                                                             <td className="px-4 py-3 capitalize">{row.type}</td>
                                                             <td className="px-4 py-3">{row.category}</td>
                                                             <td className="px-4 py-3">{row.organization_unit?.name}</td>
-                                                            <td className={`px-4 py-3 text-right font-semibold ${row.type === 'income' ? 'text-green-400' : 'text-red-400'}`}>
+                                                            <td className={`px-4 py-3 text-right font-semibold ${row.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                                                                 {row.type === 'income' ? '+' : '-'} {new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(row.amount)}
                                                             </td>
                                                         </>
                                                     )}
                                                     {reportType === 'assets' && (
                                                         <>
-                                                            <td className="px-4 py-3 font-semibold text-white">{row.name}</td>
+                                                            <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">{row.name}</td>
                                                             <td className="px-4 py-3">{row.category}</td>
                                                             <td className="px-4 py-3">{row.organization_unit?.name}</td>
                                                             <td className="px-4 py-3">{row.status}</td>
-                                                            <td className="px-4 py-3 text-right font-semibold text-green-400">
+                                                            <td className="px-4 py-3 text-right font-semibold text-green-600 dark:text-green-400">
                                                                 {new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(row.value)}
                                                             </td>
                                                         </>
                                                     )}
                                                     {reportType === 'institutions' && (
                                                         <>
-                                                            <td className="px-4 py-3 font-semibold text-white">{row.name}</td>
+                                                            <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">{row.name}</td>
                                                             <td className="px-4 py-3">{row.type}</td>
                                                             <td className="px-4 py-3">{row.organization_unit?.name}</td>
                                                             <td className="px-4 py-3">{row.contact_phone || 'N/A'}</td>

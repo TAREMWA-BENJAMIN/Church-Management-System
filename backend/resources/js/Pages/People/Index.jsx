@@ -85,8 +85,8 @@ export default function PeopleIndex({ users, roles, units }) {
     };
 
     const columns = [
-        { header: 'Name', accessor: (row) => <span className="font-semibold text-white">{row.name}</span> },
-        { header: 'Email', accessor: (row) => <span className="text-gray-300">{row.email}</span> },
+        { header: 'Name', accessor: (row) => <span className="font-semibold text-gray-900 dark:text-white">{row.name}</span> },
+        { header: 'Email', accessor: (row) => <span className="text-gray-600 dark:text-gray-300">{row.email}</span> },
         { 
             header: 'Role Assignments', 
             accessor: (row) => (
@@ -108,10 +108,10 @@ export default function PeopleIndex({ users, roles, units }) {
             accessor: (row) => (
                 row.email !== 'admin@church.org' ? (
                     <div className="flex gap-3">
-                        <button onClick={(e) => openEditDialog(e, row)} className="text-gray-400 hover:text-white transition-colors" title="Edit">
+                        <button onClick={(e) => openEditDialog(e, row)} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition-colors" title="Edit">
                             <PencilSquareIcon className="h-5 w-5" />
                         </button>
-                        <button onClick={(e) => handleDelete(e, row.id)} className="text-red-400 hover:text-red-300 transition-colors" title="Delete">
+                        <button onClick={(e) => handleDelete(e, row.id)} className="text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition-colors" title="Delete">
                             <TrashIcon className="h-5 w-5" />
                         </button>
                     </div>
@@ -121,16 +121,16 @@ export default function PeopleIndex({ users, roles, units }) {
     ];
 
     return (
-        <AppLayout header={<h2 className="text-xl font-semibold leading-tight text-gray-200">People</h2>}>
+        <AppLayout header={<h2 className="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">People</h2>}>
             <Head title="People" />
 
             <div className="py-6">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl shadow-lg">
+                    <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-6 backdrop-blur-xl shadow-lg transition-colors duration-200">
                         <div className="mb-6 flex justify-between items-start">
                             <div>
-                                <h3 className="text-xl font-bold text-white">Users Directory</h3>
-                                <p className="text-sm text-gray-400 mt-1">Manage user accounts and their organizational roles.</p>
+                                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Users Directory</h3>
+                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage user accounts and their organizational roles.</p>
                             </div>
                             <button 
                                 onClick={openAddDialog}

@@ -38,10 +38,10 @@ export default function Sidebar() {
     }
 
     return (
-        <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 px-6 ring-1 ring-white/10 h-full w-full">
+        <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white dark:bg-gray-900 px-6 ring-1 ring-gray-200 dark:ring-white/10 h-full w-full transition-colors duration-200">
             <div className="flex h-16 shrink-0 items-center">
-                <ApplicationLogo className="h-8 w-auto fill-current text-white" />
-                <span className="ml-3 text-white font-bold text-xl tracking-wide">Church ERP</span>
+                <ApplicationLogo className="h-8 w-auto fill-current text-purple-600 dark:text-white" />
+                <span className="ml-3 text-gray-900 dark:text-white font-bold text-xl tracking-wide">Church ERP</span>
             </div>
             <nav className="flex flex-1 flex-col">
                 <ul role="list" className="flex flex-1 flex-col gap-y-7">
@@ -53,8 +53,8 @@ export default function Sidebar() {
                                         href={item.href}
                                         className={classNames(
                                             item.current
-                                                ? 'bg-purple-800 text-white'
-                                                : 'text-gray-400 hover:text-white hover:bg-gray-800',
+                                                ? 'bg-purple-50 text-purple-700 dark:bg-purple-800 dark:text-white'
+                                                : 'text-gray-700 hover:text-purple-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800',
                                             'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold transition-all duration-200'
                                         )}
                                     >

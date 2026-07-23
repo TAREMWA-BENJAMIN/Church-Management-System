@@ -62,7 +62,7 @@ export default function OrganizationIndex({ units, types }) {
             <div 
                 style={style} 
                 ref={dragHandle} 
-                className={`flex items-center gap-1 transition-colors px-1 py-1 rounded-md ${node.isSelected ? 'bg-purple-900/50 text-white' : 'text-gray-300 hover:bg-gray-800'}`}
+                className={`flex items-center gap-1 transition-colors px-1 py-1 rounded-md ${node.isSelected ? 'bg-purple-100 text-purple-900 dark:bg-purple-900/50 dark:text-white' : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'}`}
             >
                 {/* Expand/Collapse Caret */}
                 <div 
@@ -95,7 +95,7 @@ export default function OrganizationIndex({ units, types }) {
                     ) : (
                         <FolderIcon className="h-4 w-4 text-purple-400" />
                     )}
-                    <span className="text-sm font-medium">{node.data.name}</span>
+                    <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{node.data.name}</span>
                 </div>
             </div>
         );
@@ -154,16 +154,16 @@ export default function OrganizationIndex({ units, types }) {
     };
 
     const columns = [
-        { header: 'Name', accessor: (row) => <span className="font-semibold text-white">{row.name}</span> },
+        { header: 'Name', accessor: (row) => <span className="font-semibold text-gray-900 dark:text-white">{row.name}</span> },
         { header: 'Type', accessor: (row) => <span className="inline-flex items-center rounded-md bg-purple-400/10 px-2 py-1 text-xs font-medium text-purple-400 ring-1 ring-inset ring-purple-400/30">{row.type?.name || 'Unknown'}</span> },
         { 
             header: 'Actions', 
             accessor: (row) => (
                 <div className="flex gap-3">
-                    <button onClick={(e) => openEditDialog(e, row)} className="text-gray-400 hover:text-white transition-colors" title="Edit">
+                    <button onClick={(e) => openEditDialog(e, row)} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition-colors" title="Edit">
                         <PencilSquareIcon className="h-5 w-5" />
                     </button>
-                    <button onClick={(e) => handleDelete(e, row.id)} className="text-red-400 hover:text-red-300 transition-colors" title="Delete">
+                    <button onClick={(e) => handleDelete(e, row.id)} className="text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition-colors" title="Delete">
                         <TrashIcon className="h-5 w-5" />
                     </button>
                 </div>
@@ -172,15 +172,15 @@ export default function OrganizationIndex({ units, types }) {
     ];
 
     return (
-        <AppLayout header={<h2 className="text-xl font-semibold leading-tight text-gray-200">Organization Hierarchy</h2>}>
+        <AppLayout header={<h2 className="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">Organization Hierarchy</h2>}>
             <Head title="Organizations" />
 
             <div className="py-6 lg:h-[calc(100vh-10rem)]">
                 <div className="mx-auto max-w-7xl flex flex-col lg:flex-row lg:h-full gap-6 px-4 sm:px-6 lg:px-8">
                     {/* Left Panel: Tree View */}
-                    <div className="w-full lg:w-1/3 min-h-[300px] lg:min-h-0 bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-xl shadow-lg flex flex-col">
-                        <div className="flex justify-between items-center mb-4 pb-2 border-b border-gray-700">
-                            <h3 className="text-lg font-semibold text-white">Structure</h3>
+                    <div className="w-full lg:w-1/3 min-h-[300px] lg:min-h-0 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-4 backdrop-blur-xl shadow-lg flex flex-col transition-colors duration-200">
+                        <div className="flex justify-between items-center mb-4 pb-2 border-b border-gray-200 dark:border-gray-700">
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Structure</h3>
                             <button 
                                 onClick={openAddDialog}
                                 className="inline-flex items-center gap-1 px-2 py-1 text-sm font-semibold rounded-md bg-purple-600 text-white hover:bg-purple-500 transition-colors shadow-sm"
@@ -204,11 +204,11 @@ export default function OrganizationIndex({ units, types }) {
                     </div>
 
                     {/* Right Panel: Data Table & Details */}
-                    <div className="w-full lg:w-2/3 min-h-[400px] lg:min-h-0 bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg flex flex-col">
+                    <div className="w-full lg:w-2/3 min-h-[400px] lg:min-h-0 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg flex flex-col transition-colors duration-200">
                         <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                             <div>
-                                <h3 className="text-xl font-bold text-white">{selectedUnitName}</h3>
-                                <p className="text-sm text-gray-400 mt-1">Viewing sub-units and details</p>
+                                <h3 className="text-xl font-bold text-gray-900 dark:text-white">{selectedUnitName}</h3>
+                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Viewing sub-units and details</p>
                             </div>
                             <button 
                                 onClick={openAddDialog}

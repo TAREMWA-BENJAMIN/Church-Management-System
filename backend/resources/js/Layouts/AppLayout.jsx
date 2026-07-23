@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Sidebar from '@/Components/Sidebar';
 import Dropdown from '@/Components/Dropdown';
 import { usePage, Link } from '@inertiajs/react';
@@ -10,7 +10,8 @@ import {
     BuildingOfficeIcon, AcademicCapIcon,
     BriefcaseIcon, ArchiveBoxIcon,
     ChartPieIcon, Cog6ToothIcon,
-    BuildingLibraryIcon, ChevronRightIcon
+    BuildingLibraryIcon, ChevronRightIcon,
+    SunIcon, MoonIcon
 } from '@heroicons/react/24/outline';
 import {
     HomeIcon as HomeIconSolid,
@@ -26,6 +27,22 @@ export default function AppLayout({ header, children }) {
     const auth = props.auth;
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [moreSheetOpen, setMoreSheetOpen] = useState(false);
+    const [isDark, setIsDark] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return localStorage.getItem('theme') !== 'light';
+        }
+        return true;
+    });
+
+    useEffect(() => {
+        if (isDark) {
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('theme', 'dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
+        }
+    }, [isDark]);
 
     const isSuperAdmin = auth?.is_super_admin;
     const isLeader = auth?.roles?.length > 0 || isSuperAdmin;
@@ -73,7 +90,7 @@ export default function AppLayout({ header, children }) {
     ].filter(item => item.show);
 
     return (
-        <div className="min-h-screen bg-[#0F172A] text-gray-300 font-sans selection:bg-purple-500 selection:text-white">
+        <div className="min-h-screen bg-gray-50 dark:bg-[#0F172A] text-gray-900 dark:text-gray-300 font-sans selection:bg-purple-500 selection:text-white transition-colors duration-200">
             
             {/* Desktop Sidebar Drawer */}
             <Transition show={sidebarOpen}>
@@ -214,21 +231,28 @@ export default function AppLayout({ header, children }) {
 
             <div className="lg:pl-64">
                 {/* Top Header Bar */}
-                <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-white/5 bg-gray-900/80 backdrop-blur-md px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+                <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 dark:border-white/5 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8 transition-colors duration-200">
 
                     {/* Logo in header - mobile only */}
                     <div className="flex flex-1 items-center gap-x-3 lg:hidden">
-                        <ApplicationLogo className="h-7 w-auto fill-current text-white" />
-                        <span className="text-white font-bold text-base tracking-wide">Church ERP</span>
+                        <ApplicationLogo className="h-7 w-auto fill-current text-purple-600 dark:text-white" />
+                        <span className="text-gray-900 dark:text-white font-bold text-base tracking-wide">Church ERP</span>
                     </div>
 
                     <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
                         <div className="flex flex-1"></div>
                         <div className="flex items-center gap-x-4 lg:gap-x-6">
-                            <button type="button" className="-m-2.5 p-2.5 text-gray-400 hover:text-gray-300">
+                            <button
+                                onClick={() => setIsDark(!isDark)}
+                                type="button"
+                                className="-m-2.5 p-2.5 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors"
+                            >
+                                {isDark ? <SunIcon className="h-6 w-6" /> : <MoonIcon className="h-6 w-6" />}
+                            </button>
+                            <button type="button" className="-m-2.5 p-2.5 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
                                 <BellIcon className="h-6 w-6" />
                             </button>
-                            <div className="hidden lg:block lg:h-6 lg:w-px lg:bg-gray-700" />
+                            <div className="hidden lg:block lg:h-6 lg:w-px lg:bg-gray-200 dark:lg:bg-gray-700" />
                             <div className="relative">
                                 <Dropdown>
                                     <Dropdown.Trigger>
@@ -237,15 +261,15 @@ export default function AppLayout({ header, children }) {
                                                 {user.name.charAt(0)}
                                             </div>
                                             <span className="hidden lg:flex lg:items-center">
-                                                <span className="ml-4 text-sm font-semibold leading-6 text-white">
+                                                <span className="ml-4 text-sm font-semibold leading-6 text-gray-900 dark:text-white">
                                                     {user.name}
                                                 </span>
                                             </span>
                                         </button>
                                     </Dropdown.Trigger>
-                                    <Dropdown.Content contentClasses="py-1 bg-gray-800 border border-gray-700">
-                                        <Dropdown.Link href={route('profile.edit')} className="text-gray-300 hover:bg-gray-700 hover:text-white">Profile</Dropdown.Link>
-                                        <Dropdown.Link href={route('logout')} method="post" as="button" className="text-gray-300 hover:bg-gray-700 hover:text-white">Log Out</Dropdown.Link>
+                                    <Dropdown.Content contentClasses="py-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                                        <Dropdown.Link href={route('profile.edit')} className="text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white">Profile</Dropdown.Link>
+                                        <Dropdown.Link href={route('logout')} method="post" as="button" className="text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white">Log Out</Dropdown.Link>
                                     </Dropdown.Content>
                                 </Dropdown>
                             </div>
@@ -262,7 +286,7 @@ export default function AppLayout({ header, children }) {
             </div>
 
             {/* ── Mobile Bottom Navigation Bar ──────────────────────── */}
-            <nav className="lg:hidden fixed bottom-0 inset-x-0 z-50 bg-gray-900/95 backdrop-blur-xl border-t border-white/10 shadow-2xl">
+            <nav className="lg:hidden fixed bottom-0 inset-x-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-t border-gray-200 dark:border-white/10 shadow-2xl transition-colors duration-200">
                 <div className="flex items-center justify-around h-16 px-1">
                     {bottomNav.map((item) => {
                         const Icon = item.active ? item.activeIcon : item.icon;
@@ -271,7 +295,7 @@ export default function AppLayout({ header, children }) {
                                 key={item.name}
                                 href={item.href}
                                 className={`relative flex flex-col items-center justify-center flex-1 h-full gap-y-1 transition-colors duration-200 ${
-                                    item.active ? 'text-purple-400' : 'text-gray-500'
+                                    item.active ? 'text-purple-600 dark:text-purple-400' : 'text-gray-500 dark:text-gray-500'
                                 }`}
                             >
                                 {item.active && (
@@ -287,7 +311,7 @@ export default function AppLayout({ header, children }) {
                     <button
                         onClick={() => setMoreSheetOpen(true)}
                         className={`relative flex flex-col items-center justify-center flex-1 h-full gap-y-1 transition-colors duration-200 ${
-                            moreSheetOpen ? 'text-purple-400' : 'text-gray-500'
+                            moreSheetOpen ? 'text-purple-600 dark:text-purple-400' : 'text-gray-500 dark:text-gray-500'
                         }`}
                     >
                         <EllipsisHorizontalIcon className="h-6 w-6" />
