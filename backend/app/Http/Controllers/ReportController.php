@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\FinanceRecord;
 use App\Models\Asset;
 use App\Models\Institution;
+use App\Models\Member;
 use App\Models\OrganizationUnit;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -41,6 +42,12 @@ class ReportController extends Controller
             $data = $query->latest()->get();
         } elseif ($reportType === 'institutions') {
             $query = Institution::with('organizationUnit');
+            if ($unitId) {
+                $query->where('organization_unit_id', $unitId);
+            }
+            $data = $query->latest()->get();
+        } elseif ($reportType === 'members') {
+            $query = Member::with('organizationUnit');
             if ($unitId) {
                 $query->where('organization_unit_id', $unitId);
             }

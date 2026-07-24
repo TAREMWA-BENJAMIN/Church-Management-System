@@ -17,7 +17,8 @@ export default function MembersIndex({ members, units }) {
         date_of_birth: '',
         gender: '',
         phone_number: '',
-        status: 'active'
+        status: 'active',
+        role: ''
     });
 
     const openAddDialog = () => {
@@ -31,7 +32,8 @@ export default function MembersIndex({ members, units }) {
             date_of_birth: '', 
             gender: '', 
             phone_number: '', 
-            status: 'active' 
+            status: 'active',
+            role: ''
         });
         setIsDialogOpen(true);
     };
@@ -48,7 +50,8 @@ export default function MembersIndex({ members, units }) {
             date_of_birth: row.date_of_birth || '',
             gender: row.gender || '',
             phone_number: row.phone_number || '',
-            status: row.status
+            status: row.status,
+            role: row.role || ''
         });
         setIsDialogOpen(true);
     };
@@ -80,6 +83,12 @@ export default function MembersIndex({ members, units }) {
     const columns = [
         { header: 'First Name', accessor: (row) => <span className="font-semibold text-gray-900 dark:text-white">{row.first_name}</span> },
         { header: 'Last Name', accessor: (row) => <span className="text-gray-600 dark:text-gray-300">{row.last_name}</span> },
+        { 
+            header: 'Role / Position', 
+            accessor: (row) => row.role 
+                ? <span className="inline-flex items-center rounded-md bg-blue-400/10 px-2 py-1 text-xs font-medium text-blue-400 ring-1 ring-inset ring-blue-400/30">{row.role}</span>
+                : <span className="text-gray-400 text-xs italic">Not set</span>
+        },
         { header: 'Gender', accessor: (row) => <span className="text-gray-500 dark:text-gray-400">{row.gender || '-'}</span> },
         { header: 'Phone', accessor: (row) => <span className="text-gray-500 dark:text-gray-400">{row.phone_number || '-'}</span> },
         { 
@@ -229,6 +238,20 @@ export default function MembersIndex({ members, units }) {
                                 {units.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
                             </select>
                             {errors.organization_unit_id && <p className="mt-1 text-sm text-red-500">{errors.organization_unit_id}</p>}
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium leading-6 text-gray-300">Role / Position <span className="text-gray-500 font-normal">(e.g. Headmaster, Teacher, Nurse)</span></label>
+                        <div className="mt-1">
+                            <input 
+                                type="text" 
+                                placeholder="e.g. Headmaster, Teacher, Nurse..."
+                                value={data.role}
+                                onChange={e => setData('role', e.target.value)}
+                                className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-purple-500 sm:text-sm sm:leading-6 placeholder:text-gray-500" 
+                            />
+                            {errors.role && <p className="mt-1 text-sm text-red-500">{errors.role}</p>}
                         </div>
                     </div>
 

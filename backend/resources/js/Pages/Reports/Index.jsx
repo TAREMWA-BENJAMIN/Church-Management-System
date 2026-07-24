@@ -59,6 +59,20 @@ export default function ReportsIndex({ units, reportType, filters, reportData })
                     </div>
                 </div>
             );
+        } else if (reportType === 'members') {
+            const active = reportData.filter(r => r.status === 'active').length;
+            return (
+                <div className="grid grid-cols-2 gap-4 border border-gray-200 dark:border-white/10 p-4 rounded-xl mb-6 bg-white dark:bg-white/5 transition-colors duration-200">
+                    <div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">Total Members</div>
+                        <div className="text-lg font-bold text-gray-900 dark:text-white">{reportData.length}</div>
+                    </div>
+                    <div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">Active Members</div>
+                        <div className="text-lg font-bold text-green-600 dark:text-green-400">{active}</div>
+                    </div>
+                </div>
+            );
         } else {
             return (
                 <div className="grid grid-cols-1 gap-4 border border-gray-200 dark:border-white/10 p-4 rounded-xl mb-6 bg-white dark:bg-white/5 transition-colors duration-200">
@@ -134,7 +148,7 @@ export default function ReportsIndex({ units, reportType, filters, reportData })
                         {/* Tab Selectors */}
                         <div className="border-b border-gray-200 dark:border-white/10 pb-4 flex flex-col sm:flex-row gap-3 sm:gap-4 sm:items-center sm:justify-between">
                             <div className="flex flex-wrap gap-2">
-                                {['finance', 'assets', 'institutions'].map((type) => (
+                                {['finance', 'assets', 'institutions', 'members'].map((type) => (
                                     <button
                                         key={type}
                                         onClick={() => handleTypeChange(type)}
@@ -204,7 +218,64 @@ export default function ReportsIndex({ units, reportType, filters, reportData })
 
                             {getSummary()}
 
-                            <div className="overflow-x-auto">
+                            {/* Mobile cards */}
+                            <div className="block md:hidden space-y-3 mt-4">
+                                {reportData.length === 0 ? (
+                                    <div className="text-center text-gray-500 py-4">No records found matching filters.</div>
+                                ) : (
+                                    reportData.map((row) => (
+                                        <div key={row.id} className="bg-gray-50 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                            <div className="flex flex-col gap-1.5">
+                                                {reportType === 'finance' && (
+                                                    <>
+                                                        <div><span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Date</span><div className="text-sm text-gray-800 dark:text-gray-200">{new Date(row.date).toLocaleDateString()}</div></div>
+                                                        <div><span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Type</span><div className="text-sm text-gray-800 dark:text-gray-200 capitalize">{row.type}</div></div>
+                                                        <div><span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Category</span><div className="text-sm text-gray-800 dark:text-gray-200">{row.category}</div></div>
+                                                        <div><span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Unit</span><div className="text-sm text-gray-800 dark:text-gray-200">{row.organization_unit?.name}</div></div>
+                                                        <div><span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Amount</span><div className={`text-sm font-semibold ${row.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>{row.type === 'income' ? '+' : '-'} {new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(row.amount)}</div></div>
+                                                    </>
+                                                )}
+                                                {reportType === 'assets' && (
+                                                    <>
+                                                        <div><span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Asset Name</span><div className="text-sm font-semibold text-gray-900 dark:text-white">{row.name}</div></div>
+                                                        <div><span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Category</span><div className="text-sm text-gray-800 dark:text-gray-200">{row.category}</div></div>
+                                                        <div><span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Owning Unit</span><div className="text-sm text-gray-800 dark:text-gray-200">{row.organization_unit?.name}</div></div>
+                                                        <div><span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Status</span><div className="text-sm text-gray-800 dark:text-gray-200">{row.status}</div></div>
+                                                        <div><span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Value</span><div className="text-sm font-semibold text-green-600 dark:text-green-400">{new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(row.value)}</div></div>
+                                                    </>
+                                                )}
+                                                {reportType === 'institutions' && (
+                                                    <>
+                                                        <div><span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Institution Name</span><div className="text-sm font-semibold text-gray-900 dark:text-white">{row.name}</div></div>
+                                                        <div><span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Type</span><div className="text-sm text-gray-800 dark:text-gray-200">{row.type}</div></div>
+                                                        <div><span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Supervising Unit</span><div className="text-sm text-gray-800 dark:text-gray-200">{row.organization_unit?.name}</div></div>
+                                                        <div><span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Contact Phone</span><div className="text-sm text-gray-800 dark:text-gray-200">{row.contact_phone || 'N/A'}</div></div>
+                                                        <div><span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Address</span><div className="text-sm text-gray-800 dark:text-gray-200">{row.address || 'N/A'}</div></div>
+                                                    </>
+                                                )}
+                                                {reportType === 'members' && (
+                                                    <>
+                                                        <div><span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Full Name</span><div className="text-sm font-semibold text-gray-900 dark:text-white">{row.first_name} {row.last_name}</div></div>
+                                                        <div><span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Role / Position</span><div className="text-sm text-gray-800 dark:text-gray-200">
+                                                            {row.role 
+                                                                ? <span className="inline-flex items-center rounded-md bg-blue-400/10 px-2 py-1 text-xs font-medium text-blue-400 ring-1 ring-inset ring-blue-400/30">{row.role}</span>
+                                                                : <span className="text-gray-400 italic text-xs">Not set</span>
+                                                            }
+                                                        </div></div>
+                                                        <div><span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Unit</span><div className="text-sm text-gray-800 dark:text-gray-200">{row.organization_unit?.name}</div></div>
+                                                        <div><span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Gender</span><div className="text-sm text-gray-800 dark:text-gray-200">{row.gender || '-'}</div></div>
+                                                        <div><span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Phone</span><div className="text-sm text-gray-800 dark:text-gray-200">{row.phone_number || '-'}</div></div>
+                                                        <div><span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Status</span><div className="text-sm text-gray-800 dark:text-gray-200 capitalize">{row.status}</div></div>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+
+                            {/* Desktop table */}
+                            <div className="hidden md:block overflow-x-auto mt-4">
                                 <table className="min-w-full divide-y divide-gray-200 dark:divide-white/10">
                                     <thead>
                                         {reportType === 'finance' && (
@@ -232,6 +303,16 @@ export default function ReportsIndex({ units, reportType, filters, reportData })
                                                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400">Supervising Unit</th>
                                                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400">Contact Phone</th>
                                                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400">Address</th>
+                                            </tr>
+                                        )}
+                                        {reportType === 'members' && (
+                                            <tr>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400">Full Name</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400">Role / Position</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400">Unit</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400">Gender</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400">Phone</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400">Status</th>
                                             </tr>
                                         )}
                                     </thead>
@@ -272,6 +353,21 @@ export default function ReportsIndex({ units, reportType, filters, reportData })
                                                             <td className="px-4 py-3">{row.organization_unit?.name}</td>
                                                             <td className="px-4 py-3">{row.contact_phone || 'N/A'}</td>
                                                             <td className="px-4 py-3">{row.address || 'N/A'}</td>
+                                                        </>
+                                                    )}
+                                                    {reportType === 'members' && (
+                                                        <>
+                                                            <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">{row.first_name} {row.last_name}</td>
+                                                            <td className="px-4 py-3">
+                                                                {row.role 
+                                                                    ? <span className="inline-flex items-center rounded-md bg-blue-400/10 px-2 py-1 text-xs font-medium text-blue-400 ring-1 ring-inset ring-blue-400/30">{row.role}</span>
+                                                                    : <span className="text-gray-400 italic text-xs">Not set</span>
+                                                                }
+                                                            </td>
+                                                            <td className="px-4 py-3">{row.organization_unit?.name}</td>
+                                                            <td className="px-4 py-3">{row.gender || '-'}</td>
+                                                            <td className="px-4 py-3">{row.phone_number || '-'}</td>
+                                                            <td className="px-4 py-3 capitalize">{row.status}</td>
                                                         </>
                                                     )}
                                                 </tr>
@@ -330,6 +426,16 @@ export default function ReportsIndex({ units, reportType, filters, reportData })
                                 <th>Location</th>
                             </tr>
                         )}
+                        {reportType === 'members' && (
+                            <tr>
+                                <th>Full Name</th>
+                                <th>Role / Position</th>
+                                <th>Unit</th>
+                                <th>Gender</th>
+                                <th>Phone</th>
+                                <th>Status</th>
+                            </tr>
+                        )}
                     </thead>
                     <tbody>
                         {reportData.map((row) => (
@@ -359,6 +465,16 @@ export default function ReportsIndex({ units, reportType, filters, reportData })
                                         <td>{row.organization_unit?.name}</td>
                                         <td>{row.contact_phone || 'N/A'}</td>
                                         <td>{row.address || 'N/A'}</td>
+                                    </>
+                                )}
+                                {reportType === 'members' && (
+                                    <>
+                                        <td>{row.first_name} {row.last_name}</td>
+                                        <td>{row.role || 'Not set'}</td>
+                                        <td>{row.organization_unit?.name}</td>
+                                        <td>{row.gender || '-'}</td>
+                                        <td>{row.phone_number || '-'}</td>
+                                        <td style={{textTransform: 'capitalize'}}>{row.status}</td>
                                     </>
                                 )}
                             </tr>

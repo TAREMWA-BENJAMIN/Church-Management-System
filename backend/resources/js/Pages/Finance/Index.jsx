@@ -108,11 +108,11 @@ export default function FinanceIndex({ records, units, institutions }) {
             header: 'Organization Unit / Source', 
             accessor: (row) => (
                 <div className="flex flex-col gap-1">
-                    <span className="inline-flex items-center rounded-md bg-purple-400/10 px-2 py-1 text-xs font-medium text-purple-400 ring-1 ring-inset ring-purple-400/30 w-max">
+                    <span className="inline-flex items-center rounded-md bg-purple-400/10 px-2 py-1 text-xs font-medium text-purple-400 ring-1 ring-inset ring-purple-400/30">
                         {row.organization_unit?.name}
                     </span>
                     {row.institution && (
-                        <span className="inline-flex items-center rounded-md bg-blue-400/10 px-2 py-1 text-xs font-medium text-blue-400 ring-1 ring-inset ring-blue-400/30 w-max">
+                        <span className="inline-flex items-center rounded-md bg-blue-400/10 px-2 py-1 text-xs font-medium text-blue-400 ring-1 ring-inset ring-blue-400/30">
                             {row.institution.name}
                         </span>
                     )}

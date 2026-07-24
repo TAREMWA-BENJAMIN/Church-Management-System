@@ -20,15 +20,15 @@ export default function DataTable({ columns, data, onRowClick }) {
                 {data.map((row, rowIndex) => (
                     <div
                         key={row.id || rowIndex}
-                        className={`bg-white dark:bg-gray-800/70 border border-gray-200 dark:border-white/10 rounded-xl p-4 transition-colors duration-200 ${onRowClick ? 'cursor-pointer active:bg-gray-50 dark:active:bg-gray-700' : ''}`}
+                        className={`bg-white dark:bg-gray-800/70 border border-gray-200 dark:border-white/10 rounded-xl p-4 shadow-sm transition-colors duration-200 ${onRowClick ? 'cursor-pointer active:bg-gray-50 dark:active:bg-gray-700' : ''}`}
                         onClick={() => onRowClick && onRowClick(row)}
                     >
                         {dataColumns.map((col, colIndex) => (
-                            <div key={colIndex} className="flex justify-between items-start py-1.5 border-b border-gray-100 dark:border-white/5 last:border-0">
-                                <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mr-4 mt-0.5 shrink-0">
+                            <div key={colIndex} className="flex flex-col gap-0.5 py-2 border-b border-gray-100 dark:border-white/5 last:border-0">
+                                <span className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
                                     {col.header}
                                 </span>
-                                <span className="text-sm text-right">
+                                <span className="text-sm text-gray-800 dark:text-gray-200 break-words overflow-hidden">
                                     {col.accessor(row)}
                                 </span>
                             </div>
