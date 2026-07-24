@@ -12,7 +12,12 @@ class InstitutionController extends Controller
     public function index()
     {
         $institutions = Institution::with(['organizationUnit', 'geographicalUnit'])->latest()->get();
-        $managingUnits = OrganizationUnit::with('type')->get();
+        $managingUnits = OrganizationUnit::withoutGlobalScope('organizationUnitSecurity')
+            ->with('type')
+            ->whereHas('type', function ($query) {
+                $query->whereIn('name', ['Directorate', 'Province']);
+            })
+            ->get();
         $locationUnits = OrganizationUnit::withoutGlobalScope('organizationUnitSecurity')->with('type')->get();
 
         $user = auth()->user();
