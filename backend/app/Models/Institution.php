@@ -14,6 +14,7 @@ class Institution extends Model
         'name',
         'type',
         'organization_unit_id',
+        'geographical_unit_id',
         'contact_email',
         'contact_phone',
         'address',
@@ -23,5 +24,10 @@ class Institution extends Model
     public function organizationUnit()
     {
         return $this->belongsTo(OrganizationUnit::class);
+    }
+
+    public function geographicalUnit()
+    {
+        return $this->belongsTo(OrganizationUnit::class, 'geographical_unit_id');
     }
 }

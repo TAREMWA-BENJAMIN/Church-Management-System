@@ -5,13 +5,14 @@ import DataTable from '@/Components/DataTable';
 import FormDialog from '@/Components/FormDialog';
 import { PlusIcon, PencilSquareIcon, TrashIcon, ArrowTrendingUpIcon, ArrowTrendingDownIcon, BanknotesIcon } from '@heroicons/react/24/outline';
 
-export default function FinanceIndex({ records, units }) {
+export default function FinanceIndex({ records, units, institutions }) {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [dialogMode, setDialogMode] = useState('add');
 
     const { data, setData, post, put, processing, errors, reset, clearErrors } = useForm({
         id: '',
         organization_unit_id: '',
+        institution_id: '',
         type: 'income',
         category: '',
         amount: '',
@@ -30,6 +31,7 @@ export default function FinanceIndex({ records, units }) {
         setData({ 
             id: '', 
             organization_unit_id: '', 
+            institution_id: '',
             type: 'income', 
             category: '', 
             amount: '', 
@@ -46,6 +48,7 @@ export default function FinanceIndex({ records, units }) {
         setData({
             id: row.id,
             organization_unit_id: row.organization_unit_id,
+            institution_id: row.institution_id || '',
             type: row.type,
             category: row.category,
             amount: row.amount,
@@ -102,11 +105,18 @@ export default function FinanceIndex({ records, units }) {
             accessor: (row) => <span className="font-semibold text-gray-900 dark:text-white">{row.category}</span> 
         },
         { 
-            header: 'Organization Unit', 
+            header: 'Organization Unit / Source', 
             accessor: (row) => (
-                <span className="inline-flex items-center rounded-md bg-purple-400/10 px-2 py-1 text-xs font-medium text-purple-400 ring-1 ring-inset ring-purple-400/30">
-                    {row.organization_unit?.name}
-                </span>
+                <div className="flex flex-col gap-1">
+                    <span className="inline-flex items-center rounded-md bg-purple-400/10 px-2 py-1 text-xs font-medium text-purple-400 ring-1 ring-inset ring-purple-400/30 w-max">
+                        {row.organization_unit?.name}
+                    </span>
+                    {row.institution && (
+                        <span className="inline-flex items-center rounded-md bg-blue-400/10 px-2 py-1 text-xs font-medium text-blue-400 ring-1 ring-inset ring-blue-400/30 w-max">
+                            {row.institution.name}
+                        </span>
+                    )}
+                </div>
             )
         },
         { 
@@ -140,33 +150,33 @@ export default function FinanceIndex({ records, units }) {
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     
                     {/* Metrics Dashboard */}
-                    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
                         <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg relative overflow-hidden transition-colors duration-200">
                             <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-green-500/10 blur-2xl"></div>
-                            <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate flex items-center gap-2">
-                                <ArrowTrendingUpIcon className="h-4 w-4 text-green-500 dark:text-green-400" /> Total Income
+                            <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                                <ArrowTrendingUpIcon className="h-4 w-4 text-green-500 dark:text-green-400 shrink-0" /> Total Income
                             </dt>
-                            <dd className="mt-2 text-3xl font-semibold tracking-tight text-green-600 dark:text-green-400">
+                            <dd className="mt-2 text-2xl lg:text-3xl font-semibold tracking-tight text-green-600 dark:text-green-400 break-words">
                                 {new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(totalIncome)}
                             </dd>
                         </div>
                         
                         <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg relative overflow-hidden transition-colors duration-200">
                             <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-red-500/10 blur-2xl"></div>
-                            <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate flex items-center gap-2">
-                                <ArrowTrendingDownIcon className="h-4 w-4 text-red-500 dark:text-red-400" /> Total Expenditure
+                            <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                                <ArrowTrendingDownIcon className="h-4 w-4 text-red-500 dark:text-red-400 shrink-0" /> Total Expenditure
                             </dt>
-                            <dd className="mt-2 text-3xl font-semibold tracking-tight text-red-600 dark:text-red-400">
+                            <dd className="mt-2 text-2xl lg:text-3xl font-semibold tracking-tight text-red-600 dark:text-red-400 break-words">
                                 {new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(totalExpenditure)}
                             </dd>
                         </div>
 
                         <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg relative overflow-hidden transition-colors duration-200">
                             <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-blue-500/10 blur-2xl"></div>
-                            <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate flex items-center gap-2">
-                                <BanknotesIcon className="h-4 w-4 text-blue-500 dark:text-blue-400" /> Net Balance
+                            <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                                <BanknotesIcon className="h-4 w-4 text-blue-500 dark:text-blue-400 shrink-0" /> Net Balance
                             </dt>
-                            <dd className={`mt-2 text-3xl font-semibold tracking-tight ${netBalance >= 0 ? 'text-gray-900 dark:text-white' : 'text-red-600 dark:text-red-400'}`}>
+                            <dd className={`mt-2 text-2xl lg:text-3xl font-semibold tracking-tight break-words ${netBalance >= 0 ? 'text-gray-900 dark:text-white' : 'text-red-600 dark:text-red-400'}`}>
                                 {new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(netBalance)}
                             </dd>
                         </div>
@@ -258,18 +268,35 @@ export default function FinanceIndex({ records, units }) {
                         </div>
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-medium leading-6 text-gray-300">Organization Unit</label>
-                        <div className="mt-1">
-                            <select 
-                                value={data.organization_unit_id}
-                                onChange={e => setData('organization_unit_id', e.target.value)}
-                                className="block w-full rounded-md border-0 bg-gray-800 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-purple-500 sm:text-sm sm:leading-6"
-                            >
-                                <option value="">Select Unit</option>
-                                {units.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
-                            </select>
-                            {errors.organization_unit_id && <p className="mt-1 text-sm text-red-500">{errors.organization_unit_id}</p>}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium leading-6 text-gray-300">Organization Unit (Directorate)</label>
+                            <div className="mt-1">
+                                <select 
+                                    value={data.organization_unit_id}
+                                    onChange={e => setData('organization_unit_id', e.target.value)}
+                                    className="block w-full rounded-md border-0 bg-gray-800 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-purple-500 sm:text-sm sm:leading-6"
+                                >
+                                    <option value="">Select Unit</option>
+                                    {units.map(u => <option key={u.id} value={u.id}>{u.name} {u.type?.name ? `(${u.type.name})` : ''}</option>)}
+                                </select>
+                                {errors.organization_unit_id && <p className="mt-1 text-sm text-red-500">{errors.organization_unit_id}</p>}
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium leading-6 text-gray-300">Institution Source (Optional)</label>
+                            <div className="mt-1">
+                                <select 
+                                    value={data.institution_id}
+                                    onChange={e => setData('institution_id', e.target.value)}
+                                    className="block w-full rounded-md border-0 bg-gray-800 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-purple-500 sm:text-sm sm:leading-6"
+                                >
+                                    <option value="">None / General</option>
+                                    {institutions.filter(i => !data.organization_unit_id || i.organization_unit_id == data.organization_unit_id).map(i => <option key={i.id} value={i.id}>{i.name}</option>)}
+                                </select>
+                                {errors.institution_id && <p className="mt-1 text-sm text-red-500">{errors.institution_id}</p>}
+                            </div>
                         </div>
                     </div>
 

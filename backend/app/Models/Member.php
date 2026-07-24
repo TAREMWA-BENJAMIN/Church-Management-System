@@ -18,6 +18,7 @@ class Member extends Model
         'gender',
         'phone_number',
         'status',
+        'role',
     ];
 
     public function organizationUnit()

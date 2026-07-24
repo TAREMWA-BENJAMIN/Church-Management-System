@@ -7,6 +7,7 @@ use App\Models\Member;
 use App\Models\FinanceRecord;
 use App\Models\User;
 use App\Models\OrganizationUnitType;
+use App\Models\Asset;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
@@ -58,6 +59,9 @@ class DashboardController extends Controller
 
         // 4. Total Revenue (Income) (Automatically scoped)
         $stats['revenue'] = number_format(FinanceRecord::where('type', 'income')->sum('amount'));
+
+        // 5. Total Assets Value (Automatically scoped)
+        $stats['assets'] = number_format(Asset::sum('value'));
 
         return Inertia::render('Dashboard', [
             'stats' => $stats

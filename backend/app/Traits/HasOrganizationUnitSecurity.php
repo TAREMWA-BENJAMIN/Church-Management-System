@@ -31,10 +31,18 @@ trait HasOrganizationUnitSecurity
                 return;
             }
 
-            // If the model is OrganizationUnit itself, we filter on 'id' instead of 'organization_unit_id'
-            $column = (new static)->getTable() === 'organization_units' ? 'id' : 'organization_unit_id';
-
-            $builder->whereIn((new static)->getTable() . '.' . $column, $allowedIds);
+            $table = (new static)->getTable();
+            
+            if ($table === 'organization_units') {
+                $builder->whereIn($table . '.id', $allowedIds);
+            } elseif ($table === 'institutions') {
+                $builder->where(function($q) use ($table, $allowedIds) {
+                    $q->whereIn($table . '.organization_unit_id', $allowedIds)
+                      ->orWhereIn($table . '.geographical_unit_id', $allowedIds);
+                });
+            } else {
+                $builder->whereIn($table . '.organization_unit_id', $allowedIds);
+            }
         });
     }
 }

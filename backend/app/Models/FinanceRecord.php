@@ -12,6 +12,7 @@ class FinanceRecord extends Model
 
     protected $fillable = [
         'organization_unit_id',
+        'institution_id',
         'type',
         'recorded_by',
         'category',
@@ -33,5 +34,10 @@ class FinanceRecord extends Model
     public function recorder()
     {
         return $this->belongsTo(User::class, 'recorded_by');
+    }
+
+    public function institution()
+    {
+        return $this->belongsTo(Institution::class);
     }
 }

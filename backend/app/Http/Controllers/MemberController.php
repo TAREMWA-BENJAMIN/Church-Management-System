@@ -30,6 +30,7 @@ class MemberController extends Controller
             'gender' => 'nullable|string|in:Male,Female',
             'phone_number' => 'nullable|string|max:255',
             'status' => 'required|string|in:active,inactive',
+            'role' => 'nullable|string|max:255',
         ]);
 
         Member::create($validated);
@@ -47,6 +48,7 @@ class MemberController extends Controller
             'gender' => 'nullable|string|in:Male,Female',
             'phone_number' => 'nullable|string|max:255',
             'status' => 'required|string|in:active,inactive',
+            'role' => 'nullable|string|max:255',
         ]);
 
         $member->update($validated);

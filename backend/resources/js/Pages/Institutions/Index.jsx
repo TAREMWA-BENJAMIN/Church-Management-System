@@ -5,7 +5,7 @@ import DataTable from '@/Components/DataTable';
 import FormDialog from '@/Components/FormDialog';
 import { PlusIcon, PencilSquareIcon, TrashIcon, BuildingOffice2Icon, PhoneIcon, EnvelopeIcon, MapPinIcon } from '@heroicons/react/24/outline';
 
-export default function InstitutionsIndex({ institutions, units }) {
+export default function InstitutionsIndex({ institutions, managingUnits, locationUnits, canEditIds }) {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [dialogMode, setDialogMode] = useState('add');
 
@@ -14,6 +14,7 @@ export default function InstitutionsIndex({ institutions, units }) {
         name: '',
         type: 'School', // School, Hospital, Clinic, University, Centre, Publisher, Bookshop, Museum, Other
         organization_unit_id: '',
+        geographical_unit_id: '',
         contact_email: '',
         contact_phone: '',
         address: '',
@@ -33,6 +34,7 @@ export default function InstitutionsIndex({ institutions, units }) {
             name: '',
             type: 'School',
             organization_unit_id: '',
+            geographical_unit_id: '',
             contact_email: '',
             contact_phone: '',
             address: '',
@@ -50,6 +52,7 @@ export default function InstitutionsIndex({ institutions, units }) {
             name: row.name,
             type: row.type,
             organization_unit_id: row.organization_unit_id,
+            geographical_unit_id: row.geographical_unit_id || '',
             contact_email: row.contact_email || '',
             contact_phone: row.contact_phone || '',
             address: row.address || '',
@@ -98,10 +101,18 @@ export default function InstitutionsIndex({ institutions, units }) {
             )
         },
         {
-            header: 'Supervising Unit',
+            header: 'Supervising Directorate',
             accessor: (row) => (
                 <span className="inline-flex items-center rounded-md bg-purple-400/10 px-2 py-1 text-xs font-medium text-purple-400 ring-1 ring-inset ring-purple-400/30">
                     {row.organization_unit?.name}
+                </span>
+            )
+        },
+        {
+            header: 'Physical Location (Parish)',
+            accessor: (row) => (
+                <span className="inline-flex items-center rounded-md bg-green-400/10 px-2 py-1 text-xs font-medium text-green-400 ring-1 ring-inset ring-green-400/30">
+                    {row.geographical_unit?.name || 'Not Set'}
                 </span>
             )
         },
@@ -147,16 +158,22 @@ export default function InstitutionsIndex({ institutions, units }) {
         },
         {
             header: 'Actions',
-            accessor: (row) => (
-                <div className="flex gap-3">
-                    <button onClick={(e) => openEditDialog(e, row)} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition-colors" title="Edit">
-                        <PencilSquareIcon className="h-5 w-5" />
-                    </button>
-                    <button onClick={(e) => handleDelete(e, row.id)} className="text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition-colors" title="Delete">
-                        <TrashIcon className="h-5 w-5" />
-                    </button>
-                </div>
-            )
+            accessor: (row) => {
+                const canEdit = canEditIds === 'all' || canEditIds.includes(row.organization_unit_id);
+                if (!canEdit) {
+                    return <span className="text-xs text-gray-500 italic">View Only</span>;
+                }
+                return (
+                    <div className="flex gap-3">
+                        <button onClick={(e) => openEditDialog(e, row)} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition-colors" title="Edit">
+                            <PencilSquareIcon className="h-5 w-5" />
+                        </button>
+                        <button onClick={(e) => handleDelete(e, row.id)} className="text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition-colors" title="Delete">
+                            <TrashIcon className="h-5 w-5" />
+                        </button>
+                    </div>
+                );
+            }
         }
     ];
 
@@ -195,7 +212,7 @@ export default function InstitutionsIndex({ institutions, units }) {
                                 <h3 className="text-xl font-bold text-gray-900 dark:text-white">Registered Institutions</h3>
                                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage and track all Church-affiliated operations.</p>
                             </div>
-                            {units.length > 0 && (
+                            {(canEditIds === 'all' || canEditIds.length > 0) && managingUnits.length > 0 && (
                                 <button
                                     onClick={openAddDialog}
                                     className="inline-flex items-center gap-x-2 rounded-md bg-purple-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-purple-500 transition-colors"
@@ -251,17 +268,32 @@ export default function InstitutionsIndex({ institutions, units }) {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium leading-6 text-gray-300">Supervising Unit</label>
+                            <label className="block text-sm font-medium leading-6 text-gray-300">Supervising Directorate (Owner)</label>
                             <div className="mt-1">
                                 <select
                                     value={data.organization_unit_id}
                                     onChange={e => setData('organization_unit_id', e.target.value)}
                                     className="block w-full rounded-md border-0 bg-gray-800 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-purple-500 sm:text-sm sm:leading-6"
                                 >
-                                    <option value="">Select Unit</option>
-                                    {units.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
+                                    <option value="">Select Directorate</option>
+                                    {managingUnits.map(u => <option key={u.id} value={u.id}>{u.name} {u.type?.name ? `(${u.type.name})` : ''}</option>)}
                                 </select>
                                 {errors.organization_unit_id && <p className="mt-1 text-sm text-red-500">{errors.organization_unit_id}</p>}
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium leading-6 text-gray-300">Physical Location (Parish/Diocese)</label>
+                            <div className="mt-1">
+                                <select
+                                    value={data.geographical_unit_id}
+                                    onChange={e => setData('geographical_unit_id', e.target.value)}
+                                    className="block w-full rounded-md border-0 bg-gray-800 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-purple-500 sm:text-sm sm:leading-6"
+                                >
+                                    <option value="">Select Location</option>
+                                    {locationUnits.map(u => <option key={u.id} value={u.id}>{u.name} {u.type?.name ? `(${u.type.name})` : ''}</option>)}
+                                </select>
+                                {errors.geographical_unit_id && <p className="mt-1 text-sm text-red-500">{errors.geographical_unit_id}</p>}
                             </div>
                         </div>
                     </div>

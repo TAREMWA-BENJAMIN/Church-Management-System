@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\FinanceRecord;
 use App\Models\OrganizationUnit;
+use App\Models\Institution;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
@@ -12,15 +13,17 @@ class FinanceRecordController extends Controller
 {
     public function index()
     {
-        $records = FinanceRecord::with(['organizationUnit', 'recorder'])
+        $records = FinanceRecord::with(['organizationUnit', 'recorder', 'institution'])
             ->latest('date')
             ->get();
             
-        $units = OrganizationUnit::all();
+        $units = OrganizationUnit::with('type')->get();
+        $institutions = Institution::all();
 
         return Inertia::render('Finance/Index', [
             'records' => $records,
-            'units' => $units
+            'units' => $units,
+            'institutions' => $institutions
         ]);
     }
 
@@ -28,6 +31,7 @@ class FinanceRecordController extends Controller
     {
         $validated = $request->validate([
             'organization_unit_id' => 'required|exists:organization_units,id',
+            'institution_id' => 'nullable|exists:institutions,id',
             'type' => 'required|in:income,expenditure',
             'category' => 'required|string|max:255',
             'amount' => 'required|numeric|min:0.01',
@@ -46,6 +50,7 @@ class FinanceRecordController extends Controller
     {
         $validated = $request->validate([
             'organization_unit_id' => 'required|exists:organization_units,id',
+            'institution_id' => 'nullable|exists:institutions,id',
             'type' => 'required|in:income,expenditure',
             'category' => 'required|string|max:255',
             'amount' => 'required|numeric|min:0.01',

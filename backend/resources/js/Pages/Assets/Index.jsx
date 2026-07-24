@@ -147,33 +147,33 @@ export default function AssetsIndex({ assets, units }) {
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     
                     {/* Metrics Dashboard */}
-                    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
                         <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg relative overflow-hidden transition-colors duration-200">
                             <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-green-500/10 blur-2xl"></div>
-                            <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate flex items-center gap-2">
-                                <CurrencyDollarIcon className="h-4 w-4 text-green-500 dark:text-green-400" /> Total Asset Value
+                            <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                                <CurrencyDollarIcon className="h-4 w-4 text-green-500 dark:text-green-400 shrink-0" /> Total Asset Value
                             </dt>
-                            <dd className="mt-2 text-3xl font-semibold tracking-tight text-green-600 dark:text-green-400">
+                            <dd className="mt-2 text-2xl lg:text-3xl font-semibold tracking-tight text-green-600 dark:text-green-400 break-words">
                                 {new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(totalValue)}
                             </dd>
                         </div>
                         
                         <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg relative overflow-hidden transition-colors duration-200">
                             <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-orange-500/10 blur-2xl"></div>
-                            <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate flex items-center gap-2">
-                                <BriefcaseIcon className="h-4 w-4 text-orange-500 dark:text-orange-400" /> Registered Assets
+                            <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                                <BriefcaseIcon className="h-4 w-4 text-orange-500 dark:text-orange-400 shrink-0" /> Registered Assets
                             </dt>
-                            <dd className="mt-2 text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">
+                            <dd className="mt-2 text-2xl lg:text-3xl font-semibold tracking-tight text-gray-900 dark:text-white break-words">
                                 {totalAssets}
                             </dd>
                         </div>
 
                         <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg relative overflow-hidden transition-colors duration-200">
                             <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-blue-500/10 blur-2xl"></div>
-                            <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate flex items-center gap-2">
-                                <BuildingOfficeIcon className="h-4 w-4 text-blue-500 dark:text-blue-400" /> Active Assets
+                            <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                                <BuildingOfficeIcon className="h-4 w-4 text-blue-500 dark:text-blue-400 shrink-0" /> Active Assets
                             </dt>
-                            <dd className="mt-2 text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">
+                            <dd className="mt-2 text-2xl lg:text-3xl font-semibold tracking-tight text-gray-900 dark:text-white break-words">
                                 {activeAssets}
                             </dd>
                         </div>

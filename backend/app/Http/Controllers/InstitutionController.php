@@ -11,12 +11,17 @@ class InstitutionController extends Controller
 {
     public function index()
     {
-        $institutions = Institution::with('organizationUnit')->latest()->get();
-        $units = OrganizationUnit::all();
+        $institutions = Institution::with(['organizationUnit', 'geographicalUnit'])->latest()->get();
+        $managingUnits = OrganizationUnit::with('type')->get();
+        $locationUnits = OrganizationUnit::withoutGlobalScope('organizationUnitSecurity')->with('type')->get();
+
+        $user = auth()->user();
 
         return Inertia::render('Institutions/Index', [
             'institutions' => $institutions,
-            'units' => $units
+            'managingUnits' => $managingUnits,
+            'locationUnits' => $locationUnits,
+            'canEditIds' => $user->is_super_admin ? 'all' : $user->getAllowedOrganizationUnitIds()
         ]);
     }
 
@@ -26,6 +31,7 @@ class InstitutionController extends Controller
             'name' => 'required|string|max:255',
             'type' => 'required|string|max:255',
             'organization_unit_id' => 'required|exists:organization_units,id',
+            'geographical_unit_id' => 'required|exists:organization_units,id',
             'contact_email' => 'nullable|email|max:255',
             'contact_phone' => 'nullable|string|max:50',
             'address' => 'nullable|string',
@@ -43,6 +49,7 @@ class InstitutionController extends Controller
             'name' => 'required|string|max:255',
             'type' => 'required|string|max:255',
             'organization_unit_id' => 'required|exists:organization_units,id',
+            'geographical_unit_id' => 'required|exists:organization_units,id',
             'contact_email' => 'nullable|email|max:255',
             'contact_phone' => 'nullable|string|max:50',
             'address' => 'nullable|string',
