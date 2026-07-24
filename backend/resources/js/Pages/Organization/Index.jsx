@@ -6,7 +6,7 @@ import DataTable from '@/Components/DataTable';
 import { FolderIcon, DocumentIcon, PlusIcon, PencilSquareIcon, TrashIcon, ChevronRightIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 import FormDialog from '@/Components/FormDialog';
 
-export default function OrganizationIndex({ units, types }) {
+export default function OrganizationIndex({ units, types, canManage }) {
     const [selectedUnitId, setSelectedUnitId] = useState(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [dialogMode, setDialogMode] = useState('add'); // 'add' or 'edit'
@@ -158,16 +158,21 @@ export default function OrganizationIndex({ units, types }) {
         { header: 'Type', accessor: (row) => <span className="inline-flex items-center rounded-md bg-purple-400/10 px-2 py-1 text-xs font-medium text-purple-400 ring-1 ring-inset ring-purple-400/30">{row.type?.name || 'Unknown'}</span> },
         { 
             header: 'Actions', 
-            accessor: (row) => (
-                <div className="flex gap-3">
-                    <button onClick={(e) => openEditDialog(e, row)} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition-colors" title="Edit">
-                        <PencilSquareIcon className="h-5 w-5" />
-                    </button>
-                    <button onClick={(e) => handleDelete(e, row.id)} className="text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition-colors" title="Delete">
-                        <TrashIcon className="h-5 w-5" />
-                    </button>
-                </div>
-            ) 
+            accessor: (row) => {
+                if (!canManage) {
+                    return <span className="text-xs text-gray-500 italic">View Only</span>;
+                }
+                return (
+                    <div className="flex gap-3">
+                        <button onClick={(e) => openEditDialog(e, row)} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition-colors" title="Edit">
+                            <PencilSquareIcon className="h-5 w-5" />
+                        </button>
+                        <button onClick={(e) => handleDelete(e, row.id)} className="text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition-colors" title="Delete">
+                            <TrashIcon className="h-5 w-5" />
+                        </button>
+                    </div>
+                );
+            } 
         }
     ];
 
@@ -181,13 +186,15 @@ export default function OrganizationIndex({ units, types }) {
                     <div className="w-full lg:w-1/3 min-h-[300px] lg:min-h-0 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-4 backdrop-blur-xl shadow-lg flex flex-col transition-colors duration-200">
                         <div className="flex justify-between items-center mb-4 pb-2 border-b border-gray-200 dark:border-gray-700">
                             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Structure</h3>
-                            <button 
-                                onClick={openAddDialog}
-                                className="inline-flex items-center gap-1 px-2 py-1 text-sm font-semibold rounded-md bg-purple-600 text-white hover:bg-purple-500 transition-colors shadow-sm"
-                            >
-                                <PlusIcon className="h-4 w-4" />
-                                Add Root
-                            </button>
+                            {canManage && (
+                                <button 
+                                    onClick={openAddDialog}
+                                    className="inline-flex items-center gap-1 px-2 py-1 text-sm font-semibold rounded-md bg-purple-600 text-white hover:bg-purple-500 transition-colors shadow-sm"
+                                >
+                                    <PlusIcon className="h-4 w-4" />
+                                    Add Root
+                                </button>
+                            )}
                         </div>
                         <div className="flex-1 overflow-y-auto custom-scrollbar">
                             <Tree
@@ -210,13 +217,15 @@ export default function OrganizationIndex({ units, types }) {
                                 <h3 className="text-xl font-bold text-gray-900 dark:text-white">{selectedUnitName}</h3>
                                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Viewing sub-units and details</p>
                             </div>
-                            <button 
-                                onClick={openAddDialog}
-                                className="inline-flex items-center gap-x-2 rounded-md bg-purple-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-purple-500 transition-colors"
-                            >
-                                <PlusIcon className="-ml-0.5 h-5 w-5" aria-hidden="true" />
-                                Add Unit
-                            </button>
+                            {canManage && (
+                                <button 
+                                    onClick={openAddDialog}
+                                    className="inline-flex items-center gap-x-2 rounded-md bg-purple-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-purple-500 transition-colors"
+                                >
+                                    <PlusIcon className="-ml-0.5 h-5 w-5" aria-hidden="true" />
+                                    Add Unit
+                                </button>
+                            )}
                         </div>
                         
                         <div className="flex-1 overflow-y-auto">

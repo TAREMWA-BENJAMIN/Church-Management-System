@@ -21,12 +21,15 @@ class InstitutionController extends Controller
             'institutions' => $institutions,
             'managingUnits' => $managingUnits,
             'locationUnits' => $locationUnits,
-            'canEditIds' => $user->is_super_admin ? 'all' : $user->getAllowedOrganizationUnitIds()
+            'canEditIds' => $user->is_super_admin ? 'all' : $user->getAllowedOrganizationUnitIds(),
+            'canManage' => $user->canManageInstitutionsAndDirectorates()
         ]);
     }
 
     public function store(Request $request)
     {
+        abort_if(!auth()->user()->canManageInstitutionsAndDirectorates(), 403, 'Unauthorized action.');
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'type' => 'required|string|max:255',
@@ -45,6 +48,8 @@ class InstitutionController extends Controller
 
     public function update(Request $request, Institution $institution)
     {
+        abort_if(!auth()->user()->canManageInstitutionsAndDirectorates(), 403, 'Unauthorized action.');
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'type' => 'required|string|max:255',
@@ -63,6 +68,8 @@ class InstitutionController extends Controller
 
     public function destroy(Institution $institution)
     {
+        abort_if(!auth()->user()->canManageInstitutionsAndDirectorates(), 403, 'Unauthorized action.');
+
         $institution->delete();
         return redirect()->back()->with('message', 'Institution deleted successfully');
     }

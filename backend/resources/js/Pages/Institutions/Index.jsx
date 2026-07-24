@@ -5,7 +5,7 @@ import DataTable from '@/Components/DataTable';
 import FormDialog from '@/Components/FormDialog';
 import { PlusIcon, PencilSquareIcon, TrashIcon, BuildingOffice2Icon, PhoneIcon, EnvelopeIcon, MapPinIcon } from '@heroicons/react/24/outline';
 
-export default function InstitutionsIndex({ institutions, managingUnits, locationUnits, canEditIds }) {
+export default function InstitutionsIndex({ institutions, managingUnits, locationUnits, canEditIds, canManage }) {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [dialogMode, setDialogMode] = useState('add');
 
@@ -159,7 +159,7 @@ export default function InstitutionsIndex({ institutions, managingUnits, locatio
         {
             header: 'Actions',
             accessor: (row) => {
-                const canEdit = canEditIds === 'all' || canEditIds.includes(row.organization_unit_id);
+                const canEdit = canManage && (canEditIds === 'all' || canEditIds.includes(row.organization_unit_id));
                 if (!canEdit) {
                     return <span className="text-xs text-gray-500 italic">View Only</span>;
                 }
@@ -212,7 +212,7 @@ export default function InstitutionsIndex({ institutions, managingUnits, locatio
                                 <h3 className="text-xl font-bold text-gray-900 dark:text-white">Registered Institutions</h3>
                                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage and track all Church-affiliated operations.</p>
                             </div>
-                            {(canEditIds === 'all' || canEditIds.length > 0) && managingUnits.length > 0 && (
+                            {canManage && managingUnits.length > 0 && (
                                 <button
                                     onClick={openAddDialog}
                                     className="inline-flex items-center gap-x-2 rounded-md bg-purple-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-purple-500 transition-colors"

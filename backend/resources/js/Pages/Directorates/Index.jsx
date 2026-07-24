@@ -4,86 +4,86 @@ import { Head, Link, useForm, router, usePage } from '@inertiajs/react';
 import FormDialog from '@/Components/FormDialog';
 import { BuildingOfficeIcon, UsersIcon, PlusIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 
-export default function DirectoratesIndex({ directorates, directorateType, units }) {
-    const { auth } = usePage().props;
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-    const { data, setData, post, processing, errors, reset, clearErrors } = useForm({
-        name: '',
-        organization_unit_type_id: directorateType?.id || '',
-        parent_id: ''
-    });
-
-    const openAddDialog = () => {
-        clearErrors();
-        setData({
+    export default function DirectoratesIndex({ directorates, directorateType, units, canManage }) {
+        const { auth } = usePage().props;
+        const [isDialogOpen, setIsDialogOpen] = useState(false);
+    
+        const { data, setData, post, processing, errors, reset, clearErrors } = useForm({
             name: '',
             organization_unit_type_id: directorateType?.id || '',
             parent_id: ''
         });
-        setIsDialogOpen(true);
-    };
-
-    const submit = (e) => {
-        e.preventDefault();
-        post(route('organization.store'), {
-            onSuccess: () => {
-                setIsDialogOpen(false);
-                reset();
-            },
-            preserveScroll: true
-        });
-    };
-
-    // A palette of accent colors for each directorate card
-    const accents = [
-        { bg: 'bg-purple-500/15', icon: 'text-purple-400', ring: 'ring-purple-500/20', glow: 'bg-purple-500/10' },
-        { bg: 'bg-blue-500/15',   icon: 'text-blue-400',   ring: 'ring-blue-500/20',   glow: 'bg-blue-500/10' },
-        { bg: 'bg-indigo-500/15', icon: 'text-indigo-400', ring: 'ring-indigo-500/20', glow: 'bg-indigo-500/10' },
-        { bg: 'bg-violet-500/15', icon: 'text-violet-400', ring: 'ring-violet-500/20', glow: 'bg-violet-500/10' },
-        { bg: 'bg-cyan-500/15',   icon: 'text-cyan-400',   ring: 'ring-cyan-500/20',   glow: 'bg-cyan-500/10' },
-        { bg: 'bg-emerald-500/15',icon: 'text-emerald-400',ring: 'ring-emerald-500/20',glow: 'bg-emerald-500/10' },
-    ];
-
-    return (
-        <AppLayout header={<h2 className="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">Directorates Dashboard</h2>}>
-            <Head title="Directorates" />
-
-            <div className="py-4">
-                <div className="mx-auto max-w-7xl">
-
-                    {/* ── Summary Metrics ── */}
-                    <div className="grid grid-cols-2 gap-4 mb-6">
-                        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg relative overflow-hidden transition-colors duration-200">
-                            <div className="absolute top-0 right-0 -mr-6 -mt-6 w-24 h-24 rounded-full bg-purple-500/10 blur-2xl" />
-                            <dt className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">Total Directorates</dt>
-                            <dd className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{directorates.length}</dd>
+    
+        const openAddDialog = () => {
+            clearErrors();
+            setData({
+                name: '',
+                organization_unit_type_id: directorateType?.id || '',
+                parent_id: ''
+            });
+            setIsDialogOpen(true);
+        };
+    
+        const submit = (e) => {
+            e.preventDefault();
+            post(route('organization.store'), {
+                onSuccess: () => {
+                    setIsDialogOpen(false);
+                    reset();
+                },
+                preserveScroll: true
+            });
+        };
+    
+        // A palette of accent colors for each directorate card
+        const accents = [
+            { bg: 'bg-purple-500/15', icon: 'text-purple-400', ring: 'ring-purple-500/20', glow: 'bg-purple-500/10' },
+            { bg: 'bg-blue-500/15',   icon: 'text-blue-400',   ring: 'ring-blue-500/20',   glow: 'bg-blue-500/10' },
+            { bg: 'bg-indigo-500/15', icon: 'text-indigo-400', ring: 'ring-indigo-500/20', glow: 'bg-indigo-500/10' },
+            { bg: 'bg-violet-500/15', icon: 'text-violet-400', ring: 'ring-violet-500/20', glow: 'bg-violet-500/10' },
+            { bg: 'bg-cyan-500/15',   icon: 'text-cyan-400',   ring: 'ring-cyan-500/20',   glow: 'bg-cyan-500/10' },
+            { bg: 'bg-emerald-500/15',icon: 'text-emerald-400',ring: 'ring-emerald-500/20',glow: 'bg-emerald-500/10' },
+        ];
+    
+        return (
+            <AppLayout header={<h2 className="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">Directorates Dashboard</h2>}>
+                <Head title="Directorates" />
+    
+                <div className="py-4">
+                    <div className="mx-auto max-w-7xl">
+    
+                        {/* ── Summary Metrics ── */}
+                        <div className="grid grid-cols-2 gap-4 mb-6">
+                            <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg relative overflow-hidden transition-colors duration-200">
+                                <div className="absolute top-0 right-0 -mr-6 -mt-6 w-24 h-24 rounded-full bg-purple-500/10 blur-2xl" />
+                                <dt className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">Total Directorates</dt>
+                                <dd className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{directorates.length}</dd>
+                            </div>
+                            <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg relative overflow-hidden transition-colors duration-200">
+                                <div className="absolute top-0 right-0 -mr-6 -mt-6 w-24 h-24 rounded-full bg-blue-500/10 blur-2xl" />
+                                <dt className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">Assigned Staff</dt>
+                                <dd className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
+                                    {directorates.reduce((acc, curr) => acc + (curr.role_assignments?.length || 0), 0)}
+                                </dd>
+                            </div>
                         </div>
-                        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg relative overflow-hidden transition-colors duration-200">
-                            <div className="absolute top-0 right-0 -mr-6 -mt-6 w-24 h-24 rounded-full bg-blue-500/10 blur-2xl" />
-                            <dt className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">Assigned Staff</dt>
-                            <dd className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
-                                {directorates.reduce((acc, curr) => acc + (curr.role_assignments?.length || 0), 0)}
-                            </dd>
+    
+                        {/* ── Header ── */}
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+                            <div>
+                                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Directorate Units</h3>
+                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Overview of all specialized directorates.</p>
+                            </div>
+                            {canManage && (
+                                <button
+                                    onClick={openAddDialog}
+                                    className="w-full sm:w-auto inline-flex items-center justify-center gap-x-2 rounded-xl bg-purple-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-purple-500 transition-colors"
+                                >
+                                    <PlusIcon className="h-4 w-4" />
+                                    Add Directorate
+                                </button>
+                            )}
                         </div>
-                    </div>
-
-                    {/* ── Header ── */}
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-                        <div>
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Directorate Units</h3>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Overview of all specialized directorates.</p>
-                        </div>
-                        {(auth.is_super_admin || units.length > 0) && (
-                            <button
-                                onClick={openAddDialog}
-                                className="w-full sm:w-auto inline-flex items-center justify-center gap-x-2 rounded-xl bg-purple-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-purple-500 transition-colors"
-                            >
-                                <PlusIcon className="h-4 w-4" />
-                                Add Directorate
-                            </button>
-                        )}
-                    </div>
 
                     {/* ── Directorate Cards ── */}
                     {directorates.length === 0 ? (

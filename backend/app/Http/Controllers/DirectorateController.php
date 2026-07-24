@@ -23,7 +23,8 @@ class DirectorateController extends Controller
         return Inertia::render('Directorates/Index', [
             'directorates' => $directorates,
             'directorateType' => $directorateType,
-            'units' => $units
+            'units' => $units,
+            'canManage' => auth()->user()->canManageInstitutionsAndDirectorates()
         ]);
     }
 }

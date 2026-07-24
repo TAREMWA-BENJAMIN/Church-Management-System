@@ -16,12 +16,15 @@ class OrganizationUnitController extends Controller
 
         return Inertia::render('Organization/Index', [
             'units' => $units,
-            'types' => $types
+            'types' => $types,
+            'canManage' => auth()->user()->canManageInstitutionsAndDirectorates()
         ]);
     }
 
     public function store(Request $request)
     {
+        abort_if(!auth()->user()->canManageInstitutionsAndDirectorates(), 403, 'Unauthorized action.');
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'organization_unit_type_id' => 'required|exists:organization_unit_types,id',
@@ -35,6 +38,8 @@ class OrganizationUnitController extends Controller
 
     public function update(Request $request, OrganizationUnit $organization)
     {
+        abort_if(!auth()->user()->canManageInstitutionsAndDirectorates(), 403, 'Unauthorized action.');
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'organization_unit_type_id' => 'required|exists:organization_unit_types,id',
@@ -48,6 +53,8 @@ class OrganizationUnitController extends Controller
 
     public function destroy(OrganizationUnit $organization)
     {
+        abort_if(!auth()->user()->canManageInstitutionsAndDirectorates(), 403, 'Unauthorized action.');
+
         // Children will be deleted automatically due to cascadeOnDelete in migration
         $organization->delete();
 

@@ -60,6 +60,21 @@ class User extends Authenticatable
     }
 
     /**
+     * Check if user is Admin or Directorate level
+     */
+    public function canManageInstitutionsAndDirectorates(): bool
+    {
+        if ($this->is_super_admin) {
+            return true;
+        }
+
+        return $this->roleAssignments()
+            ->whereHas('organizationUnit.type', function ($q) {
+                $q->whereIn('name', ['Province', 'Directorate']);
+            })->exists();
+    }
+
+    /**
      * The attributes that should be hidden for serialization.
      *
      * @var list<string>
