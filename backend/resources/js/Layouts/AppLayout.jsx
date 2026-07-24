@@ -90,7 +90,7 @@ export default function AppLayout({ header, children }) {
     const moreNav = [
         { name: 'Organization', href: route('organization.index'), icon: BuildingOfficeIcon, show: isLeader },
         { name: 'Members', href: route('members.index'), icon: UsersIcon, show: isLeader },
-        { name: 'People (Staff/Leaders)', href: route('people.index'), icon: AcademicCapIcon, show: isLeader },
+        { name: 'People (Staff/Leaders)', href: route('people.index'), icon: AcademicCapIcon, show: isSuperAdmin },
         { name: 'Institutions', href: route('institutions.index'), icon: BuildingLibraryIcon, show: isLeader },
         { name: 'Directorates', href: route('directorates.index'), icon: BriefcaseIcon, show: isLeader },
         { name: 'Assets', href: route('assets.index'), icon: ArchiveBoxIcon, show: isLeader },

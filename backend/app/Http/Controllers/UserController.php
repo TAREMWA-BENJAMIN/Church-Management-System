@@ -15,6 +15,8 @@ class UserController extends Controller
 {
     public function index()
     {
+        abort_if(!auth()->user()->is_super_admin, 403, 'Unauthorized action.');
+        
         // Get users with their role assignments, including the related Role and Organization Unit
         $users = User::with(['roleAssignments.role', 'roleAssignments.organizationUnit'])->get();
         $roles = Role::all();
@@ -29,6 +31,8 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
+        abort_if(!auth()->user()->is_super_admin, 403, 'Unauthorized action.');
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
@@ -65,6 +69,8 @@ class UserController extends Controller
 
     public function update(Request $request, User $person)
     {
+        abort_if(!auth()->user()->is_super_admin, 403, 'Unauthorized action.');
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($person->id)],
@@ -112,6 +118,8 @@ class UserController extends Controller
 
     public function destroy(User $person)
     {
+        abort_if(!auth()->user()->is_super_admin, 403, 'Unauthorized action.');
+
         // Don't allow deleting the super admin
         if ($person->email === 'admin@church.org') {
             return redirect()->back()->with('error', 'Cannot delete the system administrator.');
