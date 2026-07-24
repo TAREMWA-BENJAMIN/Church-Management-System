@@ -125,13 +125,15 @@ import { BuildingOfficeIcon, UsersIcon, PlusIcon, ArrowRightIcon } from '@heroic
                                             </div>
 
                                             {/* Action arrow */}
-                                            <Link
-                                                href={route('organization.index')}
-                                                className="shrink-0 flex items-center gap-1 text-xs font-semibold text-purple-400 hover:text-purple-300 transition-colors mt-0.5"
-                                            >
-                                                <span className="hidden sm:inline">Manage</span>
-                                                <ArrowRightIcon className="h-4 w-4" />
-                                            </Link>
+                                            {canManage && (
+                                                <Link
+                                                    href={route('organization.index')}
+                                                    className="shrink-0 flex items-center gap-1 text-xs font-semibold text-purple-400 hover:text-purple-300 transition-colors mt-0.5"
+                                                >
+                                                    <span className="hidden sm:inline">Manage</span>
+                                                    <ArrowRightIcon className="h-4 w-4" />
+                                                </Link>
+                                            )}
                                         </div>
                                     </div>
                                 );
