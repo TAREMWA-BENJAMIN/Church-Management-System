@@ -86,22 +86,7 @@ export default function Dashboard({ stats, chartData }) {
                             </div>
                         </div>
 
-                        {/* Recent Activity Widget */}
-                        <div className="rounded-2xl bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-4 sm:p-6 backdrop-blur-xl shadow-lg transition-colors duration-200">
-                            <h3 className="text-base font-semibold leading-6 text-gray-900 dark:text-white mb-4">Recent Announcements</h3>
-                            <ul role="list" className="divide-y divide-gray-200 dark:divide-gray-700/50">
-                                {[
-                                    { title: 'New Archdeaconry Formed', time: '2 hours ago' },
-                                    { title: 'Provincial Synod Dates Set', time: '1 day ago' },
-                                    { title: 'Finance Report Q3 Uploaded', time: '3 days ago' },
-                                ].map((item, idx) => (
-                                    <li key={idx} className="py-4 flex justify-between">
-                                        <div className="text-sm text-gray-800 dark:text-gray-300">{item.title}</div>
-                                        <div className="text-xs text-gray-500">{item.time}</div>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
+
                     </div>
                 </div>
             </div>

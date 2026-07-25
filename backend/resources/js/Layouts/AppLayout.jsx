@@ -257,9 +257,7 @@ export default function AppLayout({ header, children }) {
                             >
                                 {isDark ? <SunIcon className="h-6 w-6" /> : <MoonIcon className="h-6 w-6" />}
                             </button>
-                            <button type="button" className="-m-2.5 p-2.5 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
-                                <BellIcon className="h-6 w-6" />
-                            </button>
+
                             <div className="hidden lg:block lg:h-6 lg:w-px lg:bg-gray-200 dark:lg:bg-gray-700" />
                             <div className="relative">
                                 <Dropdown>
