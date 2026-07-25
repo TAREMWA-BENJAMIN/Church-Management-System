@@ -239,23 +239,32 @@ export default function OrganizationIndex({ units, types, canManage }) {
                 </div>
             </div>
 
-            {/* Add/Edit Unit Modal */}
             <FormDialog isOpen={isDialogOpen} onClose={() => setIsDialogOpen(false)} title={dialogMode === 'add' ? 'Add Organization Unit' : 'Edit Organization Unit'}>
                 <form className="space-y-4" onSubmit={submit}>
+                    
+                    {/* Guidance banner */}
+                    <div className="rounded-lg bg-purple-500/10 border border-purple-500/20 px-3 py-2 text-xs text-purple-300 leading-relaxed">
+                        <strong className="block mb-0.5 text-purple-200">Hierarchy Guide:</strong>
+                        Province → Diocese → Archdeaconry → Parish
+                        <span className="block mt-0.5 text-purple-400">Select the correct Type and assign a Parent to place it in the right level.</span>
+                    </div>
+
                     <div>
                         <label className="block text-sm font-medium leading-6 text-gray-300">Name</label>
                         <div className="mt-2">
                             <input 
                                 type="text" 
+                                placeholder="e.g. Kampala Diocese, Nakasero Parish..."
                                 value={data.name}
                                 onChange={e => setData('name', e.target.value)}
-                                className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-purple-500 sm:text-sm sm:leading-6" 
+                                className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-purple-500 sm:text-sm sm:leading-6 placeholder:text-gray-500" 
                             />
                             {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name}</p>}
                         </div>
                     </div>
+
                     <div>
-                        <label className="block text-sm font-medium leading-6 text-gray-300">Type</label>
+                        <label className="block text-sm font-medium leading-6 text-gray-300">Unit Type</label>
                         <div className="mt-2">
                             <select 
                                 value={data.organization_unit_type_id}
@@ -269,6 +278,31 @@ export default function OrganizationIndex({ units, types, canManage }) {
                             {errors.organization_unit_type_id && <p className="mt-1 text-sm text-red-500">{errors.organization_unit_type_id}</p>}
                         </div>
                     </div>
+
+                    <div>
+                        <label className="block text-sm font-medium leading-6 text-gray-300">
+                            Parent Unit
+                            <span className="ml-1 text-xs text-gray-500 font-normal">(Leave empty for top-level)</span>
+                        </label>
+                        <div className="mt-2">
+                            <select 
+                                value={data.parent_id}
+                                onChange={e => setData('parent_id', e.target.value)}
+                                className="block w-full rounded-md border-0 bg-gray-800 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-purple-500 sm:text-sm sm:leading-6"
+                            >
+                                <option value="">— No Parent (Top Level) —</option>
+                                {units
+                                    .filter(u => ['Province', 'Diocese', 'Archdeaconry'].includes(u.type?.name))
+                                    .map(u => (
+                                    <option key={u.id} value={u.id}>
+                                        {u.name} ({u.type?.name || 'Unknown'})
+                                    </option>
+                                ))}
+                            </select>
+                            {errors.parent_id && <p className="mt-1 text-sm text-red-500">{errors.parent_id}</p>}
+                        </div>
+                    </div>
+
                     <div className="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
                         <button 
                             type="submit" 
