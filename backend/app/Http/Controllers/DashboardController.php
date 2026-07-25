@@ -63,8 +63,43 @@ class DashboardController extends Controller
         // 5. Total Assets Value (Automatically scoped)
         $stats['assets'] = number_format(Asset::sum('value'));
 
+        // 6. Monthly Data for Chart (Current Year)
+        $currentYear = date('Y');
+        
+        $financeRecords = FinanceRecord::whereYear('date', $currentYear)->get(['date', 'amount', 'type']);
+        $assetRecords = Asset::whereYear('acquisition_date', $currentYear)->get(['acquisition_date', 'value']);
+
+        $chartData = [];
+        for ($i = 1; $i <= 12; $i++) {
+            $chartData[] = [
+                'name' => date('M', mktime(0, 0, 0, $i, 1)),
+                'Income' => 0,
+                'Expenses' => 0,
+                'Assets' => 0,
+            ];
+        }
+
+        foreach ($financeRecords as $record) {
+            if ($record->date) {
+                $monthIndex = (int) date('n', strtotime($record->date)) - 1;
+                if ($record->type === 'income') {
+                    $chartData[$monthIndex]['Income'] += (float) $record->amount;
+                } else if ($record->type === 'expenditure') {
+                    $chartData[$monthIndex]['Expenses'] += (float) $record->amount;
+                }
+            }
+        }
+
+        foreach ($assetRecords as $record) {
+            if ($record->acquisition_date) {
+                $monthIndex = (int) date('n', strtotime($record->acquisition_date)) - 1;
+                $chartData[$monthIndex]['Assets'] += (float) $record->value;
+            }
+        }
+
         return Inertia::render('Dashboard', [
-            'stats' => $stats
+            'stats' => $stats,
+            'chartData' => $chartData
         ]);
     }
 }

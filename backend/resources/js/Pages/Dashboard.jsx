@@ -7,8 +7,9 @@ import {
     BanknotesIcon,
     BriefcaseIcon
 } from '@heroicons/react/24/outline';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
-export default function Dashboard({ stats }) {
+export default function Dashboard({ stats, chartData }) {
     const statCards = [
         { name: 'Dioceses', value: stats?.dioceses, icon: BuildingLibraryIcon, show: stats?.dioceses !== undefined },
         { name: 'Archdeaconries', value: stats?.archdeaconries, icon: BuildingLibraryIcon, show: stats?.archdeaconries !== undefined },
@@ -47,11 +48,41 @@ export default function Dashboard({ stats }) {
                     </div>
 
                     <div className="mt-6 grid grid-cols-1 gap-6">
-                        {/* Fake Chart Widget */}
+                        {/* Financial Overview Chart Widget */}
                         <div className="rounded-2xl bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 p-4 sm:p-6 backdrop-blur-xl shadow-lg transition-colors duration-200">
-                            <h3 className="text-base font-semibold leading-6 text-gray-900 dark:text-white mb-4">Monthly Income</h3>
-                            <div className="h-48 sm:h-64 rounded-xl border border-dashed border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/30 flex items-center justify-center transition-colors duration-200">
-                                <span className="text-gray-500 text-sm">Chart Visualization Placeholder</span>
+                            <h3 className="text-base font-semibold leading-6 text-gray-900 dark:text-white mb-4">Financial Overview (Current Year)</h3>
+                            <div className="h-48 sm:h-72 rounded-xl flex items-center justify-center transition-colors duration-200 w-full" style={{ minHeight: '300px' }}>
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <AreaChart
+                                        data={chartData}
+                                        margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+                                    >
+                                        <defs>
+                                            <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor="#9333ea" stopOpacity={0.4}/>
+                                                <stop offset="95%" stopColor="#9333ea" stopOpacity={0}/>
+                                            </linearGradient>
+                                            <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor="#ef4444" stopOpacity={0.4}/>
+                                                <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
+                                            </linearGradient>
+                                            <linearGradient id="colorAssets" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4}/>
+                                                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                                            </linearGradient>
+                                        </defs>
+                                        <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+                                        <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => value >= 1000000 ? `${(value/1000000).toFixed(1)}M` : value >= 1000 ? `${(value/1000).toFixed(1)}K` : value} />
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#374151" opacity={0.2} />
+                                        <Tooltip 
+                                            contentStyle={{ backgroundColor: 'rgba(15, 23, 42, 0.9)', border: 'none', borderRadius: '8px', color: '#fff' }}
+                                        />
+                                        <Legend verticalAlign="top" height={36} iconType="circle" />
+                                        <Area type="monotone" dataKey="Income" stroke="#9333ea" strokeWidth={2} fillOpacity={1} fill="url(#colorIncome)" />
+                                        <Area type="monotone" dataKey="Expenses" stroke="#ef4444" strokeWidth={2} fillOpacity={1} fill="url(#colorExpense)" />
+                                        <Area type="monotone" dataKey="Assets" stroke="#3b82f6" strokeWidth={2} fillOpacity={1} fill="url(#colorAssets)" />
+                                    </AreaChart>
+                                </ResponsiveContainer>
                             </div>
                         </div>
 
