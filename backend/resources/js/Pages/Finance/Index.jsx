@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import AppLayout from '@/Layouts/AppLayout';
+import SneatLayout from '@/Layouts/SneatLayout';
 import { Head, useForm, router } from '@inertiajs/react';
 import DataTable from '@/Components/DataTable';
 import FormDialog from '@/Components/FormDialog';
@@ -90,29 +90,25 @@ export default function FinanceIndex({ records, units, institutions }) {
         { 
             header: 'Type', 
             accessor: (row) => (
-                <span className={`inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${
-                    row.type === 'income' 
-                        ? 'bg-green-400/10 text-green-400 ring-green-400/20' 
-                        : 'bg-red-400/10 text-red-400 ring-red-400/20'
-                }`}>
-                    {row.type === 'income' ? <ArrowTrendingUpIcon className="h-3 w-3" /> : <ArrowTrendingDownIcon className="h-3 w-3" />}
+                <span className={`badge ${row.type === 'income' ? 'bg-label-success' : 'bg-label-danger'}`}>
+                    <i className={`bx ${row.type === 'income' ? 'bx-trending-up' : 'bx-trending-down'} me-1`}></i>
                     {row.type.charAt(0).toUpperCase() + row.type.slice(1)}
                 </span>
             )
         },
         { 
             header: 'Category', 
-            accessor: (row) => <span className="font-semibold text-gray-900 dark:text-white">{row.category}</span> 
+            accessor: (row) => <span className="fw-medium">{row.category}</span> 
         },
         { 
             header: 'Organization Unit / Source', 
             accessor: (row) => (
-                <div className="flex flex-col gap-1">
-                    <span className="inline-flex items-center rounded-md bg-purple-400/10 px-2 py-1 text-xs font-medium text-purple-400 ring-1 ring-inset ring-purple-400/30">
+                <div className="d-flex flex-column gap-1">
+                    <span className="badge bg-label-primary w-100 text-start">
                         {row.organization_unit?.name}
                     </span>
                     {row.institution && (
-                        <span className="inline-flex items-center rounded-md bg-blue-400/10 px-2 py-1 text-xs font-medium text-blue-400 ring-1 ring-inset ring-blue-400/30">
+                        <span className="badge bg-label-info w-100 text-start">
                             {row.institution.name}
                         </span>
                     )}
@@ -122,7 +118,7 @@ export default function FinanceIndex({ records, units, institutions }) {
         { 
             header: 'Amount', 
             accessor: (row) => (
-                <span className={`font-bold ${row.type === 'income' ? 'text-green-400' : 'text-red-400'}`}>
+                <span className={`fw-bold ${row.type === 'income' ? 'text-success' : 'text-danger'}`}>
                     {row.type === 'income' ? '+' : '-'} {new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(row.amount)}
                 </span>
             )
@@ -130,77 +126,92 @@ export default function FinanceIndex({ records, units, institutions }) {
         { 
             header: 'Actions', 
             accessor: (row) => (
-                <div className="flex gap-3">
-                    <button onClick={(e) => openEditDialog(e, row)} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition-colors" title="Edit">
-                        <PencilSquareIcon className="h-5 w-5" />
+                <div className="dropdown">
+                    <button type="button" className="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                        <i className="bx bx-dots-vertical-rounded"></i>
                     </button>
-                    <button onClick={(e) => handleDelete(e, row.id)} className="text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition-colors" title="Delete">
-                        <TrashIcon className="h-5 w-5" />
-                    </button>
+                    <div className="dropdown-menu">
+                        <button className="dropdown-item" onClick={(e) => openEditDialog(e, row)}>
+                            <i className="bx bx-edit-alt me-1"></i> Edit
+                        </button>
+                        <button className="dropdown-item text-danger" onClick={(e) => handleDelete(e, row.id)}>
+                            <i className="bx bx-trash me-1"></i> Delete
+                        </button>
+                    </div>
                 </div>
             ) 
         }
     ];
 
     return (
-        <AppLayout header={<h2 className="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">Finance & Revenue</h2>}>
+        <SneatLayout>
             <Head title="Finance" />
 
-            <div className="py-6">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    
-                    {/* Metrics Dashboard */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
-                        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg relative overflow-hidden transition-colors duration-200">
-                            <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-green-500/10 blur-2xl"></div>
-                            <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                                <ArrowTrendingUpIcon className="h-4 w-4 text-green-500 dark:text-green-400 shrink-0" /> Total Income
-                            </dt>
-                            <dd className="mt-2 text-2xl lg:text-3xl font-semibold tracking-tight text-green-600 dark:text-green-400 break-words">
-                                {new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(totalIncome)}
-                            </dd>
-                        </div>
-                        
-                        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg relative overflow-hidden transition-colors duration-200">
-                            <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-red-500/10 blur-2xl"></div>
-                            <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                                <ArrowTrendingDownIcon className="h-4 w-4 text-red-500 dark:text-red-400 shrink-0" /> Total Expenditure
-                            </dt>
-                            <dd className="mt-2 text-2xl lg:text-3xl font-semibold tracking-tight text-red-600 dark:text-red-400 break-words">
-                                {new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(totalExpenditure)}
-                            </dd>
-                        </div>
-
-                        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg relative overflow-hidden transition-colors duration-200">
-                            <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-blue-500/10 blur-2xl"></div>
-                            <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                                <BanknotesIcon className="h-4 w-4 text-blue-500 dark:text-blue-400 shrink-0" /> Net Balance
-                            </dt>
-                            <dd className={`mt-2 text-2xl lg:text-3xl font-semibold tracking-tight break-words ${netBalance >= 0 ? 'text-gray-900 dark:text-white' : 'text-red-600 dark:text-red-400'}`}>
-                                {new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(netBalance)}
-                            </dd>
-                        </div>
-                    </div>
-
-                    <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg transition-colors duration-200">
-                        <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                            <div>
-                                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Financial Ledger</h3>
-                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Track all income and expenditures across the organization.</p>
+            <div className="container-xxl flex-grow-1 container-p-y">
+                
+                {/* Metrics Dashboard */}
+                <div className="row mb-4">
+                    <div className="col-lg-4 col-md-12 col-6 mb-4">
+                        <div className="card h-100">
+                            <div className="card-body">
+                                <div className="card-title d-flex align-items-start justify-content-between">
+                                    <div className="avatar flex-shrink-0">
+                                        <span className="avatar-initial rounded bg-label-success"><i className="bx bx-trending-up"></i></span>
+                                    </div>
+                                </div>
+                                <span className="fw-semibold d-block mb-1">Total Income</span>
+                                <h3 className="card-title mb-2 text-success">
+                                    {new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(totalIncome)}
+                                </h3>
                             </div>
-                            {units.length > 0 && (
-                                <button 
-                                    onClick={openAddDialog}
-                                    className="w-full sm:w-auto inline-flex items-center justify-center gap-x-2 rounded-md bg-purple-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-purple-500 transition-colors"
-                                >
-                                    <PlusIcon className="-ml-0.5 h-5 w-5" aria-hidden="true" />
-                                    Add Transaction
-                                </button>
-                            )}
                         </div>
-                        
-                        <DataTable columns={columns} data={records} />
                     </div>
+                    <div className="col-lg-4 col-md-12 col-6 mb-4">
+                        <div className="card h-100">
+                            <div className="card-body">
+                                <div className="card-title d-flex align-items-start justify-content-between">
+                                    <div className="avatar flex-shrink-0">
+                                        <span className="avatar-initial rounded bg-label-danger"><i className="bx bx-trending-down"></i></span>
+                                    </div>
+                                </div>
+                                <span className="fw-semibold d-block mb-1">Total Expenditure</span>
+                                <h3 className="card-title mb-2 text-danger">
+                                    {new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(totalExpenditure)}
+                                </h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="col-lg-4 col-md-12 col-6 mb-4">
+                        <div className="card h-100">
+                            <div className="card-body">
+                                <div className="card-title d-flex align-items-start justify-content-between">
+                                    <div className="avatar flex-shrink-0">
+                                        <span className="avatar-initial rounded bg-label-primary"><i className="bx bx-wallet"></i></span>
+                                    </div>
+                                </div>
+                                <span className="fw-semibold d-block mb-1">Net Balance</span>
+                                <h3 className="card-title mb-2 text-primary">
+                                    {new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(netBalance)}
+                                </h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="card">
+                    <div className="card-header d-flex justify-content-between align-items-center">
+                        <h5 className="mb-0">Transactions</h5>
+                        {units.length > 0 && (
+                            <button 
+                                onClick={openAddDialog}
+                                className="btn btn-primary"
+                            >
+                                <i className="bx bx-plus me-1"></i> Add Transaction
+                            </button>
+                        )}
+                    </div>
+                    
+                    <DataTable columns={columns} data={records} />
                 </div>
             </div>
 
@@ -331,6 +342,6 @@ export default function FinanceIndex({ records, units, institutions }) {
                     </div>
                 </form>
             </FormDialog>
-        </AppLayout>
+        </SneatLayout>
     );
 }

@@ -1,7 +1,6 @@
 import React from 'react';
-import AppLayout from '@/Layouts/AppLayout';
+import SneatLayout from '@/Layouts/SneatLayout';
 import { Head, router } from '@inertiajs/react';
-import { PrinterIcon, ChartBarIcon } from '@heroicons/react/24/outline';
 
 export default function ReportsIndex({ units, reportType, filters, reportData }) {
     
@@ -24,23 +23,44 @@ export default function ReportsIndex({ units, reportType, filters, reportData })
             const income = reportData.filter(r => r.type === 'income').reduce((sum, r) => sum + parseFloat(r.amount), 0);
             const expenditure = reportData.filter(r => r.type === 'expenditure').reduce((sum, r) => sum + parseFloat(r.amount), 0);
             return (
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 border border-gray-200 dark:border-white/10 p-4 rounded-xl mb-6 bg-white dark:bg-white/5 transition-colors duration-200">
-                    <div className="flex sm:block justify-between items-center sm:items-start border-b sm:border-b-0 border-gray-200 dark:border-white/10 pb-3 sm:pb-0">
-                        <div className="text-xs text-gray-500 dark:text-gray-400">Total Income</div>
-                        <div className="text-base sm:text-lg font-bold text-green-600 dark:text-green-400 mt-0 sm:mt-1">
-                            {new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(income)}
+                <div className="row mb-4">
+                    <div className="col-md-4 mb-3">
+                        <div className="card">
+                            <div className="card-body">
+                                <div className="card-title d-flex align-items-start justify-content-between">
+                                    <div className="avatar flex-shrink-0">
+                                        <span className="avatar-initial rounded bg-label-success"><i className="bx bx-trending-up"></i></span>
+                                    </div>
+                                </div>
+                                <span className="fw-semibold d-block mb-1">Total Income</span>
+                                <h4 className="card-title text-success mb-2">{new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(income)}</h4>
+                            </div>
                         </div>
                     </div>
-                    <div className="flex sm:block justify-between items-center sm:items-start border-b sm:border-b-0 border-gray-200 dark:border-white/10 pb-3 sm:pb-0">
-                        <div className="text-xs text-gray-500 dark:text-gray-400">Total Expenditure</div>
-                        <div className="text-base sm:text-lg font-bold text-red-600 dark:text-red-400 mt-0 sm:mt-1">
-                            {new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(expenditure)}
+                    <div className="col-md-4 mb-3">
+                        <div className="card">
+                            <div className="card-body">
+                                <div className="card-title d-flex align-items-start justify-content-between">
+                                    <div className="avatar flex-shrink-0">
+                                        <span className="avatar-initial rounded bg-label-danger"><i className="bx bx-trending-down"></i></span>
+                                    </div>
+                                </div>
+                                <span className="fw-semibold d-block mb-1">Total Expenditure</span>
+                                <h4 className="card-title text-danger mb-2">{new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(expenditure)}</h4>
+                            </div>
                         </div>
                     </div>
-                    <div className="flex sm:block justify-between items-center sm:items-start">
-                        <div className="text-xs text-gray-500 dark:text-gray-400">Net Balance</div>
-                        <div className={`text-base sm:text-lg font-bold mt-0 sm:mt-1 ${income - expenditure >= 0 ? 'text-gray-900 dark:text-white' : 'text-red-600 dark:text-red-400'}`}>
-                            {new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(income - expenditure)}
+                    <div className="col-md-4 mb-3">
+                        <div className="card">
+                            <div className="card-body">
+                                <div className="card-title d-flex align-items-start justify-content-between">
+                                    <div className="avatar flex-shrink-0">
+                                        <span className="avatar-initial rounded bg-label-primary"><i className="bx bx-wallet"></i></span>
+                                    </div>
+                                </div>
+                                <span className="fw-semibold d-block mb-1">Net Balance</span>
+                                <h4 className={`card-title mb-2 ${income - expenditure >= 0 ? 'text-primary' : 'text-danger'}`}>{new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(income - expenditure)}</h4>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -48,37 +68,57 @@ export default function ReportsIndex({ units, reportType, filters, reportData })
         } else if (reportType === 'assets') {
             const totalVal = reportData.reduce((sum, r) => sum + parseFloat(r.value || 0), 0);
             return (
-                <div className="grid grid-cols-2 gap-4 border border-gray-200 dark:border-white/10 p-4 rounded-xl mb-6 bg-white dark:bg-white/5 transition-colors duration-200">
-                    <div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">Total Assets Registered</div>
-                        <div className="text-lg font-bold text-gray-900 dark:text-white">{reportData.length}</div>
+                <div className="row mb-4">
+                    <div className="col-md-6 mb-3">
+                        <div className="card">
+                            <div className="card-body">
+                                <span className="fw-semibold d-block mb-1">Total Assets Registered</span>
+                                <h4 className="card-title mb-2">{reportData.length}</h4>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">Total Estimated Value</div>
-                        <div className="text-lg font-bold text-green-600 dark:text-green-400">{new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(totalVal)}</div>
+                    <div className="col-md-6 mb-3">
+                        <div className="card">
+                            <div className="card-body">
+                                <span className="fw-semibold d-block mb-1">Total Estimated Value</span>
+                                <h4 className="card-title text-success mb-2">{new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(totalVal)}</h4>
+                            </div>
+                        </div>
                     </div>
                 </div>
             );
         } else if (reportType === 'members') {
             const active = reportData.filter(r => r.status === 'active').length;
             return (
-                <div className="grid grid-cols-2 gap-4 border border-gray-200 dark:border-white/10 p-4 rounded-xl mb-6 bg-white dark:bg-white/5 transition-colors duration-200">
-                    <div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">Total Members</div>
-                        <div className="text-lg font-bold text-gray-900 dark:text-white">{reportData.length}</div>
+                <div className="row mb-4">
+                    <div className="col-md-6 mb-3">
+                        <div className="card">
+                            <div className="card-body">
+                                <span className="fw-semibold d-block mb-1">Total Members</span>
+                                <h4 className="card-title mb-2">{reportData.length}</h4>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">Active Members</div>
-                        <div className="text-lg font-bold text-green-600 dark:text-green-400">{active}</div>
+                    <div className="col-md-6 mb-3">
+                        <div className="card">
+                            <div className="card-body">
+                                <span className="fw-semibold d-block mb-1">Active Members</span>
+                                <h4 className="card-title text-success mb-2">{active}</h4>
+                            </div>
+                        </div>
                     </div>
                 </div>
             );
         } else {
             return (
-                <div className="grid grid-cols-1 gap-4 border border-gray-200 dark:border-white/10 p-4 rounded-xl mb-6 bg-white dark:bg-white/5 transition-colors duration-200">
-                    <div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">Total Affiliated Institutions</div>
-                        <div className="text-lg font-bold text-gray-900 dark:text-white">{reportData.length}</div>
+                <div className="row mb-4">
+                    <div className="col-12 mb-3">
+                        <div className="card">
+                            <div className="card-body">
+                                <span className="fw-semibold d-block mb-1">Total Affiliated Institutions</span>
+                                <h4 className="card-title mb-2">{reportData.length}</h4>
+                            </div>
+                        </div>
                     </div>
                 </div>
             );
@@ -86,7 +126,7 @@ export default function ReportsIndex({ units, reportType, filters, reportData })
     };
 
     return (
-        <AppLayout header={<h2 className="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">Reports & Analytics</h2>}>
+        <SneatLayout>
             <Head title="Reports" />
 
             {/* Print Stylesheet */}
@@ -97,12 +137,13 @@ export default function ReportsIndex({ units, reportType, filters, reportData })
                         color: black !important;
                     }
                     /* Hide everything except print sheet */
-                    aside, nav, header, .no-print, button, form {
+                    aside, nav, header, .no-print, button, form, .layout-navbar, .layout-menu {
                         display: none !important;
                     }
-                    main {
+                    main, .layout-page, .content-wrapper, .container-xxl {
                         margin: 0 !important;
                         padding: 0 !important;
+                        background: transparent !important;
                     }
                     .print-sheet {
                         display: block !important;
@@ -110,8 +151,6 @@ export default function ReportsIndex({ units, reportType, filters, reportData })
                         color: black !important;
                         padding: 20px !important;
                         width: 100% !important;
-                        box-shadow: none !important;
-                        border: none !important;
                     }
                     table {
                         width: 100% !important;
@@ -141,249 +180,192 @@ export default function ReportsIndex({ units, reportType, filters, reportData })
                 }
             `}} />
 
-            <div className="py-4 no-print">
-                <div className="mx-auto max-w-7xl">
-                    <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg transition-colors duration-200">
-                        
-                        {/* Tab Selectors */}
-                        <div className="border-b border-gray-200 dark:border-white/10 pb-4 flex flex-col sm:flex-row gap-3 sm:gap-4 sm:items-center sm:justify-between">
-                            <div className="flex flex-wrap gap-2">
-                                {['finance', 'assets', 'institutions', 'members'].map((type) => (
-                                    <button
-                                        key={type}
-                                        onClick={() => handleTypeChange(type)}
-                                        className={`px-3 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-colors capitalize ${
-                                            reportType === type 
-                                                ? 'bg-purple-600 text-white' 
-                                                : 'bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/10'
-                                        }`}
-                                    >
-                                        {type} Report
-                                    </button>
-                                ))}
-                            </div>
+            <div className="container-xxl flex-grow-1 container-p-y no-print">
+                <h4 className="fw-bold py-3 mb-4"><span className="text-muted fw-light">System /</span> Reports</h4>
 
-                            <button
-                                onClick={printReport}
-                                className="w-full sm:w-auto inline-flex items-center justify-center gap-x-2 rounded-md bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 transition-colors"
-                            >
-                                <PrinterIcon className="h-5 w-5" />
-                                Print / Save PDF
-                            </button>
-                        </div>
-
-                        {/* Filter Settings Form */}
-                        <form className="grid grid-cols-1 sm:grid-cols-3 gap-6 my-6 p-4 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 transition-colors duration-200">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-400">Organization Unit</label>
-                                <select
-                                    value={filters.unit_id || ''}
-                                    onChange={e => handleFilterChange('unit_id', e.target.value)}
-                                    className="mt-1 block w-full rounded-md border-0 bg-gray-800 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-purple-500 sm:text-sm sm:leading-6"
+                <div className="nav-align-top mb-4">
+                    <ul className="nav nav-tabs" role="tablist">
+                        {['finance', 'assets', 'institutions', 'members'].map((type) => (
+                            <li className="nav-item" key={type}>
+                                <button
+                                    type="button"
+                                    className={`nav-link text-capitalize ${reportType === type ? 'active' : ''}`}
+                                    onClick={() => handleTypeChange(type)}
                                 >
-                                    <option value="">All Units</option>
-                                    {units.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
-                                </select>
+                                    {type}
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
+                    <div className="tab-content">
+                        <div className="tab-pane fade show active">
+                            
+                            {/* Filter Settings Form */}
+                            <div className="row mb-4 align-items-end">
+                                <div className="col-md-3 mb-3 mb-md-0">
+                                    <label className="form-label">Organization Unit</label>
+                                    <select
+                                        value={filters.unit_id || ''}
+                                        onChange={e => handleFilterChange('unit_id', e.target.value)}
+                                        className="form-select"
+                                    >
+                                        <option value="">All Units</option>
+                                        {units.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
+                                    </select>
+                                </div>
+
+                                {reportType === 'finance' && (
+                                    <>
+                                        <div className="col-md-3 mb-3 mb-md-0">
+                                            <label className="form-label">Start Date</label>
+                                            <input
+                                                type="date"
+                                                value={filters.start_date || ''}
+                                                onChange={e => handleFilterChange('start_date', e.target.value)}
+                                                className="form-control"
+                                            />
+                                        </div>
+                                        <div className="col-md-3 mb-3 mb-md-0">
+                                            <label className="form-label">End Date</label>
+                                            <input
+                                                type="date"
+                                                value={filters.end_date || ''}
+                                                onChange={e => handleFilterChange('end_date', e.target.value)}
+                                                className="form-control"
+                                            />
+                                        </div>
+                                    </>
+                                )}
+                                
+                                <div className="col-md-3">
+                                    <button
+                                        onClick={printReport}
+                                        className="btn btn-primary w-100"
+                                    >
+                                        <i className="bx bx-printer me-1"></i> Print / Save PDF
+                                    </button>
+                                </div>
                             </div>
 
-                            {reportType === 'finance' && (
-                                <>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-400">Start Date</label>
-                                        <input
-                                            type="date"
-                                            value={filters.start_date || ''}
-                                            onChange={e => handleFilterChange('start_date', e.target.value)}
-                                            className="mt-1 block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-purple-500 sm:text-sm sm:leading-6 [color-scheme:dark]"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-400">End Date</label>
-                                        <input
-                                            type="date"
-                                            value={filters.end_date || ''}
-                                            onChange={e => handleFilterChange('end_date', e.target.value)}
-                                            className="mt-1 block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-purple-500 sm:text-sm sm:leading-6 [color-scheme:dark]"
-                                        />
-                                    </div>
-                                </>
-                            )}
-                        </form>
-
-                        {/* On-screen Preview Frame */}
-                        <div className="border border-gray-200 dark:border-white/10 rounded-xl p-4 sm:p-6 bg-white dark:bg-white/5 transition-colors duration-200">
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                                <ChartBarIcon className="h-5 w-5 text-purple-400" /> Report Preview
-                            </h3>
-
+                            {/* Summary Cards */}
                             {getSummary()}
 
-                            {/* Mobile cards */}
-                            <div className="block md:hidden space-y-3 mt-4">
-                                {reportData.length === 0 ? (
-                                    <div className="text-center text-gray-500 py-4">No records found matching filters.</div>
-                                ) : (
-                                    reportData.map((row) => (
-                                        <div key={row.id} className="bg-gray-50 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                            <div className="flex flex-col gap-1.5">
-                                                {reportType === 'finance' && (
-                                                    <>
-                                                        <div><span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Date</span><div className="text-sm text-gray-800 dark:text-gray-200">{new Date(row.date).toLocaleDateString()}</div></div>
-                                                        <div><span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Type</span><div className="text-sm text-gray-800 dark:text-gray-200 capitalize">{row.type}</div></div>
-                                                        <div><span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Category</span><div className="text-sm text-gray-800 dark:text-gray-200">{row.category}</div></div>
-                                                        <div><span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Unit</span><div className="text-sm text-gray-800 dark:text-gray-200">{row.organization_unit?.name}</div></div>
-                                                        <div><span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Amount</span><div className={`text-sm font-semibold ${row.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>{row.type === 'income' ? '+' : '-'} {new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(row.amount)}</div></div>
-                                                    </>
-                                                )}
-                                                {reportType === 'assets' && (
-                                                    <>
-                                                        <div><span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Asset Name</span><div className="text-sm font-semibold text-gray-900 dark:text-white">{row.name}</div></div>
-                                                        <div><span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Category</span><div className="text-sm text-gray-800 dark:text-gray-200">{row.category}</div></div>
-                                                        <div><span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Owning Unit</span><div className="text-sm text-gray-800 dark:text-gray-200">{row.organization_unit?.name}</div></div>
-                                                        <div><span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Status</span><div className="text-sm text-gray-800 dark:text-gray-200">{row.status}</div></div>
-                                                        <div><span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Value</span><div className="text-sm font-semibold text-green-600 dark:text-green-400">{new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(row.value)}</div></div>
-                                                    </>
-                                                )}
-                                                {reportType === 'institutions' && (
-                                                    <>
-                                                        <div><span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Institution Name</span><div className="text-sm font-semibold text-gray-900 dark:text-white">{row.name}</div></div>
-                                                        <div><span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Type</span><div className="text-sm text-gray-800 dark:text-gray-200">{row.type}</div></div>
-                                                        <div><span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Supervising Unit</span><div className="text-sm text-gray-800 dark:text-gray-200">{row.organization_unit?.name}</div></div>
-                                                        <div><span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Contact Phone</span><div className="text-sm text-gray-800 dark:text-gray-200">{row.contact_phone || 'N/A'}</div></div>
-                                                        <div><span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Address</span><div className="text-sm text-gray-800 dark:text-gray-200">{row.address || 'N/A'}</div></div>
-                                                    </>
-                                                )}
-                                                {reportType === 'members' && (
-                                                    <>
-                                                        <div><span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Full Name</span><div className="text-sm font-semibold text-gray-900 dark:text-white">{row.first_name} {row.last_name}</div></div>
-                                                        <div><span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Role / Position</span><div className="text-sm text-gray-800 dark:text-gray-200">
-                                                            {row.role 
-                                                                ? <span className="inline-flex items-center rounded-md bg-blue-400/10 px-2 py-1 text-xs font-medium text-blue-400 ring-1 ring-inset ring-blue-400/30">{row.role}</span>
-                                                                : <span className="text-gray-400 italic text-xs">Not set</span>
-                                                            }
-                                                        </div></div>
-                                                        <div><span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Unit</span><div className="text-sm text-gray-800 dark:text-gray-200">{row.organization_unit?.name}</div></div>
-                                                        <div><span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Gender</span><div className="text-sm text-gray-800 dark:text-gray-200">{row.gender || '-'}</div></div>
-                                                        <div><span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Phone</span><div className="text-sm text-gray-800 dark:text-gray-200">{row.phone_number || '-'}</div></div>
-                                                        <div><span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Status</span><div className="text-sm text-gray-800 dark:text-gray-200 capitalize">{row.status}</div></div>
-                                                    </>
-                                                )}
-                                            </div>
-                                        </div>
-                                    ))
-                                )}
-                            </div>
-
-                            {/* Desktop table */}
-                            <div className="hidden md:block overflow-x-auto mt-4">
-                                <table className="min-w-full divide-y divide-gray-200 dark:divide-white/10">
-                                    <thead>
-                                        {reportType === 'finance' && (
-                                            <tr>
-                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400">Date</th>
-                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400">Type</th>
-                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400">Category</th>
-                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400">Unit</th>
-                                                <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-400">Amount</th>
-                                            </tr>
-                                        )}
-                                        {reportType === 'assets' && (
-                                            <tr>
-                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400">Asset Name</th>
-                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400">Category</th>
-                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400">Owning Unit</th>
-                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400">Status</th>
-                                                <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-400">Value</th>
-                                            </tr>
-                                        )}
-                                        {reportType === 'institutions' && (
-                                            <tr>
-                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400">Institution Name</th>
-                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400">Type</th>
-                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400">Supervising Unit</th>
-                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400">Contact Phone</th>
-                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400">Address</th>
-                                            </tr>
-                                        )}
-                                        {reportType === 'members' && (
-                                            <tr>
-                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400">Full Name</th>
-                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400">Role / Position</th>
-                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400">Unit</th>
-                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400">Gender</th>
-                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400">Phone</th>
-                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400">Status</th>
-                                            </tr>
-                                        )}
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-200 dark:divide-white/10 text-gray-700 dark:text-gray-300 text-sm">
-                                        {reportData.length === 0 ? (
-                                            <tr>
-                                                <td colSpan={5} className="px-4 py-8 text-center text-gray-500">No records found matching filters.</td>
-                                            </tr>
-                                        ) : (
-                                            reportData.map((row) => (
-                                                <tr key={row.id}>
-                                                    {reportType === 'finance' && (
-                                                        <>
-                                                            <td className="px-4 py-3">{new Date(row.date).toLocaleDateString()}</td>
-                                                            <td className="px-4 py-3 capitalize">{row.type}</td>
-                                                            <td className="px-4 py-3">{row.category}</td>
-                                                            <td className="px-4 py-3">{row.organization_unit?.name}</td>
-                                                            <td className={`px-4 py-3 text-right font-semibold ${row.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                                                                {row.type === 'income' ? '+' : '-'} {new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(row.amount)}
-                                                            </td>
-                                                        </>
-                                                    )}
-                                                    {reportType === 'assets' && (
-                                                        <>
-                                                            <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">{row.name}</td>
-                                                            <td className="px-4 py-3">{row.category}</td>
-                                                            <td className="px-4 py-3">{row.organization_unit?.name}</td>
-                                                            <td className="px-4 py-3">{row.status}</td>
-                                                            <td className="px-4 py-3 text-right font-semibold text-green-600 dark:text-green-400">
-                                                                {new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(row.value)}
-                                                            </td>
-                                                        </>
-                                                    )}
-                                                    {reportType === 'institutions' && (
-                                                        <>
-                                                            <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">{row.name}</td>
-                                                            <td className="px-4 py-3">{row.type}</td>
-                                                            <td className="px-4 py-3">{row.organization_unit?.name}</td>
-                                                            <td className="px-4 py-3">{row.contact_phone || 'N/A'}</td>
-                                                            <td className="px-4 py-3">{row.address || 'N/A'}</td>
-                                                        </>
-                                                    )}
-                                                    {reportType === 'members' && (
-                                                        <>
-                                                            <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">{row.first_name} {row.last_name}</td>
-                                                            <td className="px-4 py-3">
-                                                                {row.role 
-                                                                    ? <span className="inline-flex items-center rounded-md bg-blue-400/10 px-2 py-1 text-xs font-medium text-blue-400 ring-1 ring-inset ring-blue-400/30">{row.role}</span>
-                                                                    : <span className="text-gray-400 italic text-xs">Not set</span>
-                                                                }
-                                                            </td>
-                                                            <td className="px-4 py-3">{row.organization_unit?.name}</td>
-                                                            <td className="px-4 py-3">{row.gender || '-'}</td>
-                                                            <td className="px-4 py-3">{row.phone_number || '-'}</td>
-                                                            <td className="px-4 py-3 capitalize">{row.status}</td>
-                                                        </>
-                                                    )}
+                            {/* Data Table */}
+                            <div className="card">
+                                <div className="table-responsive text-nowrap">
+                                    <table className="table table-hover">
+                                        <thead>
+                                            {reportType === 'finance' && (
+                                                <tr>
+                                                    <th>Date</th>
+                                                    <th>Type</th>
+                                                    <th>Category</th>
+                                                    <th>Unit</th>
+                                                    <th className="text-end">Amount</th>
                                                 </tr>
-                                            ))
-                                        )}
-                                    </tbody>
-                                </table>
+                                            )}
+                                            {reportType === 'assets' && (
+                                                <tr>
+                                                    <th>Asset Name</th>
+                                                    <th>Category</th>
+                                                    <th>Owning Unit</th>
+                                                    <th>Status</th>
+                                                    <th className="text-end">Value</th>
+                                                </tr>
+                                            )}
+                                            {reportType === 'institutions' && (
+                                                <tr>
+                                                    <th>Institution Name</th>
+                                                    <th>Type</th>
+                                                    <th>Supervising Unit</th>
+                                                    <th>Contact Phone</th>
+                                                    <th>Address</th>
+                                                </tr>
+                                            )}
+                                            {reportType === 'members' && (
+                                                <tr>
+                                                    <th>Full Name</th>
+                                                    <th>Role / Position</th>
+                                                    <th>Unit</th>
+                                                    <th>Gender</th>
+                                                    <th>Phone</th>
+                                                    <th>Status</th>
+                                                </tr>
+                                            )}
+                                        </thead>
+                                        <tbody className="table-border-bottom-0">
+                                            {reportData.length === 0 ? (
+                                                <tr>
+                                                    <td colSpan={6} className="text-center py-4 text-muted">No records found matching filters.</td>
+                                                </tr>
+                                            ) : (
+                                                reportData.map((row) => (
+                                                    <tr key={row.id}>
+                                                        {reportType === 'finance' && (
+                                                            <>
+                                                                <td>{new Date(row.date).toLocaleDateString()}</td>
+                                                                <td className="text-capitalize">{row.type}</td>
+                                                                <td>{row.category}</td>
+                                                                <td><span className="badge bg-label-primary">{row.organization_unit?.name}</span></td>
+                                                                <td className={`text-end fw-semibold ${row.type === 'income' ? 'text-success' : 'text-danger'}`}>
+                                                                    {row.type === 'income' ? '+' : '-'} {new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(row.amount)}
+                                                                </td>
+                                                            </>
+                                                        )}
+                                                        {reportType === 'assets' && (
+                                                            <>
+                                                                <td className="fw-medium">{row.name}</td>
+                                                                <td>{row.category}</td>
+                                                                <td><span className="badge bg-label-primary">{row.organization_unit?.name}</span></td>
+                                                                <td>{row.status}</td>
+                                                                <td className="text-end fw-semibold text-success">
+                                                                    {new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(row.value)}
+                                                                </td>
+                                                            </>
+                                                        )}
+                                                        {reportType === 'institutions' && (
+                                                            <>
+                                                                <td className="fw-medium">{row.name}</td>
+                                                                <td>{row.type}</td>
+                                                                <td><span className="badge bg-label-primary">{row.organization_unit?.name}</span></td>
+                                                                <td>{row.contact_phone || 'N/A'}</td>
+                                                                <td>{row.address || 'N/A'}</td>
+                                                            </>
+                                                        )}
+                                                        {reportType === 'members' && (
+                                                            <>
+                                                                <td className="fw-medium">{row.first_name} {row.last_name}</td>
+                                                                <td>
+                                                                    {row.role 
+                                                                        ? <span className="badge bg-label-info">{row.role}</span>
+                                                                        : <span className="text-muted fst-italic">Not set</span>
+                                                                    }
+                                                                </td>
+                                                                <td><span className="badge bg-label-primary">{row.organization_unit?.name}</span></td>
+                                                                <td>{row.gender || '-'}</td>
+                                                                <td>{row.phone_number || '-'}</td>
+                                                                <td>
+                                                                    <span className={`badge ${row.status === 'active' ? 'bg-label-success' : 'bg-label-danger'}`}>
+                                                                        {row.status.charAt(0).toUpperCase() + row.status.slice(1)}
+                                                                    </span>
+                                                                </td>
+                                                            </>
+                                                        )}
+                                                    </tr>
+                                                ))
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
-                        </div>
 
+                        </div>
                     </div>
                 </div>
             </div>
 
             {/* Offline Printable Sheet (Only visible to browser printer) */}
-            <div className="hidden print-sheet">
+            <div className="hidden print-sheet d-none">
                 <div className="print-header">
                     <h1>Church of Uganda</h1>
                     <h3>Official {reportType.toUpperCase()} Report</h3>
@@ -482,6 +464,6 @@ export default function ReportsIndex({ units, reportType, filters, reportData })
                     </tbody>
                 </table>
             </div>
-        </AppLayout>
+        </SneatLayout>
     );
 }

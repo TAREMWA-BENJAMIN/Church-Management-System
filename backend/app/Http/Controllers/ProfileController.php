@@ -41,6 +41,26 @@ class ProfileController extends Controller
     }
 
     /**
+     * Update the user's digital signature.
+     */
+    public function updateSignature(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'signature' => ['required', 'image', 'mimes:png,jpg,jpeg', 'max:2048'],
+        ]);
+
+        $user = $request->user();
+
+        if ($request->hasFile('signature')) {
+            $path = $request->file('signature')->store('signatures', 'public');
+            $user->signature_path = $path;
+            $user->save();
+        }
+
+        return Redirect::route('profile.edit')->with('status', 'signature-updated');
+    }
+
+    /**
      * Delete the user's account.
      */
     public function destroy(Request $request): RedirectResponse

@@ -10,4 +10,11 @@ export default defineConfig({
         }),
         react(),
     ],
+    build: {
+        chunkSizeWarningLimit: 1000,
+    },
+    optimizeDeps: {
+        include: ['react', 'react-dom', '@inertiajs/react'],
+    },
 });
+

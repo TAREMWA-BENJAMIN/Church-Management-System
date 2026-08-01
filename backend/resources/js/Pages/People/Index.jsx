@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import AppLayout from '@/Layouts/AppLayout';
+import SneatLayout from '@/Layouts/SneatLayout';
 import { Head, useForm, router } from '@inertiajs/react';
 import DataTable from '@/Components/DataTable';
 import FormDialog from '@/Components/FormDialog';
@@ -85,17 +85,17 @@ export default function PeopleIndex({ users, roles, units }) {
     };
 
     const columns = [
-        { header: 'Name', accessor: (row) => <span className="font-semibold text-gray-900 dark:text-white">{row.name}</span> },
-        { header: 'Email', accessor: (row) => <span className="text-gray-600 dark:text-gray-300">{row.email}</span> },
+        { header: 'Name', accessor: (row) => <span className="fw-medium">{row.name}</span> },
+        { header: 'Email', accessor: (row) => <span>{row.email}</span> },
         { 
             header: 'Role Assignments', 
             accessor: (row) => (
-                <div className="flex flex-col gap-1">
+                <div className="d-flex flex-column gap-1">
                     {row.role_assignments.length === 0 ? (
-                        <span className="text-gray-500 italic text-xs">No assignments</span>
+                        <span className="text-muted small fst-italic">No assignments</span>
                     ) : (
                         row.role_assignments.map((assignment, idx) => (
-                            <span key={idx} className="inline-flex items-center rounded-md bg-purple-400/10 px-2 py-1 text-xs font-medium text-purple-400 ring-1 ring-inset ring-purple-400/30 w-max">
+                            <span key={idx} className="badge bg-label-primary text-start">
                                 {assignment.role?.name} @ {assignment.organization_unit?.name}
                             </span>
                         ))
@@ -107,42 +107,44 @@ export default function PeopleIndex({ users, roles, units }) {
             header: 'Actions', 
             accessor: (row) => (
                 row.email !== 'admin@church.org' ? (
-                    <div className="flex gap-3">
-                        <button onClick={(e) => openEditDialog(e, row)} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition-colors" title="Edit">
-                            <PencilSquareIcon className="h-5 w-5" />
+                    <div className="dropdown">
+                        <button type="button" className="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                            <i className="bx bx-dots-vertical-rounded"></i>
                         </button>
-                        <button onClick={(e) => handleDelete(e, row.id)} className="text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition-colors" title="Delete">
-                            <TrashIcon className="h-5 w-5" />
-                        </button>
+                        <div className="dropdown-menu">
+                            <button className="dropdown-item" onClick={(e) => openEditDialog(e, row)}>
+                                <i className="bx bx-edit-alt me-1"></i> Edit
+                            </button>
+                            <button className="dropdown-item text-danger" onClick={(e) => handleDelete(e, row.id)}>
+                                <i className="bx bx-trash me-1"></i> Delete
+                            </button>
+                        </div>
                     </div>
-                ) : <span className="text-gray-500 text-xs italic">System Admin</span>
+                ) : <span className="text-muted small fst-italic">System Admin</span>
             ) 
         }
     ];
 
     return (
-        <AppLayout header={<h2 className="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">People</h2>}>
+        <SneatLayout>
             <Head title="People" />
 
-            <div className="py-6">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-6 backdrop-blur-xl shadow-lg transition-colors duration-200">
-                        <div className="mb-6 flex justify-between items-start">
-                            <div>
-                                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Users Directory</h3>
-                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage user accounts and their organizational roles.</p>
-                            </div>
-                            <button 
-                                onClick={openAddDialog}
-                                className="inline-flex items-center gap-x-2 rounded-md bg-purple-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-purple-500 transition-colors"
-                            >
-                                <PlusIcon className="-ml-0.5 h-5 w-5" aria-hidden="true" />
-                                Add User
-                            </button>
+            <div className="container-xxl flex-grow-1 container-p-y">
+                <div className="card">
+                    <div className="card-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 className="mb-0">Users Directory</h5>
+                            <small className="text-muted">Manage user accounts and their organizational roles.</small>
                         </div>
-                        
-                        <DataTable columns={columns} data={users} />
+                        <button 
+                            onClick={openAddDialog}
+                            className="btn btn-primary"
+                        >
+                            <i className="bx bx-plus me-1"></i> Add User
+                        </button>
                     </div>
+                    
+                    <DataTable columns={columns} data={users} />
                 </div>
             </div>
 
@@ -258,6 +260,6 @@ export default function PeopleIndex({ users, roles, units }) {
                     </div>
                 </form>
             </FormDialog>
-        </AppLayout>
+        </SneatLayout>
     );
 }

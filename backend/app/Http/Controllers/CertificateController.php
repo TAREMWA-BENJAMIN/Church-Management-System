@@ -1,0 +1,104 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Certificate;
+use App\Models\OrganizationUnit;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
+
+class CertificateController extends Controller
+{
+    public function index(Request $request)
+    {
+        $user = Auth::user();
+        
+        // Find the user's primary assigned parish/diocese
+        $allowedUnitIds = $user->getAllowedOrganizationUnitIds();
+        
+        $query = Certificate::with(['issuedBy', 'organizationUnit', 'diocese'])
+            ->orderBy('issued_date', 'desc');
+            
+        if (!$user->is_super_admin && !empty($allowedUnitIds)) {
+            $query->whereIn('organization_unit_id', $allowedUnitIds)
+                  ->orWhereIn('diocese_id', $allowedUnitIds);
+        }
+
+        $certificates = $query->paginate(20);
+
+        return Inertia::render('Certificates/Index', [
+            'certificates' => $certificates
+        ]);
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'type' => 'required|string|in:Marriage,Baptism,Confirmation',
+            'recipient_name' => 'required|string|max:255',
+            'issued_date' => 'required|date',
+            'details' => 'nullable|array',
+            'organization_unit_id' => 'required|exists:organization_units,id',
+        ]);
+
+        $parish = OrganizationUnit::findOrFail($request->organization_unit_id);
+        
+        // Find the diocese for this parish (traverse up the tree)
+        $dioceseId = null;
+        $currentUnit = $parish;
+        while ($currentUnit && $currentUnit->parent_id) {
+            $parent = OrganizationUnit::with('type')->find($currentUnit->parent_id);
+            if ($parent && $parent->type->name === 'Diocese') {
+                $dioceseId = $parent->id;
+                break;
+            }
+            $currentUnit = $parent;
+        }
+
+        $certificate = Certificate::create([
+            'type' => $request->type,
+            'certificate_number' => strtoupper(Str::random(10)),
+            'recipient_name' => $request->recipient_name,
+            'details' => $request->details,
+            'issued_date' => $request->issued_date,
+            'organization_unit_id' => $parish->id,
+            'diocese_id' => $dioceseId,
+            'issued_by_user_id' => Auth::id(),
+        ]);
+
+        return redirect()->back()->with('success', 'Certificate generated successfully.');
+    }
+
+    public function downloadPdf(Certificate $certificate)
+    {
+        $certificate->load(['organizationUnit', 'diocese', 'issuedBy']);
+        
+        // Try to find the Bishop for the Diocese
+        $bishopSignature = null;
+        if ($certificate->diocese_id) {
+            // Find a user assigned to this diocese role (we assume the one with highest permissions or specifically 'Bishop' role, for simplicity we find an admin of that Diocese)
+            $bishopUser = \App\Models\User::whereHas('roleAssignments', function($q) use ($certificate) {
+                $q->where('organization_unit_id', $certificate->diocese_id);
+            })->whereNotNull('signature_path')->first();
+            
+            if ($bishopUser) {
+                $bishopSignature = storage_path('app/public/' . $bishopUser->signature_path);
+            }
+        }
+
+        $priestSignature = null;
+        if ($certificate->issuedBy && $certificate->issuedBy->signature_path) {
+            $priestSignature = storage_path('app/public/' . $certificate->issuedBy->signature_path);
+        }
+
+        $pdf = Pdf::loadView('certificates.template', compact('certificate', 'bishopSignature', 'priestSignature'));
+        
+        // Landscape for certificates
+        $pdf->setPaper('a4', 'landscape');
+        
+        return $pdf->download($certificate->type . '_' . $certificate->recipient_name . '.pdf');
+    }
+}

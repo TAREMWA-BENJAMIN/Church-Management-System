@@ -8,6 +8,7 @@ use App\Models\Institution;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class FinanceRecordController extends Controller
 {
@@ -43,6 +44,8 @@ class FinanceRecordController extends Controller
 
         FinanceRecord::create($validated);
 
+        Cache::forget('dashboard_data_' . Auth::id());
+
         return redirect()->back()->with('success', 'Transaction recorded successfully.');
     }
 
@@ -60,12 +63,15 @@ class FinanceRecordController extends Controller
 
         $finance->update($validated);
 
+        Cache::forget('dashboard_data_' . Auth::id());
+
         return redirect()->back()->with('success', 'Transaction updated successfully.');
     }
 
     public function destroy(FinanceRecord $finance)
     {
         $finance->delete();
+        Cache::forget('dashboard_data_' . Auth::id());
         return redirect()->back()->with('success', 'Transaction deleted successfully.');
     }
 }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import AppLayout from '@/Layouts/AppLayout';
+import SneatLayout from '@/Layouts/SneatLayout';
 import { Head, useForm, router } from '@inertiajs/react';
 import DataTable from '@/Components/DataTable';
 import FormDialog from '@/Components/FormDialog';
@@ -67,11 +67,11 @@ export default function RolesIndex({ roles, permissions }) {
     };
 
     const columns = [
-        { header: 'Role Name', accessor: (row) => <span className="font-semibold text-white">{row.name}</span> },
+        { header: 'Role Name', accessor: (row) => <span className="fw-medium">{row.name}</span> },
         { 
             header: 'Permissions Assigned', 
             accessor: (row) => (
-                <span className="text-gray-400">
+                <span className="text-muted">
                     {row.name === 'Super Admin' ? 'All Permissions' : `${row.permissions.length} permissions`}
                 </span>
             )
@@ -80,42 +80,44 @@ export default function RolesIndex({ roles, permissions }) {
             header: 'Actions', 
             accessor: (row) => (
                 row.name !== 'Super Admin' ? (
-                    <div className="flex gap-3">
-                        <button onClick={(e) => openEditDialog(e, row)} className="text-gray-400 hover:text-white transition-colors" title="Edit">
-                            <PencilSquareIcon className="h-5 w-5" />
+                    <div className="dropdown">
+                        <button type="button" className="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                            <i className="bx bx-dots-vertical-rounded"></i>
                         </button>
-                        <button onClick={(e) => handleDelete(e, row.id)} className="text-red-400 hover:text-red-300 transition-colors" title="Delete">
-                            <TrashIcon className="h-5 w-5" />
-                        </button>
+                        <div className="dropdown-menu">
+                            <button className="dropdown-item" onClick={(e) => openEditDialog(e, row)}>
+                                <i className="bx bx-edit-alt me-1"></i> Edit
+                            </button>
+                            <button className="dropdown-item text-danger" onClick={(e) => handleDelete(e, row.id)}>
+                                <i className="bx bx-trash me-1"></i> Delete
+                            </button>
+                        </div>
                     </div>
-                ) : <span className="text-gray-500 text-xs italic">System Role</span>
+                ) : <span className="text-muted small fst-italic">System Role</span>
             ) 
         }
     ];
 
     return (
-        <AppLayout header={<h2 className="text-xl font-semibold leading-tight text-gray-200">Roles & Permissions</h2>}>
+        <SneatLayout>
             <Head title="Roles" />
 
-            <div className="py-6">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl shadow-lg">
-                        <div className="mb-6 flex justify-between items-start">
-                            <div>
-                                <h3 className="text-xl font-bold text-white">System Roles</h3>
-                                <p className="text-sm text-gray-400 mt-1">Manage functionary roles and their access levels.</p>
-                            </div>
-                            <button 
-                                onClick={openAddDialog}
-                                className="inline-flex items-center gap-x-2 rounded-md bg-purple-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-purple-500 transition-colors"
-                            >
-                                <PlusIcon className="-ml-0.5 h-5 w-5" aria-hidden="true" />
-                                Add Role
-                            </button>
+            <div className="container-xxl flex-grow-1 container-p-y">
+                <div className="card">
+                    <div className="card-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 className="mb-0">System Roles</h5>
+                            <small className="text-muted">Manage functionary roles and their access levels.</small>
                         </div>
-                        
-                        <DataTable columns={columns} data={roles} />
+                        <button 
+                            onClick={openAddDialog}
+                            className="btn btn-primary"
+                        >
+                            <i className="bx bx-plus me-1"></i> Add Role
+                        </button>
                     </div>
+                    
+                    <DataTable columns={columns} data={roles} />
                 </div>
             </div>
 
@@ -177,6 +179,6 @@ export default function RolesIndex({ roles, permissions }) {
                     </div>
                 </form>
             </FormDialog>
-        </AppLayout>
+        </SneatLayout>
     );
 }

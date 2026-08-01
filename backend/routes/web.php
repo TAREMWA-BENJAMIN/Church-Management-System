@@ -16,6 +16,7 @@ Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'ind
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile/signature', [ProfileController::class, 'updateSignature'])->name('profile.update.signature');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     
     Route::resource('organization', \App\Http\Controllers\OrganizationUnitController::class)->only(['index', 'store', 'update', 'destroy']);
@@ -27,6 +28,11 @@ Route::middleware('auth')->group(function () {
     Route::resource('assets', \App\Http\Controllers\AssetController::class);
     Route::resource('institutions', \App\Http\Controllers\InstitutionController::class);
     Route::get('/reports', [\App\Http\Controllers\ReportController::class, 'index'])->name('reports.index');
+    
+    // Certificates
+    Route::get('/certificates', [\App\Http\Controllers\CertificateController::class, 'index'])->name('certificates.index');
+    Route::post('/certificates', [\App\Http\Controllers\CertificateController::class, 'store'])->name('certificates.store');
+    Route::get('/certificates/{certificate}/download', [\App\Http\Controllers\CertificateController::class, 'downloadPdf'])->name('certificates.download');
 
     // Communication Module
     Route::prefix('communications')->group(function () {

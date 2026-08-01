@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import AppLayout from '@/Layouts/AppLayout';
+import SneatLayout from '@/Layouts/SneatLayout';
 import { Head, useForm, router } from '@inertiajs/react';
 import DataTable from '@/Components/DataTable';
 import FormDialog from '@/Components/FormDialog';
@@ -85,13 +85,13 @@ export default function AssetsIndex({ assets, units }) {
         { 
             header: 'Asset Name', 
             accessor: (row) => (
-                <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-orange-500/10 ring-1 ring-orange-500/20">
-                        <BriefcaseIcon className="h-5 w-5 text-orange-400" />
+                <div className="d-flex align-items-center gap-3">
+                    <div className="avatar">
+                        <span className="avatar-initial rounded bg-label-warning"><i className="bx bx-briefcase"></i></span>
                     </div>
                     <div>
-                        <div className="font-semibold text-gray-900 dark:text-white">{row.name}</div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">{row.category}</div>
+                        <div className="fw-medium">{row.name}</div>
+                        <div className="text-muted small">{row.category}</div>
                     </div>
                 </div>
             ) 
@@ -99,7 +99,7 @@ export default function AssetsIndex({ assets, units }) {
         { 
             header: 'Organization Unit', 
             accessor: (row) => (
-                <span className="inline-flex items-center rounded-md bg-purple-400/10 px-2 py-1 text-xs font-medium text-purple-400 ring-1 ring-inset ring-purple-400/30">
+                <span className="badge bg-label-primary">
                     {row.organization_unit?.name}
                 </span>
             )
@@ -107,7 +107,7 @@ export default function AssetsIndex({ assets, units }) {
         { 
             header: 'Value', 
             accessor: (row) => (
-                <span className="font-semibold text-green-600 dark:text-green-400">
+                <span className="fw-medium text-success">
                     {new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(row.value)}
                 </span>
             )
@@ -115,10 +115,10 @@ export default function AssetsIndex({ assets, units }) {
         { 
             header: 'Status', 
             accessor: (row) => (
-                <span className={`inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${
-                    row.status === 'Active' ? 'bg-green-400/10 text-green-400 ring-green-400/20' : 
-                    row.status === 'Maintenance' ? 'bg-yellow-400/10 text-yellow-400 ring-yellow-400/20' : 
-                    'bg-gray-400/10 text-gray-400 ring-gray-400/20'
+                <span className={`badge ${
+                    row.status === 'Active' ? 'bg-label-success' : 
+                    row.status === 'Maintenance' ? 'bg-label-warning' : 
+                    'bg-label-secondary'
                 }`}>
                     {row.status}
                 </span>
@@ -127,77 +127,77 @@ export default function AssetsIndex({ assets, units }) {
         { 
             header: 'Actions', 
             accessor: (row) => (
-                <div className="flex gap-3">
-                    <button onClick={(e) => openEditDialog(e, row)} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition-colors" title="Edit">
-                        <PencilSquareIcon className="h-5 w-5" />
+                <div className="dropdown">
+                    <button type="button" className="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                        <i className="bx bx-dots-vertical-rounded"></i>
                     </button>
-                    <button onClick={(e) => handleDelete(e, row.id)} className="text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition-colors" title="Delete">
-                        <TrashIcon className="h-5 w-5" />
-                    </button>
+                    <div className="dropdown-menu">
+                        <button className="dropdown-item" onClick={(e) => openEditDialog(e, row)}>
+                            <i className="bx bx-edit-alt me-1"></i> Edit
+                        </button>
+                        <button className="dropdown-item text-danger" onClick={(e) => handleDelete(e, row.id)}>
+                            <i className="bx bx-trash me-1"></i> Delete
+                        </button>
+                    </div>
                 </div>
             ) 
         }
     ];
 
     return (
-        <AppLayout header={<h2 className="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">Assets & Inventory</h2>}>
+        <SneatLayout>
             <Head title="Assets" />
 
-            <div className="py-6">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    
-                    {/* Metrics Dashboard */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
-                        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg relative overflow-hidden transition-colors duration-200">
-                            <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-green-500/10 blur-2xl"></div>
-                            <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                                <CurrencyDollarIcon className="h-4 w-4 text-green-500 dark:text-green-400 shrink-0" /> Total Asset Value
-                            </dt>
-                            <dd className="mt-2 text-2xl lg:text-3xl font-semibold tracking-tight text-green-600 dark:text-green-400 break-words">
-                                {new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(totalValue)}
-                            </dd>
-                        </div>
-                        
-                        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg relative overflow-hidden transition-colors duration-200">
-                            <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-orange-500/10 blur-2xl"></div>
-                            <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                                <BriefcaseIcon className="h-4 w-4 text-orange-500 dark:text-orange-400 shrink-0" /> Registered Assets
-                            </dt>
-                            <dd className="mt-2 text-2xl lg:text-3xl font-semibold tracking-tight text-gray-900 dark:text-white break-words">
-                                {totalAssets}
-                            </dd>
-                        </div>
-
-                        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg relative overflow-hidden transition-colors duration-200">
-                            <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-blue-500/10 blur-2xl"></div>
-                            <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                                <BuildingOfficeIcon className="h-4 w-4 text-blue-500 dark:text-blue-400 shrink-0" /> Active Assets
-                            </dt>
-                            <dd className="mt-2 text-2xl lg:text-3xl font-semibold tracking-tight text-gray-900 dark:text-white break-words">
-                                {activeAssets}
-                            </dd>
-                        </div>
-                    </div>
-
-                    <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg transition-colors duration-200">
-                        <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                            <div>
-                                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Asset Registry</h3>
-                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Track land, buildings, vehicles, and equipment.</p>
+            <div className="container-xxl flex-grow-1 container-p-y">
+                
+                {/* Metrics Dashboard */}
+                <div className="row mb-4">
+                    <div className="col-lg-6 col-md-12 col-6 mb-4">
+                        <div className="card h-100">
+                            <div className="card-body">
+                                <div className="card-title d-flex align-items-start justify-content-between">
+                                    <div className="avatar flex-shrink-0">
+                                        <span className="avatar-initial rounded bg-label-info"><i className="bx bx-briefcase"></i></span>
+                                    </div>
+                                </div>
+                                <span className="fw-semibold d-block mb-1">Total Assets</span>
+                                <h3 className="card-title mb-2 text-info">
+                                    {totalAssets}
+                                </h3>
                             </div>
-                            {units.length > 0 && (
-                                <button 
-                                    onClick={openAddDialog}
-                                    className="w-full sm:w-auto inline-flex items-center justify-center gap-x-2 rounded-md bg-orange-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-orange-500 transition-colors"
-                                >
-                                    <PlusIcon className="-ml-0.5 h-5 w-5" aria-hidden="true" />
-                                    Register Asset
-                                </button>
-                            )}
                         </div>
-                        
-                        <DataTable columns={columns} data={assets} />
                     </div>
+                    <div className="col-lg-6 col-md-12 col-6 mb-4">
+                        <div className="card h-100">
+                            <div className="card-body">
+                                <div className="card-title d-flex align-items-start justify-content-between">
+                                    <div className="avatar flex-shrink-0">
+                                        <span className="avatar-initial rounded bg-label-success"><i className="bx bx-money"></i></span>
+                                    </div>
+                                </div>
+                                <span className="fw-semibold d-block mb-1">Total Estimated Value</span>
+                                <h3 className="card-title mb-2 text-success">
+                                    {new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX' }).format(totalValue)}
+                                </h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="card">
+                    <div className="card-header d-flex justify-content-between align-items-center">
+                        <h5 className="mb-0">Assets</h5>
+                        {units.length > 0 && (
+                            <button 
+                                onClick={openAddDialog}
+                                className="btn btn-primary"
+                            >
+                                <i className="bx bx-plus me-1"></i> Register Asset
+                            </button>
+                        )}
+                    </div>
+                    
+                    <DataTable columns={columns} data={assets} />
                 </div>
             </div>
 
@@ -326,6 +326,6 @@ export default function AssetsIndex({ assets, units }) {
                     </div>
                 </form>
             </FormDialog>
-        </AppLayout>
+        </SneatLayout>
     );
 }

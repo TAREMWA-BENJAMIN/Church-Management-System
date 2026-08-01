@@ -1,11 +1,6 @@
 import React, { useState, useRef } from 'react';
-import AppLayout from '@/Layouts/AppLayout';
+import SneatLayout from '@/Layouts/SneatLayout';
 import { Head, Link, router } from '@inertiajs/react';
-import {
-    ArrowLeftIcon, PaperClipIcon, PaperAirplaneIcon,
-    ArrowUpTrayIcon, XMarkIcon, DocumentIcon,
-    PhotoIcon, TrashIcon, BuildingOfficeIcon, UserCircleIcon
-} from '@heroicons/react/24/outline';
 
 export default function CommunicationsShow({ message, units, myUnitIds }) {
     const [replyBody, setReplyBody] = useState('');
@@ -32,11 +27,6 @@ export default function CommunicationsShow({ message, units, myUnitIds }) {
     };
 
     const isImage = (mime) => mime?.startsWith('image/');
-
-    const getFileIcon = (mime) => {
-        if (isImage(mime)) return <PhotoIcon className="h-5 w-5 text-blue-400" />;
-        return <DocumentIcon className="h-5 w-5 text-purple-400" />;
-    };
 
     const handleFileChange = (e) => {
         const files = Array.from(e.target.files);
@@ -78,145 +68,132 @@ export default function CommunicationsShow({ message, units, myUnitIds }) {
         });
     };
 
+    // Helper: initials
+    const getInitials = (name) => {
+        if (!name) return 'UN';
+        return name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+    };
+
     // Build full thread: original message + replies
     const thread = [message, ...(message.replies || [])];
 
     return (
-        <AppLayout header={
-            <div className="flex items-center gap-3">
-                <Link href={route('communications.index')} className="p-1.5 rounded-lg text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
-                    <ArrowLeftIcon className="h-5 w-5" />
-                </Link>
-                <div className="min-w-0">
-                    <h2 className="text-lg font-bold text-gray-900 dark:text-white truncate">{message.subject}</h2>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                        {thread.length} message{thread.length !== 1 ? 's' : ''} in this thread
-                    </p>
-                </div>
-            </div>
-        }>
+        <SneatLayout>
             <Head title={message.subject} />
 
-            <div className="py-4">
-                <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 space-y-4">
+            <div className="container-xxl flex-grow-1 container-p-y">
 
-                    {/* ─── Thread Messages ─── */}
-                    {thread.map((msg, index) => (
-                        <div
-                            key={msg.id}
-                            className={`bg-white dark:bg-white/5 border rounded-2xl overflow-hidden shadow-sm transition-colors duration-200 ${index === 0 ? 'border-purple-200 dark:border-purple-500/30' : 'border-gray-200 dark:border-white/10'}`}
-                        >
-                            {/* Message Header */}
-                            <div className={`px-6 py-4 flex items-start justify-between gap-4 ${index === 0 ? 'bg-purple-50 dark:bg-purple-900/20' : 'bg-gray-50 dark:bg-white/5'}`}>
-                                <div className="flex items-start gap-3">
-                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-800/50">
-                                        <BuildingOfficeIcon className="h-5 w-5 text-purple-600 dark:text-purple-300" />
-                                    </div>
-                                    <div>
-                                        <div className="flex items-center gap-2 flex-wrap">
-                                            <span className="text-sm font-bold text-gray-900 dark:text-white">
-                                                {msg.sender_unit?.name}
-                                            </span>
-                                            {index === 0 && (
-                                                <span className="inline-flex items-center rounded-full bg-purple-100 dark:bg-purple-800/50 px-2 py-0.5 text-xs font-medium text-purple-700 dark:text-purple-300">
-                                                    Original
-                                                </span>
-                                            )}
-                                            {msg.parent_id && (
-                                                <span className="inline-flex items-center rounded-full bg-blue-100 dark:bg-blue-800/30 px-2 py-0.5 text-xs font-medium text-blue-700 dark:text-blue-300">
-                                                    Reply
-                                                </span>
-                                            )}
-                                        </div>
-                                        <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-                                            <UserCircleIcon className="h-3.5 w-3.5 text-gray-400" />
-                                            <span className="text-xs text-gray-500 dark:text-gray-400">{msg.sender_user?.name}</span>
-                                            <span className="text-gray-300 dark:text-gray-600">·</span>
-                                            <span className="text-xs text-gray-400">{formatDate(msg.created_at)}</span>
-                                        </div>
-                                        {/* To: */}
-                                        {msg.recipients?.length > 0 && (
-                                            <div className="mt-1 flex flex-wrap gap-1">
-                                                <span className="text-xs text-gray-400">To:</span>
-                                                {msg.recipients.map(r => (
-                                                    <span key={r.id} className="text-xs text-purple-600 dark:text-purple-400 font-medium">
-                                                        {r.organization_unit?.name}
-                                                    </span>
-                                                ))}
-                                            </div>
+                {/* Thread Messages */}
+                {thread.map((msg, index) => (
+                    <div key={msg.id} className={`card mb-4 ${index === 0 ? 'border-primary' : ''}`}>
+                        {/* Message Header */}
+                        <div className={`card-header d-flex align-items-start justify-content-between ${index === 0 ? 'bg-label-primary' : 'bg-lighter'}`}>
+                            <div className="d-flex align-items-start gap-3">
+                                <div className="avatar avatar-sm flex-shrink-0">
+                                    <span className="avatar-initial rounded-circle bg-primary text-white">
+                                        {getInitials(msg.sender_unit?.name)}
+                                    </span>
+                                </div>
+                                <div>
+                                    <div className="d-flex align-items-center gap-2 flex-wrap">
+                                        <span className="fw-semibold text-heading">{msg.sender_unit?.name}</span>
+                                        {index === 0 && (
+                                            <span className="badge bg-label-primary">Original</span>
+                                        )}
+                                        {msg.parent_id && (
+                                            <span className="badge bg-label-info">Reply</span>
                                         )}
                                     </div>
-                                </div>
-                            </div>
-
-                            {/* Message Body */}
-                            <div className="px-6 py-5">
-                                <div className="prose prose-sm dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
-                                    {msg.body}
-                                </div>
-                            </div>
-
-                            {/* Attachments */}
-                            {msg.attachments?.length > 0 && (
-                                <div className="px-6 pb-5">
-                                    <div className="border-t border-gray-100 dark:border-white/10 pt-4">
-                                        <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                                            <PaperClipIcon className="h-4 w-4" />
-                                            {msg.attachments.length} Attachment{msg.attachments.length !== 1 ? 's' : ''}
-                                        </p>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                            {msg.attachments.map(att => (
-                                                <a
-                                                    key={att.id}
-                                                    href={att.url}
-                                                    download={att.original_filename}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="flex items-center gap-3 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 p-3 hover:border-purple-300 dark:hover:border-purple-500/50 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all group"
-                                                >
-                                                    <div className="shrink-0">
-                                                        {isImage(att.mime_type) ? (
-                                                            <img
-                                                                src={att.url}
-                                                                alt={att.original_filename}
-                                                                className="h-10 w-10 rounded-lg object-cover"
-                                                            />
-                                                        ) : (
-                                                            <div className="h-10 w-10 rounded-lg bg-purple-100 dark:bg-purple-800/30 flex items-center justify-center">
-                                                                {getFileIcon(att.mime_type)}
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                    <div className="min-w-0 flex-1">
-                                                        <p className="text-xs font-semibold text-gray-700 dark:text-gray-300 truncate group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
-                                                            {att.original_filename}
-                                                        </p>
-                                                        <p className="text-xs text-gray-400 mt-0.5">{formatFileSize(att.file_size)}</p>
-                                                    </div>
-                                                </a>
+                                    <div className="d-flex align-items-center gap-2 mt-1 flex-wrap">
+                                        <i className="bx bx-user text-muted small"></i>
+                                        <small className="text-muted">{msg.sender_user?.name}</small>
+                                        <span className="text-muted">·</span>
+                                        <small className="text-muted">{formatDate(msg.created_at)}</small>
+                                    </div>
+                                    {/* To: recipients */}
+                                    {msg.recipients?.length > 0 && (
+                                        <div className="mt-1 d-flex flex-wrap gap-1 align-items-center">
+                                            <small className="text-muted">To:</small>
+                                            {msg.recipients.map(r => (
+                                                <span key={r.id} className="badge bg-label-primary">
+                                                    {r.organization_unit?.name}
+                                                </span>
                                             ))}
                                         </div>
-                                    </div>
+                                    )}
                                 </div>
-                            )}
-                        </div>
-                    ))}
-
-                    {/* ─── Reply Box ─── */}
-                    <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl overflow-hidden shadow-sm">
-                        <div className="px-6 py-4 border-b border-gray-100 dark:border-white/10 bg-gray-50 dark:bg-white/5">
-                            <h3 className="text-sm font-bold text-gray-800 dark:text-white">Reply to Thread</h3>
+                            </div>
                         </div>
 
-                        <form onSubmit={handleSendReply} className="p-6 space-y-4">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {/* Message Body */}
+                        <div className="card-body">
+                            <p className="text-body" style={{ whiteSpace: 'pre-wrap', lineHeight: '1.7' }}>
+                                {msg.body}
+                            </p>
+                        </div>
+
+                        {/* Attachments */}
+                        {msg.attachments?.length > 0 && (
+                            <div className="card-footer border-top">
+                                <p className="text-uppercase small fw-semibold text-muted mb-3">
+                                    <i className="bx bx-paperclip me-1"></i>
+                                    {msg.attachments.length} Attachment{msg.attachments.length !== 1 ? 's' : ''}
+                                </p>
+                                <div className="row g-3">
+                                    {msg.attachments.map(att => (
+                                        <div key={att.id} className="col-sm-6 col-lg-4">
+                                            <a
+                                                href={att.url}
+                                                download={att.original_filename}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="d-flex align-items-center gap-2 border rounded p-2 text-decoration-none text-body hover-shadow"
+                                            >
+                                                {isImage(att.mime_type) ? (
+                                                    <img
+                                                        src={att.url}
+                                                        alt={att.original_filename}
+                                                        className="rounded"
+                                                        style={{ width: 40, height: 40, objectFit: 'cover' }}
+                                                    />
+                                                ) : (
+                                                    <div className="avatar flex-shrink-0">
+                                                        <span className="avatar-initial rounded bg-label-primary">
+                                                            <i className="bx bx-file"></i>
+                                                        </span>
+                                                    </div>
+                                                )}
+                                                <div className="text-truncate">
+                                                    <p className="fw-medium small mb-0 text-truncate">{att.original_filename}</p>
+                                                    <small className="text-muted">{formatFileSize(att.file_size)}</small>
+                                                </div>
+                                                <i className="bx bx-download ms-auto text-primary"></i>
+                                            </a>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                ))}
+
+                {/* ─── Reply Box ─── */}
+                <div className="card">
+                    <div className="card-header">
+                        <h5 className="mb-0">
+                            <i className="bx bx-reply me-2"></i>Reply to Thread
+                        </h5>
+                    </div>
+                    <div className="card-body">
+                        <form onSubmit={handleSendReply}>
+                            <div className="row g-3">
                                 {/* From */}
-                                <div>
-                                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">From (Your Unit)</label>
+                                <div className="col-md-6">
+                                    <label className="form-label">From (Your Unit)</label>
                                     <select
+                                        className="form-select"
                                         value={replySenderUnitId}
                                         onChange={e => setReplySenderUnitId(e.target.value)}
-                                        className="block w-full rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 py-2 px-3 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 outline-none"
                                         required
                                     >
                                         {myUnits.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
@@ -224,86 +201,94 @@ export default function CommunicationsShow({ message, units, myUnitIds }) {
                                 </div>
 
                                 {/* Reply To */}
-                                <div>
-                                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Reply To (Units)</label>
-                                    <div className="rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 max-h-24 overflow-y-auto p-2 space-y-1">
+                                <div className="col-md-6">
+                                    <label className="form-label">Reply To (Units)</label>
+                                    <div className="border rounded p-2" style={{ maxHeight: '120px', overflowY: 'auto' }}>
                                         {units.map(u => (
-                                            <label key={u.id} className="flex items-center gap-2 px-2 py-0.5 rounded cursor-pointer hover:bg-gray-100 dark:hover:bg-white/10">
+                                            <div key={u.id} className="form-check">
                                                 <input
+                                                    className="form-check-input"
                                                     type="checkbox"
+                                                    id={`reply-unit-${u.id}`}
                                                     checked={replyRecipientIds.includes(u.id)}
                                                     onChange={() => handleToggleRecipient(u.id)}
-                                                    className="h-3.5 w-3.5 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
                                                 />
-                                                <span className="text-xs text-gray-700 dark:text-gray-300">{u.name}</span>
-                                            </label>
+                                                <label className="form-check-label small" htmlFor={`reply-unit-${u.id}`}>
+                                                    {u.name}
+                                                </label>
+                                            </div>
                                         ))}
                                     </div>
                                 </div>
-                            </div>
 
-                            {/* Body */}
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Your Reply</label>
-                                <textarea
-                                    value={replyBody}
-                                    onChange={e => setReplyBody(e.target.value)}
-                                    rows={5}
-                                    placeholder="Type your reply here..."
-                                    className="block w-full rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 py-2.5 px-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 outline-none resize-none"
-                                    required
-                                />
-                            </div>
-
-                            {/* Attachment Upload */}
-                            <div>
-                                <div
-                                    onClick={() => fileInputRef.current?.click()}
-                                    className="border-2 border-dashed border-gray-200 dark:border-white/10 rounded-xl p-4 text-center cursor-pointer hover:border-purple-400 dark:hover:border-purple-500 transition-colors group"
-                                >
-                                    <ArrowUpTrayIcon className="h-5 w-5 mx-auto text-gray-300 group-hover:text-purple-400 transition-colors" />
-                                    <p className="text-xs text-gray-400 mt-1">Attach files — PDFs, Word, Excel, Images, Videos, etc.</p>
+                                {/* Body */}
+                                <div className="col-12">
+                                    <label className="form-label">Your Reply</label>
+                                    <textarea
+                                        className="form-control"
+                                        rows={5}
+                                        placeholder="Type your reply here..."
+                                        value={replyBody}
+                                        onChange={e => setReplyBody(e.target.value)}
+                                        required
+                                    />
                                 </div>
-                                <input ref={fileInputRef} type="file" multiple onChange={handleFileChange} className="hidden" />
-                                {replyPreviews.length > 0 && (
-                                    <ul className="mt-2 space-y-1">
-                                        {replyPreviews.map((f, i) => (
-                                            <li key={i} className="flex items-center justify-between rounded-lg bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 px-3 py-1.5 text-xs">
-                                                <div className="flex items-center gap-2 min-w-0">
-                                                    {isImage(f.type) ? <PhotoIcon className="h-4 w-4 text-blue-400 shrink-0" /> : <DocumentIcon className="h-4 w-4 text-purple-400 shrink-0" />}
-                                                    <span className="text-gray-700 dark:text-gray-300 truncate">{f.name}</span>
-                                                    <span className="text-gray-400 shrink-0">{formatFileSize(f.size)}</span>
-                                                </div>
-                                                <button type="button" onClick={() => removeAttachment(i)} className="text-red-400 hover:text-red-600 ml-2">
-                                                    <XMarkIcon className="h-4 w-4" />
-                                                </button>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                )}
-                            </div>
 
-                            {/* Actions */}
-                            <div className="flex items-center justify-between pt-2">
-                                <Link
-                                    href={route('communications.index')}
-                                    className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white transition-colors"
-                                >
-                                    ← Back to Inbox
-                                </Link>
-                                <button
-                                    type="submit"
-                                    disabled={isSending || !replyBody.trim() || replyRecipientIds.length === 0}
-                                    className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-purple-600 rounded-xl hover:bg-purple-500 transition-colors disabled:opacity-50 shadow-md hover:shadow-purple-500/30 hover:shadow-lg"
-                                >
-                                    <PaperAirplaneIcon className="h-4 w-4" />
-                                    {isSending ? 'Sending...' : 'Send Reply'}
-                                </button>
+                                {/* Attachments */}
+                                <div className="col-12">
+                                    <div
+                                        className="border rounded p-3 text-center"
+                                        style={{ borderStyle: 'dashed', cursor: 'pointer' }}
+                                        onClick={() => fileInputRef.current?.click()}
+                                    >
+                                        <i className="bx bx-upload fs-4 text-muted"></i>
+                                        <p className="small text-muted mb-0 mt-1">
+                                            Attach files — PDFs, Word, Excel, Images, Videos, etc.
+                                        </p>
+                                    </div>
+                                    <input ref={fileInputRef} type="file" multiple onChange={handleFileChange} className="d-none" />
+                                    {replyPreviews.length > 0 && (
+                                        <ul className="list-unstyled mt-2">
+                                            {replyPreviews.map((f, i) => (
+                                                <li key={i} className="d-flex align-items-center justify-content-between bg-light rounded px-3 py-2 mb-1">
+                                                    <div className="d-flex align-items-center gap-2 text-truncate">
+                                                        <i className={`bx ${isImage(f.type) ? 'bx-image' : 'bx-file'} text-muted`}></i>
+                                                        <span className="small text-truncate">{f.name}</span>
+                                                        <span className="small text-muted">({formatFileSize(f.size)})</span>
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-sm btn-icon text-danger ms-2"
+                                                        onClick={() => removeAttachment(i)}
+                                                    >
+                                                        <i className="bx bx-x"></i>
+                                                    </button>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
+                                </div>
+
+                                {/* Actions */}
+                                <div className="col-12 d-flex align-items-center justify-content-between">
+                                    <Link href={route('communications.index')} className="btn btn-label-secondary">
+                                        <i className="bx bx-arrow-back me-1"></i> Back to Inbox
+                                    </Link>
+                                    <button
+                                        type="submit"
+                                        className="btn btn-primary"
+                                        disabled={isSending || !replyBody.trim() || replyRecipientIds.length === 0}
+                                    >
+                                        <i className="bx bx-send me-1"></i>
+                                        {isSending ? 'Sending...' : 'Send Reply'}
+                                    </button>
+                                </div>
                             </div>
                         </form>
                     </div>
                 </div>
+
             </div>
-        </AppLayout>
+        </SneatLayout>
     );
 }

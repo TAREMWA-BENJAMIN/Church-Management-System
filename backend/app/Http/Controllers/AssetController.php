@@ -6,6 +6,8 @@ use App\Models\Asset;
 use App\Models\OrganizationUnit;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Auth;
 
 class AssetController extends Controller
 {
@@ -35,6 +37,8 @@ class AssetController extends Controller
 
         Asset::create($validated);
 
+        Cache::forget('dashboard_data_' . Auth::id());
+
         return redirect()->back()->with('message', 'Asset created successfully');
     }
 
@@ -52,12 +56,15 @@ class AssetController extends Controller
 
         $asset->update($validated);
 
+        Cache::forget('dashboard_data_' . Auth::id());
+
         return redirect()->back()->with('message', 'Asset updated successfully');
     }
 
     public function destroy(Asset $asset)
     {
         $asset->delete();
+        Cache::forget('dashboard_data_' . Auth::id());
         return redirect()->back()->with('message', 'Asset deleted successfully');
     }
 }

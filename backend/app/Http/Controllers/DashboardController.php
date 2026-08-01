@@ -11,6 +11,7 @@ use App\Models\Asset;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class DashboardController extends Controller
 {
@@ -18,7 +19,10 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
-        $stats = [];
+        $cacheKey = 'dashboard_data_' . $user->id;
+        
+        $data = Cache::remember($cacheKey, 300, function() use ($user) {
+            $stats = [];
 
         // 1. Dynamic Organization Unit Counts (Automatically scoped by security trait)
         $unitCounts = OrganizationUnit::selectRaw('organization_unit_type_id, count(*) as count')
@@ -47,11 +51,13 @@ class DashboardController extends Controller
         // 2. Members Count (Automatically scoped)
         $stats['members'] = Member::count();
 
+        // Get allowed unit IDs for scoping (used throughout)
+        $allowedUnitIds = $user->is_super_admin ? [] : $user->getAllowedOrganizationUnitIds();
+
         // 3. Staff / Priests Count
         if ($user->is_super_admin) {
             $stats['staff'] = User::count();
         } else {
-            $allowedUnitIds = $user->getAllowedOrganizationUnitIds();
             $stats['staff'] = User::whereHas('roleAssignments', function($q) use ($allowedUnitIds) {
                 $q->whereIn('organization_unit_id', $allowedUnitIds);
             })->count();
@@ -63,7 +69,17 @@ class DashboardController extends Controller
         // 5. Total Assets Value (Automatically scoped)
         $stats['assets'] = number_format(Asset::sum('value'));
 
-        // 6. Monthly Data for Chart (Current Year)
+        // 6. Certificate Stats
+        $certQuery = \App\Models\Certificate::query();
+        if (!$user->is_super_admin && !empty($allowedUnitIds)) {
+            $certQuery->whereIn('organization_unit_id', $allowedUnitIds)
+                      ->orWhereIn('diocese_id', $allowedUnitIds);
+        }
+        $stats['totalMarriages'] = (clone $certQuery)->where('type', 'Marriage')->count();
+        $stats['totalBaptisms'] = (clone $certQuery)->where('type', 'Baptism')->count();
+        $stats['totalConfirmations'] = (clone $certQuery)->where('type', 'Confirmation')->count();
+
+        // 7. Monthly Data for Chart (Current Year)
         $currentYear = date('Y');
         
         $financeRecords = FinanceRecord::whereYear('date', $currentYear)->get(['date', 'amount', 'type']);
@@ -97,9 +113,12 @@ class DashboardController extends Controller
             }
         }
 
-        return Inertia::render('Dashboard', [
-            'stats' => $stats,
-            'chartData' => $chartData
-        ]);
+            return [
+                'stats' => $stats,
+                'chartData' => $chartData
+            ];
+        });
+
+        return Inertia::render('Dashboard', $data);
     }
 }

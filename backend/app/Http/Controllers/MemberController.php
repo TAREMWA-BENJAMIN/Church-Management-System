@@ -6,6 +6,8 @@ use App\Models\Member;
 use App\Models\OrganizationUnit;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Auth;
 
 class MemberController extends Controller
 {
@@ -35,6 +37,8 @@ class MemberController extends Controller
 
         Member::create($validated);
 
+        Cache::forget('dashboard_data_' . Auth::id());
+
         return redirect()->back()->with('success', 'Member registered successfully.');
     }
 
@@ -53,12 +57,15 @@ class MemberController extends Controller
 
         $member->update($validated);
 
+        Cache::forget('dashboard_data_' . Auth::id());
+
         return redirect()->back()->with('success', 'Member updated successfully.');
     }
 
     public function destroy(Member $member)
     {
         $member->delete();
+        Cache::forget('dashboard_data_' . Auth::id());
         return redirect()->back()->with('success', 'Member deleted successfully.');
     }
 }

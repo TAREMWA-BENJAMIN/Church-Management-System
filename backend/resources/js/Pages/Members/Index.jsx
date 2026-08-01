@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import AppLayout from '@/Layouts/AppLayout';
+import SneatLayout from '@/Layouts/SneatLayout';
 import { Head, useForm, router } from '@inertiajs/react';
 import DataTable from '@/Components/DataTable';
 import FormDialog from '@/Components/FormDialog';
@@ -81,20 +81,20 @@ export default function MembersIndex({ members, units }) {
     };
 
     const columns = [
-        { header: 'First Name', accessor: (row) => <span className="font-semibold text-gray-900 dark:text-white">{row.first_name}</span> },
-        { header: 'Last Name', accessor: (row) => <span className="text-gray-600 dark:text-gray-300">{row.last_name}</span> },
+        { header: 'First Name', accessor: (row) => <span className="fw-medium">{row.first_name}</span> },
+        { header: 'Last Name', accessor: (row) => <span>{row.last_name}</span> },
         { 
             header: 'Role / Position', 
             accessor: (row) => row.role 
-                ? <span className="inline-flex items-center rounded-md bg-blue-400/10 px-2 py-1 text-xs font-medium text-blue-400 ring-1 ring-inset ring-blue-400/30">{row.role}</span>
-                : <span className="text-gray-400 text-xs italic">Not set</span>
+                ? <span className="badge bg-label-info">{row.role}</span>
+                : <span className="text-muted fst-italic">Not set</span>
         },
-        { header: 'Gender', accessor: (row) => <span className="text-gray-500 dark:text-gray-400">{row.gender || '-'}</span> },
-        { header: 'Phone', accessor: (row) => <span className="text-gray-500 dark:text-gray-400">{row.phone_number || '-'}</span> },
+        { header: 'Gender', accessor: (row) => <span>{row.gender || '-'}</span> },
+        { header: 'Phone', accessor: (row) => <span>{row.phone_number || '-'}</span> },
         { 
             header: 'Organization', 
             accessor: (row) => (
-                <span className="inline-flex items-center rounded-md bg-purple-400/10 px-2 py-1 text-xs font-medium text-purple-400 ring-1 ring-inset ring-purple-400/30">
+                <span className="badge bg-label-primary">
                     {row.organization_unit?.name}
                 </span>
             )
@@ -102,11 +102,7 @@ export default function MembersIndex({ members, units }) {
         { 
             header: 'Status', 
             accessor: (row) => (
-                <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${
-                    row.status === 'active' 
-                        ? 'bg-green-400/10 text-green-400 ring-green-400/20' 
-                        : 'bg-red-400/10 text-red-400 ring-red-400/20'
-                }`}>
+                <span className={`badge ${row.status === 'active' ? 'bg-label-success' : 'bg-label-danger'}`}>
                     {row.status.charAt(0).toUpperCase() + row.status.slice(1)}
                 </span>
             )
@@ -114,41 +110,40 @@ export default function MembersIndex({ members, units }) {
         { 
             header: 'Actions', 
             accessor: (row) => (
-                <div className="flex gap-3">
-                    <button onClick={(e) => openEditDialog(e, row)} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition-colors" title="Edit">
-                        <PencilSquareIcon className="h-5 w-5" />
+                <div className="dropdown">
+                    <button type="button" className="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                        <i className="bx bx-dots-vertical-rounded"></i>
                     </button>
-                    <button onClick={(e) => handleDelete(e, row.id)} className="text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition-colors" title="Delete">
-                        <TrashIcon className="h-5 w-5" />
-                    </button>
+                    <div className="dropdown-menu">
+                        <button className="dropdown-item" onClick={(e) => openEditDialog(e, row)}>
+                            <i className="bx bx-edit-alt me-1"></i> Edit
+                        </button>
+                        <button className="dropdown-item text-danger" onClick={(e) => handleDelete(e, row.id)}>
+                            <i className="bx bx-trash me-1"></i> Delete
+                        </button>
+                    </div>
                 </div>
             ) 
         }
     ];
 
     return (
-        <AppLayout header={<h2 className="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">Congregation Directory</h2>}>
+        <SneatLayout>
             <Head title="Members" />
 
-            <div className="py-4">
-                <div className="mx-auto max-w-7xl">
-                    <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg transition-colors duration-200">
-                        <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                            <div>
-                                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Members</h3>
-                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage everyday congregation members across all parishes.</p>
-                            </div>
-                            <button 
-                                onClick={openAddDialog}
-                                className="w-full sm:w-auto inline-flex items-center justify-center gap-x-2 rounded-md bg-purple-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-purple-500 transition-colors"
-                            >
-                                <PlusIcon className="-ml-0.5 h-5 w-5" aria-hidden="true" />
-                                Add Member
-                            </button>
-                        </div>
-                        
-                        <DataTable columns={columns} data={members} />
+            <div className="container-xxl flex-grow-1 container-p-y">
+                <div className="card">
+                    <div className="card-header d-flex justify-content-between align-items-center">
+                        <h5 className="mb-0">Members</h5>
+                        <button 
+                            onClick={openAddDialog}
+                            className="btn btn-primary"
+                        >
+                            <i className="bx bx-plus me-1"></i> Add Member
+                        </button>
                     </div>
+                    
+                    <DataTable columns={columns} data={members} />
                 </div>
             </div>
 
@@ -288,6 +283,6 @@ export default function MembersIndex({ members, units }) {
                     </div>
                 </form>
             </FormDialog>
-        </AppLayout>
+        </SneatLayout>
     );
 }

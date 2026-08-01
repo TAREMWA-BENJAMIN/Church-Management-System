@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import AppLayout from '@/Layouts/AppLayout';
+import SneatLayout from '@/Layouts/SneatLayout';
 import { Head, useForm, router } from '@inertiajs/react';
 import { Tree } from 'react-arborist';
 import DataTable from '@/Components/DataTable';
@@ -154,22 +154,27 @@ export default function OrganizationIndex({ units, types, canManage }) {
     };
 
     const columns = [
-        { header: 'Name', accessor: (row) => <span className="font-semibold text-gray-900 dark:text-white">{row.name}</span> },
-        { header: 'Type', accessor: (row) => <span className="inline-flex items-center rounded-md bg-purple-400/10 px-2 py-1 text-xs font-medium text-purple-400 ring-1 ring-inset ring-purple-400/30">{row.type?.name || 'Unknown'}</span> },
+        { header: 'Name', accessor: (row) => <span className="fw-medium">{row.name}</span> },
+        { header: 'Type', accessor: (row) => <span className="badge bg-label-primary">{row.type?.name || 'Unknown'}</span> },
         { 
             header: 'Actions', 
             accessor: (row) => {
                 if (!canManage) {
-                    return <span className="text-xs text-gray-500 italic">View Only</span>;
+                    return <span className="small text-muted fst-italic">View Only</span>;
                 }
                 return (
-                    <div className="flex gap-3">
-                        <button onClick={(e) => openEditDialog(e, row)} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition-colors" title="Edit">
-                            <PencilSquareIcon className="h-5 w-5" />
+                    <div className="dropdown">
+                        <button type="button" className="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                            <i className="bx bx-dots-vertical-rounded"></i>
                         </button>
-                        <button onClick={(e) => handleDelete(e, row.id)} className="text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition-colors" title="Delete">
-                            <TrashIcon className="h-5 w-5" />
-                        </button>
+                        <div className="dropdown-menu">
+                            <button className="dropdown-item" onClick={(e) => openEditDialog(e, row)}>
+                                <i className="bx bx-edit-alt me-1"></i> Edit
+                            </button>
+                            <button className="dropdown-item text-danger" onClick={(e) => handleDelete(e, row.id)}>
+                                <i className="bx bx-trash me-1"></i> Delete
+                            </button>
+                        </div>
                     </div>
                 );
             } 
@@ -177,58 +182,58 @@ export default function OrganizationIndex({ units, types, canManage }) {
     ];
 
     return (
-        <AppLayout header={<h2 className="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">Organization Hierarchy</h2>}>
+        <SneatLayout>
             <Head title="Organizations" />
 
-            <div className="py-6 lg:h-[calc(100vh-10rem)]">
-                <div className="mx-auto max-w-7xl flex flex-col lg:flex-row lg:h-full gap-6 px-4 sm:px-6 lg:px-8">
+            <div className="container-xxl flex-grow-1 container-p-y">
+                <div className="row">
                     {/* Left Panel: Tree View */}
-                    <div className="w-full lg:w-1/3 min-h-[300px] lg:min-h-0 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-4 backdrop-blur-xl shadow-lg flex flex-col transition-colors duration-200">
-                        <div className="flex justify-between items-center mb-4 pb-2 border-b border-gray-200 dark:border-gray-700">
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Structure</h3>
-                            {canManage && (
-                                <button 
-                                    onClick={openAddDialog}
-                                    className="inline-flex items-center gap-1 px-2 py-1 text-sm font-semibold rounded-md bg-purple-600 text-white hover:bg-purple-500 transition-colors shadow-sm"
+                    <div className="col-12 col-lg-4 mb-4 mb-lg-0">
+                        <div className="card h-100">
+                            <div className="card-header d-flex justify-content-between align-items-center">
+                                <h5 className="mb-0">Structure</h5>
+                                {canManage && (
+                                    <button 
+                                        onClick={openAddDialog}
+                                        className="btn btn-sm btn-primary"
+                                    >
+                                        <i className="bx bx-plus"></i> Add Root
+                                    </button>
+                                )}
+                            </div>
+                            <div className="card-body overflow-auto custom-scrollbar" style={{ maxHeight: '600px' }}>
+                                <Tree
+                                    data={treeData}
+                                    width="100%"
+                                    height={600}
+                                    rowHeight={32}
+                                    indent={24}
+                                    openByDefault={false}
                                 >
-                                    <PlusIcon className="h-4 w-4" />
-                                    Add Root
-                                </button>
-                            )}
-                        </div>
-                        <div className="flex-1 overflow-y-auto custom-scrollbar">
-                            <Tree
-                                data={treeData}
-                                width="100%"
-                                height={600}
-                                rowHeight={32}
-                                indent={24}
-                                openByDefault={false}
-                            >
-                                {Node}
-                            </Tree>
+                                    {Node}
+                                </Tree>
+                            </div>
                         </div>
                     </div>
 
                     {/* Right Panel: Data Table & Details */}
-                    <div className="w-full lg:w-2/3 min-h-[400px] lg:min-h-0 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-lg flex flex-col transition-colors duration-200">
-                        <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                            <div>
-                                <h3 className="text-xl font-bold text-gray-900 dark:text-white">{selectedUnitName}</h3>
-                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Viewing sub-units and details</p>
+                    <div className="col-12 col-lg-8">
+                        <div className="card h-100">
+                            <div className="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 className="mb-0">{selectedUnitName}</h5>
+                                    <small className="text-muted">Viewing sub-units and details</small>
+                                </div>
+                                {canManage && (
+                                    <button 
+                                        onClick={openAddDialog}
+                                        className="btn btn-primary"
+                                    >
+                                        <i className="bx bx-plus me-1"></i> Add Unit
+                                    </button>
+                                )}
                             </div>
-                            {canManage && (
-                                <button 
-                                    onClick={openAddDialog}
-                                    className="inline-flex items-center gap-x-2 rounded-md bg-purple-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-purple-500 transition-colors"
-                                >
-                                    <PlusIcon className="-ml-0.5 h-5 w-5" aria-hidden="true" />
-                                    Add Unit
-                                </button>
-                            )}
-                        </div>
-                        
-                        <div className="flex-1 overflow-y-auto">
+                            
                             <DataTable 
                                 columns={columns} 
                                 data={currentChildren} 
@@ -321,6 +326,6 @@ export default function OrganizationIndex({ units, types, canManage }) {
                     </div>
                 </form>
             </FormDialog>
-        </AppLayout>
+        </SneatLayout>
     );
 }

@@ -10,7 +10,8 @@ import {
     Cog6ToothIcon, 
     ArchiveBoxIcon, 
     BriefcaseIcon,
-    EnvelopeIcon
+    EnvelopeIcon,
+    DocumentIcon
 } from '@heroicons/react/24/outline';
 
 export default function Sidebar() {
@@ -28,6 +29,7 @@ export default function Sidebar() {
         { name: 'Members', href: route('members.index'), icon: UsersIcon, current: url.startsWith('/members'), show: isLeader },
         { name: 'People (Staff/Leaders)', href: route('people.index'), icon: AcademicCapIcon, current: url.startsWith('/people'), show: isSuperAdmin },
         { name: 'Institutions', href: route('institutions.index'), icon: BuildingOfficeIcon, current: url.startsWith('/institutions'), show: isLeader },
+        { name: 'Certificates', href: route('certificates.index'), icon: DocumentIcon, current: url.startsWith('/certificates'), show: isLeader },
         { name: 'Directorates', href: route('directorates.index'), icon: BriefcaseIcon, current: url.startsWith('/directorates'), show: isLeader },
         { name: 'Finance', href: route('finance.index'), icon: BanknotesIcon, current: url.startsWith('/finance'), show: isLeader },
         { name: 'Assets', href: route('assets.index'), icon: BriefcaseIcon, current: url.startsWith('/assets'), show: isLeader },

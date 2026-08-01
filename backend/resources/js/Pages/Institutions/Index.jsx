@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import AppLayout from '@/Layouts/AppLayout';
+import SneatLayout from '@/Layouts/SneatLayout';
 import { Head, useForm, router } from '@inertiajs/react';
 import DataTable from '@/Components/DataTable';
 import FormDialog from '@/Components/FormDialog';
@@ -89,13 +89,13 @@ export default function InstitutionsIndex({ institutions, managingUnits, locatio
         {
             header: 'Institution Name',
             accessor: (row) => (
-                <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-purple-500/10 ring-1 ring-purple-500/20">
-                        <BuildingOffice2Icon className="h-5 w-5 text-purple-400" />
+                <div className="d-flex align-items-center gap-3">
+                    <div className="avatar">
+                        <span className="avatar-initial rounded bg-label-info"><i className="bx bx-building"></i></span>
                     </div>
                     <div>
-                        <div className="font-semibold text-gray-900 dark:text-white">{row.name}</div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">{row.type}</div>
+                        <div className="fw-medium">{row.name}</div>
+                        <div className="text-muted small">{row.type}</div>
                     </div>
                 </div>
             )
@@ -103,7 +103,7 @@ export default function InstitutionsIndex({ institutions, managingUnits, locatio
         {
             header: 'Supervising Directorate',
             accessor: (row) => (
-                <span className="inline-flex items-center rounded-md bg-purple-400/10 px-2 py-1 text-xs font-medium text-purple-400 ring-1 ring-inset ring-purple-400/30">
+                <span className="badge bg-label-primary">
                     {row.organization_unit?.name}
                 </span>
             )
@@ -111,7 +111,7 @@ export default function InstitutionsIndex({ institutions, managingUnits, locatio
         {
             header: 'Physical Location (Parish)',
             accessor: (row) => (
-                <span className="inline-flex items-center rounded-md bg-green-400/10 px-2 py-1 text-xs font-medium text-green-400 ring-1 ring-inset ring-green-400/30">
+                <span className="badge bg-label-success">
                     {row.geographical_unit?.name || 'Not Set'}
                 </span>
             )
@@ -119,16 +119,16 @@ export default function InstitutionsIndex({ institutions, managingUnits, locatio
         {
             header: 'Contact Info',
             accessor: (row) => (
-                <div className="space-y-1 text-xs text-gray-600 dark:text-gray-300">
+                <div className="d-flex flex-column gap-1 text-muted small">
                     {row.contact_phone && (
-                        <div className="flex items-center gap-1">
-                            <PhoneIcon className="h-3.5 w-3.5 text-gray-400" />
+                        <div className="d-flex align-items-center gap-1">
+                            <i className="bx bx-phone"></i>
                             {row.contact_phone}
                         </div>
                     )}
                     {row.contact_email && (
-                        <div className="flex items-center gap-1">
-                            <EnvelopeIcon className="h-3.5 w-3.5 text-gray-400" />
+                        <div className="d-flex align-items-center gap-1">
+                            <i className="bx bx-envelope"></i>
                             {row.contact_email}
                         </div>
                     )}
@@ -138,19 +138,19 @@ export default function InstitutionsIndex({ institutions, managingUnits, locatio
         {
             header: 'Address',
             accessor: (row) => (
-                <div className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-300">
-                    <MapPinIcon className="h-3.5 w-3.5 text-gray-400 shrink-0" />
-                    <span className="truncate max-w-[200px]" title={row.address}>{row.address || 'N/A'}</span>
+                <div className="d-flex align-items-center gap-1 text-muted small">
+                    <i className="bx bx-map"></i>
+                    <span className="text-truncate" style={{ maxWidth: '200px' }} title={row.address}>{row.address || 'N/A'}</span>
                 </div>
             )
         },
         {
             header: 'Status',
             accessor: (row) => (
-                <span className={`inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${
+                <span className={`badge ${
                     row.status === 'Active' 
-                        ? 'bg-green-400/10 text-green-400 ring-green-400/20' 
-                        : 'bg-red-400/10 text-red-400 ring-red-400/20'
+                        ? 'bg-label-success' 
+                        : 'bg-label-danger'
                 }`}>
                     {row.status}
                 </span>
@@ -161,16 +161,21 @@ export default function InstitutionsIndex({ institutions, managingUnits, locatio
             accessor: (row) => {
                 const canEdit = canManage && (canEditIds === 'all' || canEditIds.includes(row.organization_unit_id));
                 if (!canEdit) {
-                    return <span className="text-xs text-gray-500 italic">View Only</span>;
+                    return <span className="small text-muted fst-italic">View Only</span>;
                 }
                 return (
-                    <div className="flex gap-3">
-                        <button onClick={(e) => openEditDialog(e, row)} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition-colors" title="Edit">
-                            <PencilSquareIcon className="h-5 w-5" />
+                    <div className="dropdown">
+                        <button type="button" className="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                            <i className="bx bx-dots-vertical-rounded"></i>
                         </button>
-                        <button onClick={(e) => handleDelete(e, row.id)} className="text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition-colors" title="Delete">
-                            <TrashIcon className="h-5 w-5" />
-                        </button>
+                        <div className="dropdown-menu">
+                            <button className="dropdown-item" onClick={(e) => openEditDialog(e, row)}>
+                                <i className="bx bx-edit-alt me-1"></i> Edit
+                            </button>
+                            <button className="dropdown-item text-danger" onClick={(e) => handleDelete(e, row.id)}>
+                                <i className="bx bx-trash me-1"></i> Delete
+                            </button>
+                        </div>
                     </div>
                 );
             }
@@ -178,53 +183,71 @@ export default function InstitutionsIndex({ institutions, managingUnits, locatio
     ];
 
     return (
-        <AppLayout header={<h2 className="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">Church Institutions</h2>}>
+        <SneatLayout>
             <Head title="Institutions" />
 
-            <div className="py-6">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    
-                    {/* Metrics Cards */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-                        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-6 backdrop-blur-xl shadow-lg relative overflow-hidden transition-colors duration-200">
-                            <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-purple-500/10 blur-2xl"></div>
-                            <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Total Institutions</dt>
-                            <dd className="mt-2 text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">{totalCount}</dd>
-                        </div>
-                        
-                        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-6 backdrop-blur-xl shadow-lg relative overflow-hidden transition-colors duration-200">
-                            <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-blue-500/10 blur-2xl"></div>
-                            <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Schools & Universities</dt>
-                            <dd className="mt-2 text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">{schoolsCount}</dd>
-                        </div>
-
-                        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-6 backdrop-blur-xl shadow-lg relative overflow-hidden transition-colors duration-200">
-                            <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-green-500/10 blur-2xl"></div>
-                            <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Hospitals & Clinics</dt>
-                            <dd className="mt-2 text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">{healthCount}</dd>
-                        </div>
-                    </div>
-
-                    {/* Data List */}
-                    <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-6 backdrop-blur-xl shadow-lg transition-colors duration-200">
-                        <div className="mb-6 flex justify-between items-start">
-                            <div>
-                                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Registered Institutions</h3>
-                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage and track all Church-affiliated operations.</p>
+            <div className="container-xxl flex-grow-1 container-p-y">
+                
+                {/* Metrics Cards */}
+                <div className="row mb-4">
+                    <div className="col-lg-4 col-md-12 col-6 mb-4">
+                        <div className="card h-100">
+                            <div className="card-body">
+                                <div className="card-title d-flex align-items-start justify-content-between">
+                                    <div className="avatar flex-shrink-0">
+                                        <span className="avatar-initial rounded bg-label-info"><i className="bx bx-buildings"></i></span>
+                                    </div>
+                                </div>
+                                <span className="fw-semibold d-block mb-1">Total Institutions</span>
+                                <h3 className="card-title mb-2 text-info">{totalCount}</h3>
                             </div>
-                            {canManage && managingUnits.length > 0 && (
-                                <button
-                                    onClick={openAddDialog}
-                                    className="inline-flex items-center gap-x-2 rounded-md bg-purple-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-purple-500 transition-colors"
-                                >
-                                    <PlusIcon className="-ml-0.5 h-5 w-5" aria-hidden="true" />
-                                    Add Institution
-                                </button>
-                            )}
                         </div>
-                        
-                        <DataTable columns={columns} data={institutions} />
                     </div>
+                    
+                    <div className="col-lg-4 col-md-12 col-6 mb-4">
+                        <div className="card h-100">
+                            <div className="card-body">
+                                <div className="card-title d-flex align-items-start justify-content-between">
+                                    <div className="avatar flex-shrink-0">
+                                        <span className="avatar-initial rounded bg-label-primary"><i className="bx bx-book-reader"></i></span>
+                                    </div>
+                                </div>
+                                <span className="fw-semibold d-block mb-1">Schools & Universities</span>
+                                <h3 className="card-title mb-2 text-primary">{schoolsCount}</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="col-lg-4 col-md-12 col-6 mb-4">
+                        <div className="card h-100">
+                            <div className="card-body">
+                                <div className="card-title d-flex align-items-start justify-content-between">
+                                    <div className="avatar flex-shrink-0">
+                                        <span className="avatar-initial rounded bg-label-success"><i className="bx bx-plus-medical"></i></span>
+                                    </div>
+                                </div>
+                                <span className="fw-semibold d-block mb-1">Hospitals & Clinics</span>
+                                <h3 className="card-title mb-2 text-success">{healthCount}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Data List */}
+                <div className="card">
+                    <div className="card-header d-flex justify-content-between align-items-center">
+                        <h5 className="mb-0">Registered Institutions</h5>
+                        {canManage && managingUnits.length > 0 && (
+                            <button
+                                onClick={openAddDialog}
+                                className="btn btn-primary"
+                            >
+                                <i className="bx bx-plus me-1"></i> Add Institution
+                            </button>
+                        )}
+                    </div>
+                    
+                    <DataTable columns={columns} data={institutions} />
                 </div>
             </div>
 
@@ -375,6 +398,6 @@ export default function InstitutionsIndex({ institutions, managingUnits, locatio
                     </div>
                 </form>
             </FormDialog>
-        </AppLayout>
+        </SneatLayout>
     );
 }
