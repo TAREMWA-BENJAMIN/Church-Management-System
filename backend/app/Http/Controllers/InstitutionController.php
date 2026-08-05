@@ -11,7 +11,11 @@ class InstitutionController extends Controller
 {
     public function index()
     {
-        $institutions = Institution::with(['organizationUnit', 'geographicalUnit'])->latest()->get();
+        $institutions = Institution::with(['organizationUnit', 'geographicalUnit'])->latest()->paginate(10);
+        $totalCount = Institution::count();
+        $schoolsCount = Institution::whereIn('type', ['School', 'University'])->count();
+        $healthCount = Institution::whereIn('type', ['Hospital', 'Clinic'])->count();
+
         $managingUnits = OrganizationUnit::withoutGlobalScope('organizationUnitSecurity')
             ->with('type')
             ->whereHas('type', function ($query) {
@@ -24,6 +28,9 @@ class InstitutionController extends Controller
 
         return Inertia::render('Institutions/Index', [
             'institutions' => $institutions,
+            'totalCount' => $totalCount,
+            'schoolsCount' => $schoolsCount,
+            'healthCount' => $healthCount,
             'managingUnits' => $managingUnits,
             'locationUnits' => $locationUnits,
             'canEditIds' => $user->is_super_admin ? 'all' : $user->getAllowedOrganizationUnitIds(),

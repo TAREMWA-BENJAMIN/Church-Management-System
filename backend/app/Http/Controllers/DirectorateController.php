@@ -17,12 +17,25 @@ class DirectorateController extends Controller
         $directorates = OrganizationUnit::withoutGlobalScope('organizationUnitSecurity')
             ->with(['parent', 'roleAssignments.user'])
             ->where('organization_unit_type_id', $directorateType?->id)
-            ->get();
+            ->paginate(10);
+
+        // Calculate stats on the whole dataset
+        $totalDirectorates = OrganizationUnit::withoutGlobalScope('organizationUnitSecurity')
+            ->where('organization_unit_type_id', $directorateType?->id)
+            ->count();
+            
+        $totalStaff = OrganizationUnit::withoutGlobalScope('organizationUnitSecurity')
+            ->where('organization_unit_type_id', $directorateType?->id)
+            ->withCount('roleAssignments')
+            ->get()
+            ->sum('role_assignments_count');
 
         $units = OrganizationUnit::withoutGlobalScope('organizationUnitSecurity')->get(); // For selecting who the directorate reports to
 
         return Inertia::render('Directorates/Index', [
             'directorates' => $directorates,
+            'totalDirectorates' => $totalDirectorates,
+            'totalStaff' => $totalStaff,
             'directorateType' => $directorateType,
             'units' => $units,
             'canManage' => auth()->user()->canManageInstitutionsAndDirectorates()

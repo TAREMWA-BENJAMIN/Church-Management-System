@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import SneatLayout from '@/Layouts/SneatLayout';
 import { Head, Link, useForm, router, usePage } from '@inertiajs/react';
+import Pagination from '@/Components/Pagination';
 
-export default function DirectoratesIndex({ directorates, directorateType, units, canManage }) {
+export default function DirectoratesIndex({ directorates, totalDirectorates, totalStaff, directorateType, units, canManage }) {
     const { auth } = usePage().props;
     const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -57,7 +58,7 @@ export default function DirectoratesIndex({ directorates, directorateType, units
                                     </div>
                                 </div>
                                 <span className="fw-semibold d-block mb-1">Total Directorates</span>
-                                <h3 className="card-title mb-2">{directorates.length}</h3>
+                                <h3 className="card-title mb-2">{totalDirectorates}</h3>
                             </div>
                         </div>
                     </div>
@@ -73,7 +74,7 @@ export default function DirectoratesIndex({ directorates, directorateType, units
                                 </div>
                                 <span className="fw-semibold d-block mb-1">Assigned Staff</span>
                                 <h3 className="card-title mb-2">
-                                    {directorates.reduce((acc, curr) => acc + (curr.role_assignments?.length || 0), 0)}
+                                    {totalStaff}
                                 </h3>
                             </div>
                         </div>
@@ -91,7 +92,7 @@ export default function DirectoratesIndex({ directorates, directorateType, units
                         )}
                     </div>
 
-                    {directorates.length === 0 ? (
+                    {directorates.data.length === 0 ? (
                         <div className="card-body text-center py-5">
                             <i className="bx bx-building-house bx-lg text-muted mb-3 d-block"></i>
                             <p className="text-muted">No directorates found. Add one to get started.</p>
@@ -114,7 +115,7 @@ export default function DirectoratesIndex({ directorates, directorateType, units
                                     </tr>
                                 </thead>
                                 <tbody className="table-border-bottom-0">
-                                    {directorates.map((dir, index) => (
+                                    {directorates.data.map((dir, index) => (
                                         <tr key={dir.id}>
                                             <td>
                                                 <span className={`avatar-initial rounded bg-label-${accentColors[index % accentColors.length]}`}
@@ -151,6 +152,8 @@ export default function DirectoratesIndex({ directorates, directorateType, units
                             </table>
                         </div>
                     )}
+                    
+                    {directorates.links && <Pagination links={directorates.links} />}
                 </div>
             </div>
 

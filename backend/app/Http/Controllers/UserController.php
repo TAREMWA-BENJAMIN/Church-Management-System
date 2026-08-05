@@ -17,8 +17,7 @@ class UserController extends Controller
     {
         abort_if(!auth()->user()->is_super_admin, 403, 'Unauthorized action.');
         
-        // Get users with their role assignments, including the related Role and Organization Unit
-        $users = User::with(['roleAssignments.role', 'roleAssignments.organizationUnit'])->get();
+        $users = User::with(['roleAssignments.role', 'roleAssignments.organizationUnit'])->paginate(10);
         $roles = Role::all();
         $units = OrganizationUnit::all();
 

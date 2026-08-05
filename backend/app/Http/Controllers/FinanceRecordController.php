@@ -16,13 +16,18 @@ class FinanceRecordController extends Controller
     {
         $records = FinanceRecord::with(['organizationUnit', 'recorder', 'institution'])
             ->latest('date')
-            ->get();
+            ->paginate(10);
+            
+        $totalIncome = FinanceRecord::where('type', 'income')->sum('amount');
+        $totalExpenditure = FinanceRecord::where('type', 'expenditure')->sum('amount');
             
         $units = OrganizationUnit::with('type')->get();
         $institutions = Institution::all();
 
         return Inertia::render('Finance/Index', [
             'records' => $records,
+            'totalIncome' => $totalIncome,
+            'totalExpenditure' => $totalExpenditure,
             'units' => $units,
             'institutions' => $institutions
         ]);

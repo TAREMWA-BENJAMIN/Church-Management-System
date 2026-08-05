@@ -1,8 +1,9 @@
 import React from 'react';
 import SneatLayout from '@/Layouts/SneatLayout';
 import { Head, router } from '@inertiajs/react';
+import Pagination from '@/Components/Pagination';
 
-export default function ReportsIndex({ units, reportType, filters, reportData }) {
+export default function ReportsIndex({ units, reportType, filters, reportData, stats }) {
     
     const handleFilterChange = (key, value) => {
         const newFilters = { ...filters, [key]: value };
@@ -20,8 +21,8 @@ export default function ReportsIndex({ units, reportType, filters, reportData })
     // Calculate metrics for preview
     const getSummary = () => {
         if (reportType === 'finance') {
-            const income = reportData.filter(r => r.type === 'income').reduce((sum, r) => sum + parseFloat(r.amount), 0);
-            const expenditure = reportData.filter(r => r.type === 'expenditure').reduce((sum, r) => sum + parseFloat(r.amount), 0);
+            const income = stats.income || 0;
+            const expenditure = stats.expenditure || 0;
             return (
                 <div className="row mb-4">
                     <div className="col-md-4 mb-3">
@@ -66,14 +67,14 @@ export default function ReportsIndex({ units, reportType, filters, reportData })
                 </div>
             );
         } else if (reportType === 'assets') {
-            const totalVal = reportData.reduce((sum, r) => sum + parseFloat(r.value || 0), 0);
+            const totalVal = stats.totalVal || 0;
             return (
                 <div className="row mb-4">
                     <div className="col-md-6 mb-3">
                         <div className="card">
                             <div className="card-body">
                                 <span className="fw-semibold d-block mb-1">Total Assets Registered</span>
-                                <h4 className="card-title mb-2">{reportData.length}</h4>
+                                <h4 className="card-title mb-2">{stats.count || 0}</h4>
                             </div>
                         </div>
                     </div>
@@ -88,14 +89,14 @@ export default function ReportsIndex({ units, reportType, filters, reportData })
                 </div>
             );
         } else if (reportType === 'members') {
-            const active = reportData.filter(r => r.status === 'active').length;
+            const active = stats.active || 0;
             return (
                 <div className="row mb-4">
                     <div className="col-md-6 mb-3">
                         <div className="card">
                             <div className="card-body">
                                 <span className="fw-semibold d-block mb-1">Total Members</span>
-                                <h4 className="card-title mb-2">{reportData.length}</h4>
+                                <h4 className="card-title mb-2">{stats.count || 0}</h4>
                             </div>
                         </div>
                     </div>
@@ -116,7 +117,7 @@ export default function ReportsIndex({ units, reportType, filters, reportData })
                         <div className="card">
                             <div className="card-body">
                                 <span className="fw-semibold d-block mb-1">Total Affiliated Institutions</span>
-                                <h4 className="card-title mb-2">{reportData.length}</h4>
+                                <h4 className="card-title mb-2">{stats.count || 0}</h4>
                             </div>
                         </div>
                     </div>
@@ -294,12 +295,12 @@ export default function ReportsIndex({ units, reportType, filters, reportData })
                                             )}
                                         </thead>
                                         <tbody className="table-border-bottom-0">
-                                            {reportData.length === 0 ? (
+                                            {reportData.data.length === 0 ? (
                                                 <tr>
                                                     <td colSpan={6} className="text-center py-4 text-muted">No records found matching filters.</td>
                                                 </tr>
                                             ) : (
-                                                reportData.map((row) => (
+                                                reportData.data.map((row) => (
                                                     <tr key={row.id}>
                                                         {reportType === 'finance' && (
                                                             <>
@@ -357,6 +358,7 @@ export default function ReportsIndex({ units, reportType, filters, reportData })
                                         </tbody>
                                     </table>
                                 </div>
+                                {reportData.links && <Pagination links={reportData.links} />}
                             </div>
 
                         </div>
@@ -420,7 +422,7 @@ export default function ReportsIndex({ units, reportType, filters, reportData })
                         )}
                     </thead>
                     <tbody>
-                        {reportData.map((row) => (
+                        {reportData.data.map((row) => (
                             <tr key={row.id}>
                                 {reportType === 'finance' && (
                                     <>

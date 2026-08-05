@@ -13,12 +13,19 @@ class AssetController extends Controller
 {
     public function index()
     {
-        $assets = Asset::with('organizationUnit')->latest()->get();
+        $assets = Asset::with('organizationUnit')->latest()->paginate(10);
+        $totalAssets = Asset::count();
+        $activeAssets = Asset::where('status', 'Active')->count();
+        $totalValue = Asset::sum('value');
+
         // Since Global Scope is active, OrganizationUnit::all() returns only units they can see
         $units = OrganizationUnit::all();
 
         return Inertia::render('Assets/Index', [
             'assets' => $assets,
+            'totalAssets' => $totalAssets,
+            'activeAssets' => $activeAssets,
+            'totalValue' => $totalValue,
             'units' => $units
         ]);
     }

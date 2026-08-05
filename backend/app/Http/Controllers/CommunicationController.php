@@ -39,8 +39,8 @@ class CommunicationController extends Controller
             ->whereNull('parent_id')
             ->whereHas('recipients', fn($q) => $q->whereIn('organization_unit_id', $unitIds))
             ->orderByDesc('created_at')
-            ->get()
-            ->map(function ($msg) use ($unitIds) {
+            ->paginate(10)
+            ->through(function ($msg) use ($unitIds) {
                 $recipientRow = $msg->recipients
                     ->whereIn('organization_unit_id', $unitIds)
                     ->first();
@@ -53,8 +53,8 @@ class CommunicationController extends Controller
             ->whereNull('parent_id')
             ->whereIn('sender_unit_id', $unitIds)
             ->orderByDesc('created_at')
-            ->get()
-            ->map(function ($msg) {
+            ->paginate(10)
+            ->through(function ($msg) {
                 $msg->reply_count = Message::where('parent_id', $msg->id)->count();
                 return $msg;
             });

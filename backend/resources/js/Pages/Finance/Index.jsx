@@ -5,7 +5,7 @@ import DataTable from '@/Components/DataTable';
 import FormDialog from '@/Components/FormDialog';
 import { PlusIcon, PencilSquareIcon, TrashIcon, ArrowTrendingUpIcon, ArrowTrendingDownIcon, BanknotesIcon } from '@heroicons/react/24/outline';
 
-export default function FinanceIndex({ records, units, institutions }) {
+export default function FinanceIndex({ records, totalIncome, totalExpenditure, units, institutions }) {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [dialogMode, setDialogMode] = useState('add');
 
@@ -21,8 +21,6 @@ export default function FinanceIndex({ records, units, institutions }) {
     });
 
     // Calculate metrics
-    const totalIncome = records.filter(r => r.type === 'income').reduce((sum, r) => sum + parseFloat(r.amount), 0);
-    const totalExpenditure = records.filter(r => r.type === 'expenditure').reduce((sum, r) => sum + parseFloat(r.amount), 0);
     const netBalance = totalIncome - totalExpenditure;
 
     const openAddDialog = () => {

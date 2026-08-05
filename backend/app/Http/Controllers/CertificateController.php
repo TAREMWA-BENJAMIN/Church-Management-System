@@ -27,7 +27,7 @@ class CertificateController extends Controller
                   ->orWhereIn('diocese_id', $allowedUnitIds);
         }
 
-        $certificates = $query->paginate(20);
+        $certificates = $query->paginate(10);
 
         return Inertia::render('Certificates/Index', [
             'certificates' => $certificates

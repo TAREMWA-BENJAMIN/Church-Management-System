@@ -92,7 +92,7 @@ export default function CertificatesIndex({ certificates }) {
                     </div>
 
                     <DataTable 
-                        data={certificates.data} 
+                        data={certificates} 
                         columns={columns} 
                     />
                 </div>

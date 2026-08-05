@@ -5,7 +5,7 @@ import DataTable from '@/Components/DataTable';
 import FormDialog from '@/Components/FormDialog';
 import { PlusIcon, PencilSquareIcon, TrashIcon, BriefcaseIcon, BuildingOfficeIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline';
 
-export default function AssetsIndex({ assets, units }) {
+export default function AssetsIndex({ assets, totalAssets, activeAssets, totalValue, units }) {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [dialogMode, setDialogMode] = useState('add');
 
@@ -19,10 +19,6 @@ export default function AssetsIndex({ assets, units }) {
         value: '',
         status: 'Active'
     });
-
-    const totalValue = assets.reduce((sum, asset) => sum + parseFloat(asset.value || 0), 0);
-    const totalAssets = assets.length;
-    const activeAssets = assets.filter(a => a.status === 'Active').length;
 
     const openAddDialog = () => {
         clearErrors();

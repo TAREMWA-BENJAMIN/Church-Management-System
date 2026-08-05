@@ -21,6 +21,7 @@ class ReportController extends Controller
         $endDate = $request->input('end_date');
 
         $data = [];
+        $stats = [];
 
         if ($reportType === 'finance') {
             $query = FinanceRecord::with('organizationUnit');
@@ -33,25 +34,32 @@ class ReportController extends Controller
             if ($endDate) {
                 $query->whereDate('date', '<=', $endDate);
             }
-            $data = $query->latest()->get();
+            $stats['income'] = (clone $query)->where('type', 'income')->sum('amount');
+            $stats['expenditure'] = (clone $query)->where('type', 'expenditure')->sum('amount');
+            $data = $query->latest()->paginate(10)->withQueryString();
         } elseif ($reportType === 'assets') {
             $query = Asset::with('organizationUnit');
             if ($unitId) {
                 $query->where('organization_unit_id', $unitId);
             }
-            $data = $query->latest()->get();
+            $stats['count'] = (clone $query)->count();
+            $stats['totalVal'] = (clone $query)->sum('value');
+            $data = $query->latest()->paginate(10)->withQueryString();
         } elseif ($reportType === 'institutions') {
             $query = Institution::with('organizationUnit');
             if ($unitId) {
                 $query->where('organization_unit_id', $unitId);
             }
-            $data = $query->latest()->get();
+            $stats['count'] = (clone $query)->count();
+            $data = $query->latest()->paginate(10)->withQueryString();
         } elseif ($reportType === 'members') {
             $query = Member::with('organizationUnit');
             if ($unitId) {
                 $query->where('organization_unit_id', $unitId);
             }
-            $data = $query->latest()->get();
+            $stats['count'] = (clone $query)->count();
+            $stats['active'] = (clone $query)->where('status', 'active')->count();
+            $data = $query->latest()->paginate(10)->withQueryString();
         }
 
         return Inertia::render('Reports/Index', [
@@ -62,7 +70,8 @@ class ReportController extends Controller
                 'start_date' => $startDate,
                 'end_date' => $endDate,
             ],
-            'reportData' => $data
+            'reportData' => $data,
+            'stats' => $stats
         ]);
     }
 }

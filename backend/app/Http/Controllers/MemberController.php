@@ -13,11 +13,15 @@ class MemberController extends Controller
 {
     public function index()
     {
-        $members = Member::with('organizationUnit')->latest()->get();
+        $members = Member::with('organizationUnit')->latest()->paginate(10);
+        $totalMembers = Member::count();
+        $activeMembers = Member::where('status', 'active')->count();
         $units = OrganizationUnit::all();
 
         return Inertia::render('Members/Index', [
             'members' => $members,
+            'totalMembers' => $totalMembers,
+            'activeMembers' => $activeMembers,
             'units' => $units
         ]);
     }

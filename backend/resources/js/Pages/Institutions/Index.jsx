@@ -5,7 +5,7 @@ import DataTable from '@/Components/DataTable';
 import FormDialog from '@/Components/FormDialog';
 import { PlusIcon, PencilSquareIcon, TrashIcon, BuildingOffice2Icon, PhoneIcon, EnvelopeIcon, MapPinIcon } from '@heroicons/react/24/outline';
 
-export default function InstitutionsIndex({ institutions, managingUnits, locationUnits, canEditIds, canManage }) {
+export default function InstitutionsIndex({ institutions, totalCount, schoolsCount, healthCount, managingUnits, locationUnits, canEditIds, canManage }) {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [dialogMode, setDialogMode] = useState('add');
 
@@ -20,11 +20,6 @@ export default function InstitutionsIndex({ institutions, managingUnits, locatio
         address: '',
         status: 'Active'
     });
-
-    // Derived metrics
-    const totalCount = institutions.length;
-    const schoolsCount = institutions.filter(i => i.type === 'School' || i.type === 'University').length;
-    const healthCount = institutions.filter(i => i.type === 'Hospital' || i.type === 'Clinic').length;
 
     const openAddDialog = () => {
         clearErrors();

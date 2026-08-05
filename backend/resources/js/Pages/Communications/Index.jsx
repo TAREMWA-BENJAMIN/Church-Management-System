@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import SneatLayout from '@/Layouts/SneatLayout';
 import { Head, router, useForm } from '@inertiajs/react';
+import Pagination from '@/Components/Pagination';
 
 export default function CommunicationsIndex({ inbox, sent, units, myUnitIds, unreadCount }) {
     const [activeTab, setActiveTab] = useState('inbox');
@@ -19,7 +20,7 @@ export default function CommunicationsIndex({ inbox, sent, units, myUnitIds, unr
 
     const messages = activeTab === 'inbox' ? inbox : sent;
 
-    const filtered = messages.filter(m =>
+    const filtered = (messages.data || []).filter(m =>
         m.subject?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         m.sender_unit?.name?.toLowerCase().includes(searchQuery.toLowerCase())
     );
@@ -265,6 +266,7 @@ export default function CommunicationsIndex({ inbox, sent, units, myUnitIds, unr
                                             ))}
                                         </ul>
                                     )}
+                                    {messages.links && <Pagination links={messages.links} />}
                                 </div>
                             </div>
                         </div>
