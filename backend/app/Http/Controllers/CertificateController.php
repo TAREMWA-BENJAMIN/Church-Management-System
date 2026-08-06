@@ -23,11 +23,21 @@ class CertificateController extends Controller
             ->orderBy('issued_date', 'desc');
             
         if (!$user->is_super_admin && !empty($allowedUnitIds)) {
-            $query->whereIn('organization_unit_id', $allowedUnitIds)
+            $query->where(function($q) use ($allowedUnitIds) {
+                $q->whereIn('organization_unit_id', $allowedUnitIds)
                   ->orWhereIn('diocese_id', $allowedUnitIds);
+            });
         }
 
-        $certificates = $query->paginate(10);
+        if ($request->has('search') && !empty($request->search)) {
+            $search = strtolower($request->search);
+            $query->where(function($q) use ($search) {
+                $q->whereRaw('LOWER(recipient_name) LIKE ?', ["%{$search}%"])
+                  ->orWhereRaw('LOWER(certificate_number) LIKE ?', ["%{$search}%"]);
+            });
+        }
+
+        $certificates = $query->paginate(10)->withQueryString();
 
         return Inertia::render('Certificates/Index', [
             'certificates' => $certificates

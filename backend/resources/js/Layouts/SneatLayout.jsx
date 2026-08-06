@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, usePage } from '@inertiajs/react';
+import { Link, usePage, router } from '@inertiajs/react';
 import ApplicationLogo from '@/Components/ApplicationLogo';
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { 
@@ -23,6 +23,26 @@ export default function SneatLayout({ children }) {
     const { url } = usePage();
     const user = auth?.user;
     const [moreSheetOpen, setMoreSheetOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+
+    useEffect(() => {
+        const searchParams = new URLSearchParams(window.location.search);
+        if (searchParams.has('search')) {
+            setSearchQuery(searchParams.get('search'));
+        }
+    }, [window.location.search]);
+
+    const handleSearchKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const currentPath = window.location.pathname;
+            if (searchQuery.trim() === '') {
+                router.get(currentPath, {}, { preserveState: true, replace: true });
+            } else {
+                router.get(currentPath, { search: searchQuery }, { preserveState: true, replace: true });
+            }
+        }
+    };
 
     const isSuperAdmin = auth?.is_super_admin;
     const isLeader = auth?.roles?.length > 0 || isSuperAdmin;
@@ -210,7 +230,15 @@ export default function SneatLayout({ children }) {
                             <div className="navbar-nav align-items-center">
                                 <div className="nav-item d-flex align-items-center">
                                     <i className="bx bx-search fs-4 lh-0"></i>
-                                    <input type="text" className="form-control border-0 shadow-none" placeholder="Search..." aria-label="Search..." />
+                                    <input 
+                                        type="text" 
+                                        className="form-control border-0 shadow-none" 
+                                        placeholder="Search..." 
+                                        aria-label="Search..." 
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        onKeyDown={handleSearchKeyDown}
+                                    />
                                 </div>
                             </div>
 
