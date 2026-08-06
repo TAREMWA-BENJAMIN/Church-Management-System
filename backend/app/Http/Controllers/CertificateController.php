@@ -41,21 +41,38 @@ class CertificateController extends Controller
             'recipient_name' => 'required|string|max:255',
             'issued_date' => 'required|date',
             'details' => 'nullable|array',
-            'organization_unit_id' => 'required|exists:organization_units,id',
         ]);
 
-        $parish = OrganizationUnit::findOrFail($request->organization_unit_id);
+        $user = auth()->user();
+        $roleAssignment = $user->roleAssignments()->first();
+        
+        if ($roleAssignment) {
+            $parish = OrganizationUnit::findOrFail($roleAssignment->organization_unit_id);
+        } else {
+            // Fallback for super admins or users without explicit assignments
+            $parish = OrganizationUnit::first();
+        }
         
         // Find the diocese for this parish (traverse up the tree)
         $dioceseId = null;
-        $currentUnit = $parish;
-        while ($currentUnit && $currentUnit->parent_id) {
-            $parent = OrganizationUnit::with('type')->find($currentUnit->parent_id);
-            if ($parent && $parent->type->name === 'Diocese') {
-                $dioceseId = $parent->id;
-                break;
+        
+        if ($parish->type && $parish->type->name === 'Diocese') {
+            $dioceseId = $parish->id;
+        } else {
+            $currentUnit = $parish;
+            while ($currentUnit && $currentUnit->parent_id) {
+                $parent = OrganizationUnit::with('type')->find($currentUnit->parent_id);
+                if ($parent && $parent->type->name === 'Diocese') {
+                    $dioceseId = $parent->id;
+                    break;
+                }
+                $currentUnit = $parent;
             }
-            $currentUnit = $parent;
+        }
+        
+        // Fallback to the parish itself if no diocese is found in the hierarchy to avoid database constraint errors
+        if (!$dioceseId) {
+            $dioceseId = $parish->id;
         }
 
         $certificate = Certificate::create([
@@ -94,7 +111,14 @@ class CertificateController extends Controller
             $priestSignature = storage_path('app/public/' . $certificate->issuedBy->signature_path);
         }
 
-        $pdf = Pdf::loadView('certificates.template', compact('certificate', 'bishopSignature', 'priestSignature'));
+        // Select the template based on certificate type
+        $templateView = match ($certificate->type) {
+            'Marriage'     => 'certificates.marriage',
+            'Confirmation' => 'certificates.confirmation',
+            default        => 'certificates.template',
+        };
+
+        $pdf = Pdf::loadView($templateView, compact('certificate', 'bishopSignature', 'priestSignature'));
         
         // Landscape for certificates
         $pdf->setPaper('a4', 'landscape');

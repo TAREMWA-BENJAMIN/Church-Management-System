@@ -10,28 +10,34 @@ export default function CertificatesIndex({ certificates }) {
     const { props } = usePage();
     const user = props.auth.user;
 
-    const { data, setData, post, processing, errors, reset, clearErrors } = useForm({
+    const { data, setData, post, processing, errors, reset, clearErrors, transform } = useForm({
         type: 'Marriage',
         recipient_name: '',
         issued_date: new Date().toISOString().split('T')[0],
         organization_unit_id: '',
+        husband_name: '',
+        wife_name: '',
         details_parents: '',
-        details_sponsors: ''
+        details_sponsors: '',
+        details_place: '',
+        details_confirmation_name: ''
     });
 
     const submit = (e) => {
         e.preventDefault();
         
-        const payload = {
+        transform((data) => ({
             ...data,
+            recipient_name: data.type === 'Marriage' ? `${data.husband_name} & ${data.wife_name}` : data.recipient_name,
             details: {
                 parents: data.details_parents,
-                sponsors: data.details_sponsors
+                sponsors: data.details_sponsors,
+                place: data.details_place,
+                confirmation_name: data.details_confirmation_name
             }
-        };
+        }));
 
         post(route('certificates.store'), {
-            data: payload,
             onSuccess: () => {
                 setIsDialogOpen(false);
                 reset();
@@ -114,17 +120,42 @@ export default function CertificatesIndex({ certificates }) {
                         {errors.type && <p className="mt-1 text-sm text-red-500">{errors.type}</p>}
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-300">Recipient Name(s)</label>
-                        <input 
-                            type="text" 
-                            placeholder={data.type === 'Marriage' ? "e.g. John Doe & Jane Smith" : "e.g. John Doe"}
-                            value={data.recipient_name}
-                            onChange={e => setData('recipient_name', e.target.value)}
-                            className="mt-1 block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-purple-500" 
-                        />
-                        {errors.recipient_name && <p className="mt-1 text-sm text-red-500">{errors.recipient_name}</p>}
-                    </div>
+                    {data.type === 'Marriage' ? (
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300">Husband Name</label>
+                                <input 
+                                    type="text" 
+                                    placeholder="e.g. John Doe"
+                                    value={data.husband_name}
+                                    onChange={e => setData('husband_name', e.target.value)}
+                                    className="mt-1 block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-purple-500" 
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300">Wife Name</label>
+                                <input 
+                                    type="text" 
+                                    placeholder="e.g. Jane Smith"
+                                    value={data.wife_name}
+                                    onChange={e => setData('wife_name', e.target.value)}
+                                    className="mt-1 block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-purple-500" 
+                                />
+                            </div>
+                        </div>
+                    ) : (
+                        <div>
+                            <label className="block text-sm font-medium text-gray-300">Recipient Name(s)</label>
+                            <input 
+                                type="text" 
+                                placeholder="e.g. John Doe"
+                                value={data.recipient_name}
+                                onChange={e => setData('recipient_name', e.target.value)}
+                                className="mt-1 block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-purple-500" 
+                            />
+                            {errors.recipient_name && <p className="mt-1 text-sm text-red-500">{errors.recipient_name}</p>}
+                        </div>
+                    )}
 
                     <div>
                         <label className="block text-sm font-medium text-gray-300">Issued Date</label>
@@ -137,20 +168,7 @@ export default function CertificatesIndex({ certificates }) {
                         {errors.issued_date && <p className="mt-1 text-sm text-red-500">{errors.issued_date}</p>}
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-300">Parish ID (Your Parish)</label>
-                        <input 
-                            type="number" 
-                            placeholder="Enter Parish ID"
-                            value={data.organization_unit_id}
-                            onChange={e => setData('organization_unit_id', e.target.value)}
-                            className="mt-1 block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-purple-500" 
-                        />
-                        <p className="text-xs text-gray-500 mt-1">Note: Typically this would be a dropdown of your assigned parishes, using an ID for now.</p>
-                        {errors.organization_unit_id && <p className="mt-1 text-sm text-red-500">{errors.organization_unit_id}</p>}
-                    </div>
-
-                    <div className="pt-2 border-t border-white/10">
+                    <div className="pt-4 border-t border-white/10">
                         <label className="block text-sm font-medium text-gray-300 mb-2">Additional Details</label>
                         <div className="space-y-3">
                             <input 
@@ -162,11 +180,31 @@ export default function CertificatesIndex({ certificates }) {
                             />
                             <input 
                                 type="text" 
-                                placeholder="Sponsors/Godparents (Optional)"
+                                placeholder={data.type === 'Marriage' ? "Witnesses (Optional)" : "Sponsors/Godparents (Optional)"}
                                 value={data.details_sponsors}
                                 onChange={e => setData('details_sponsors', e.target.value)}
                                 className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-purple-500" 
                             />
+                            
+                            {data.type === 'Marriage' && (
+                                <input 
+                                    type="text" 
+                                    placeholder="Place of Marriage (Optional)"
+                                    value={data.details_place}
+                                    onChange={e => setData('details_place', e.target.value)}
+                                    className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-purple-500" 
+                                />
+                            )}
+                            
+                            {data.type === 'Confirmation' && (
+                                <input 
+                                    type="text" 
+                                    placeholder="Confirmation Name (Optional)"
+                                    value={data.details_confirmation_name}
+                                    onChange={e => setData('details_confirmation_name', e.target.value)}
+                                    className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-purple-500" 
+                                />
+                            )}
                         </div>
                     </div>
 
