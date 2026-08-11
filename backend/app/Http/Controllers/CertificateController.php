@@ -125,6 +125,7 @@ class CertificateController extends Controller
         $templateView = match ($certificate->type) {
             'Marriage'     => 'certificates.marriage',
             'Confirmation' => 'certificates.confirmation',
+            'Baptism'      => 'certificates.baptism',
             default        => 'certificates.template',
         };
 

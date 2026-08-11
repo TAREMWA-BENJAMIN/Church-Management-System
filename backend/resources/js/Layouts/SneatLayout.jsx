@@ -157,18 +157,22 @@ export default function SneatLayout({ children }) {
                                 <div>Members</div>
                             </Link>
                         </li>
-                        <li className="menu-item">
-                            <Link href="/people" className="menu-link">
-                                <i className="menu-icon tf-icons bx bx-user"></i>
-                                <div>Users</div>
-                            </Link>
-                        </li>
-                        <li className="menu-item">
-                            <Link href="/roles" className="menu-link">
-                                <i className="menu-icon tf-icons bx bx-check-shield"></i>
-                                <div>Roles & Permissions</div>
-                            </Link>
-                        </li>
+                        {isSuperAdmin && (
+                            <>
+                                <li className="menu-item">
+                                    <Link href="/people" className="menu-link">
+                                        <i className="menu-icon tf-icons bx bx-user"></i>
+                                        <div>Users</div>
+                                    </Link>
+                                </li>
+                                <li className="menu-item">
+                                    <Link href="/roles" className="menu-link">
+                                        <i className="menu-icon tf-icons bx bx-check-shield"></i>
+                                        <div>Roles & Permissions</div>
+                                    </Link>
+                                </li>
+                            </>
+                        )}
 
                         <li className="menu-header small text-uppercase">
                             <span className="menu-header-text">Records</span>
