@@ -72,12 +72,15 @@ class DashboardController extends Controller
         // 6. Certificate Stats
         $certQuery = \App\Models\Certificate::query();
         if (!$user->is_super_admin && !empty($allowedUnitIds)) {
-            $certQuery->whereIn('organization_unit_id', $allowedUnitIds)
-                      ->orWhereIn('diocese_id', $allowedUnitIds);
+            $certQuery->where(function($q) use ($allowedUnitIds) {
+                $q->whereIn('organization_unit_id', $allowedUnitIds)
+                  ->orWhereIn('diocese_id', $allowedUnitIds);
+            });
         }
         $stats['totalMarriages'] = (clone $certQuery)->where('type', 'Marriage')->count();
         $stats['totalBaptisms'] = (clone $certQuery)->where('type', 'Baptism')->count();
         $stats['totalConfirmations'] = (clone $certQuery)->where('type', 'Confirmation')->count();
+        $stats['totalCertificates'] = (clone $certQuery)->count();
 
         // 7. Monthly Data for Chart (Current Year)
         $currentYear = date('Y');

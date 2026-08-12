@@ -181,11 +181,11 @@ export default function Dashboard({ stats, chartData }) {
                                 <div className="card-body">
                                     <div className="card-title d-flex align-items-start justify-content-between">
                                         <div className="avatar flex-shrink-0">
-                                            <img src="/assets/img/icons/unicons/cc-primary.png" alt="Marriages" className="rounded" />
+                                            <span className="avatar-initial rounded bg-label-info"><i className="bx bx-certification"></i></span>
                                         </div>
                                     </div>
-                                    <span className="fw-semibold d-block mb-1">Marriages</span>
-                                    <h3 className="card-title mb-2">{stats?.totalMarriages || 0}</h3>
+                                    <span className="fw-semibold d-block mb-1">Certificates</span>
+                                    <h3 className="card-title mb-2">{stats?.totalCertificates || 0}</h3>
                                 </div>
                             </div>
                         </div>
@@ -221,10 +221,10 @@ export default function Dashboard({ stats, chartData }) {
 
             </div>
 
-            {/* ── ROW 3: Baptisms & Confirmations ── */}
+            {/* ── ROW 3: Stats ── */}
             <div className="row">
-                <div className="col-lg-3 col-md-6 col-6 mb-4">
-                    <div className="card">
+                <div className="col-lg-2 col-md-4 col-6 mb-4">
+                    <div className="card h-100">
                         <div className="card-body">
                             <div className="avatar flex-shrink-0 mb-2">
                                 <span className="avatar-initial rounded bg-label-primary"><i className="bx bx-water"></i></span>
@@ -234,8 +234,8 @@ export default function Dashboard({ stats, chartData }) {
                         </div>
                     </div>
                 </div>
-                <div className="col-lg-3 col-md-6 col-6 mb-4">
-                    <div className="card">
+                <div className="col-lg-2 col-md-4 col-6 mb-4">
+                    <div className="card h-100">
                         <div className="card-body">
                             <div className="avatar flex-shrink-0 mb-2">
                                 <span className="avatar-initial rounded bg-label-info"><i className="bx bx-check-shield"></i></span>
@@ -245,24 +245,46 @@ export default function Dashboard({ stats, chartData }) {
                         </div>
                     </div>
                 </div>
-                <div className="col-lg-3 col-md-6 col-6 mb-4">
-                    <div className="card">
+                <div className="col-lg-2 col-md-4 col-6 mb-4">
+                    <div className="card h-100">
+                        <div className="card-body">
+                            <div className="avatar flex-shrink-0 mb-2">
+                                <span className="avatar-initial rounded bg-label-danger"><i className="bx bx-heart"></i></span>
+                            </div>
+                            <span className="fw-semibold d-block mb-1">Marriages</span>
+                            <h3 className="card-title mb-2">{stats?.totalMarriages || 0}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div className="col-lg-2 col-md-4 col-6 mb-4">
+                    <div className="card h-100">
+                        <div className="card-body">
+                            <div className="avatar flex-shrink-0 mb-2">
+                                <span className="avatar-initial rounded bg-label-secondary"><i className="bx bx-user-badge"></i></span>
+                            </div>
+                            <span className="fw-semibold d-block mb-1">Staff</span>
+                            <h3 className="card-title mb-2">{stats?.staff || 0}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div className="col-lg-2 col-md-4 col-6 mb-4">
+                    <div className="card h-100">
                         <div className="card-body">
                             <div className="avatar flex-shrink-0 mb-2">
                                 <span className="avatar-initial rounded bg-label-success"><i className="bx bx-group"></i></span>
                             </div>
-                            <span className="fw-semibold d-block mb-1">Total Members</span>
+                            <span className="fw-semibold d-block mb-1">Members</span>
                             <h3 className="card-title mb-2">{stats?.members || 0}</h3>
                         </div>
                     </div>
                 </div>
-                <div className="col-lg-3 col-md-6 col-6 mb-4">
-                    <div className="card">
+                <div className="col-lg-2 col-md-4 col-6 mb-4">
+                    <div className="card h-100">
                         <div className="card-body">
                             <div className="avatar flex-shrink-0 mb-2">
                                 <span className="avatar-initial rounded bg-label-warning"><i className="bx bx-money"></i></span>
                             </div>
-                            <span className="fw-semibold d-block mb-1">Total Revenue</span>
+                            <span className="fw-semibold d-block mb-1">Revenue</span>
                             <h4 className="card-title mb-2 text-truncate" title={`UGX ${stats?.revenue || 0}`}>UGX {stats?.revenue || 0}</h4>
                         </div>
                     </div>
