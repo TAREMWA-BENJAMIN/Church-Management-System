@@ -13,12 +13,42 @@ class AssetController extends Controller
 {
     public function index()
     {
-        $assets = Asset::with('organizationUnit')->latest()->paginate(10);
-        $totalAssets = Asset::count();
-        $activeAssets = Asset::where('status', 'Active')->count();
-        $totalValue = Asset::sum('value');
+        $user = Auth::user();
+        $query = Asset::withoutGlobalScope('organizationUnitSecurity')->with('organizationUnit')->latest();
 
-        // Since Global Scope is active, OrganizationUnit::all() returns only units they can see
+        if (!$user->is_super_admin) {
+            $assignedUnitIds = $user->roleAssignments()->pluck('organization_unit_id')->toArray();
+            $allDescendantIds = $assignedUnitIds;
+            $currentParentIds = $assignedUnitIds;
+            
+            while (!empty($currentParentIds)) {
+                $childIds = \App\Models\OrganizationUnit::withoutGlobalScope('organizationUnitSecurity')
+                    ->whereIn('parent_id', $currentParentIds)
+                    ->pluck('id')
+                    ->toArray();
+                    
+                if (empty($childIds)) {
+                    break;
+                }
+                
+                $allDescendantIds = array_merge($allDescendantIds, $childIds);
+                $currentParentIds = $childIds;
+            }
+            
+            if (empty($allDescendantIds)) {
+                $query->where('id', '<', 0); // No units
+            } else {
+                $query->whereIn('organization_unit_id', $allDescendantIds);
+            }
+        }
+
+        $assets = (clone $query)->paginate(10);
+        $totalAssets = (clone $query)->count();
+        $activeAssets = (clone $query)->where('status', 'Active')->count();
+        $totalValue = (clone $query)->sum('value');
+
+        // Since Global Scope is active, OrganizationUnit::all() returns only units they can see,
+        // but for assigning an asset we probably only want them assigning to units they can see.
         $units = OrganizationUnit::all();
 
         return Inertia::render('Assets/Index', [

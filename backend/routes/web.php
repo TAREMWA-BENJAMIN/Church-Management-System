@@ -25,7 +25,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('members', \App\Http\Controllers\MemberController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::get('/directorates', [\App\Http\Controllers\DirectorateController::class, 'index'])->name('directorates.index');
     Route::resource('finance', \App\Http\Controllers\FinanceRecordController::class)->only(['index', 'store', 'update', 'destroy']);
-    Route::resource('assets', \App\Http\Controllers\AssetController::class);
+    Route::resource('church-assets', \App\Http\Controllers\AssetController::class)->names('assets');
     Route::resource('institutions', \App\Http\Controllers\InstitutionController::class);
     Route::get('/reports', [\App\Http\Controllers\ReportController::class, 'index'])->name('reports.index');
     

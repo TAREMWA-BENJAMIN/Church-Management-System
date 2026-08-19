@@ -93,8 +93,12 @@ class DashboardController extends Controller
         // 4. Total Revenue (Income) (Automatically scoped)
         $stats['revenue'] = number_format(FinanceRecord::where('type', 'income')->sum('amount'));
 
-        // 5. Total Assets Value (Automatically scoped)
-        $stats['assets'] = number_format(Asset::sum('value'));
+        // 5. Total Assets Value (Fetch all descendants)
+        if ($user->is_super_admin) {
+            $stats['assets'] = number_format(Asset::withoutGlobalScope('organizationUnitSecurity')->sum('value'));
+        } else {
+            $stats['assets'] = number_format(Asset::withoutGlobalScope('organizationUnitSecurity')->whereIn('organization_unit_id', $allDescendantIds)->sum('value'));
+        }
 
         // 6. Certificate Stats
         $certQuery = \App\Models\Certificate::query();
@@ -116,7 +120,14 @@ class DashboardController extends Controller
         $currentYear = date('Y');
         
         $financeRecords = FinanceRecord::whereYear('date', $currentYear)->get(['date', 'amount', 'type']);
-        $assetRecords = Asset::whereYear('acquisition_date', $currentYear)->get(['acquisition_date', 'value']);
+        if ($user->is_super_admin) {
+            $assetRecords = Asset::withoutGlobalScope('organizationUnitSecurity')
+                ->whereYear('acquisition_date', $currentYear)->get(['acquisition_date', 'value']);
+        } else {
+            $assetRecords = Asset::withoutGlobalScope('organizationUnitSecurity')
+                ->whereIn('organization_unit_id', $allDescendantIds)
+                ->whereYear('acquisition_date', $currentYear)->get(['acquisition_date', 'value']);
+        }
 
         $chartData = [];
         for ($i = 1; $i <= 12; $i++) {

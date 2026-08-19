@@ -200,7 +200,7 @@ export default function SneatLayout({ children }) {
                             </Link>
                         </li>
                         <li className="menu-item">
-                            <Link href="/assets" className="menu-link">
+                            <Link href="/church-assets" className="menu-link">
                                 <i className="menu-icon tf-icons bx bx-briefcase"></i>
                                 <div>Assets</div>
                             </Link>

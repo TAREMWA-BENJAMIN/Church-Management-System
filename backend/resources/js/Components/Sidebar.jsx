@@ -32,7 +32,7 @@ export default function Sidebar() {
         { name: 'Certificates', href: route('certificates.index'), icon: DocumentIcon, current: url.startsWith('/certificates'), show: isLeader },
         { name: 'Directorates', href: route('directorates.index'), icon: BriefcaseIcon, current: url.startsWith('/directorates'), show: isLeader },
         { name: 'Finance', href: route('finance.index'), icon: BanknotesIcon, current: url.startsWith('/finance'), show: isLeader },
-        { name: 'Assets', href: route('assets.index'), icon: BriefcaseIcon, current: url.startsWith('/assets'), show: isLeader },
+        { name: 'Assets', href: route('assets.index'), icon: BriefcaseIcon, current: url.startsWith('/church-assets'), show: isLeader },
         { name: 'Communications', href: route('communications.index'), icon: EnvelopeIcon, current: url.startsWith('/communications'), show: isLeader, badge: unreadCount > 0 ? unreadCount : null },
         { name: 'Reports', href: route('reports.index'), icon: ChartPieIcon, current: url.startsWith('/reports'), show: isLeader },
         { name: 'Roles', href: route('roles.index'), icon: Cog6ToothIcon, current: url.startsWith('/roles'), show: isSuperAdmin },
