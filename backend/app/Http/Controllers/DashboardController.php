@@ -24,10 +24,37 @@ class DashboardController extends Controller
         $data = Cache::remember($cacheKey, 300, function() use ($user) {
             $stats = [];
 
-        // 1. Dynamic Organization Unit Counts (Automatically scoped by security trait)
-        $unitCounts = OrganizationUnit::selectRaw('organization_unit_type_id, count(*) as count')
-            ->groupBy('organization_unit_type_id')
-            ->get();
+        // 1. Dynamic Organization Unit Counts (Fetch all descendants to show total parishes)
+        if ($user->is_super_admin) {
+            $unitCounts = OrganizationUnit::withoutGlobalScope('organizationUnitSecurity')
+                ->selectRaw('organization_unit_type_id, count(*) as count')
+                ->groupBy('organization_unit_type_id')
+                ->get();
+        } else {
+            $assignedUnitIds = $user->roleAssignments()->pluck('organization_unit_id')->toArray();
+            $allDescendantIds = $assignedUnitIds;
+            $currentParentIds = $assignedUnitIds;
+            
+            while (!empty($currentParentIds)) {
+                $childIds = \App\Models\OrganizationUnit::withoutGlobalScope('organizationUnitSecurity')
+                    ->whereIn('parent_id', $currentParentIds)
+                    ->pluck('id')
+                    ->toArray();
+                    
+                if (empty($childIds)) {
+                    break;
+                }
+                
+                $allDescendantIds = array_merge($allDescendantIds, $childIds);
+                $currentParentIds = $childIds;
+            }
+
+            $unitCounts = OrganizationUnit::withoutGlobalScope('organizationUnitSecurity')
+                ->whereIn('id', $allDescendantIds)
+                ->selectRaw('organization_unit_type_id, count(*) as count')
+                ->groupBy('organization_unit_type_id')
+                ->get();
+        }
             
         $types = OrganizationUnitType::all()->keyBy('id');
         
@@ -71,11 +98,14 @@ class DashboardController extends Controller
 
         // 6. Certificate Stats
         $certQuery = \App\Models\Certificate::query();
-        if (!$user->is_super_admin && !empty($allowedUnitIds)) {
-            $certQuery->where(function($q) use ($allowedUnitIds) {
-                $q->whereIn('organization_unit_id', $allowedUnitIds)
-                  ->orWhereIn('diocese_id', $allowedUnitIds);
-            });
+        if (!$user->is_super_admin) {
+            $assignedUnitIds = $user->roleAssignments()->pluck('organization_unit_id')->toArray();
+            
+            if (!empty($assignedUnitIds)) {
+                $certQuery->whereIn('organization_unit_id', $assignedUnitIds);
+            } else {
+                $certQuery->where('id', '<', 0);
+            }
         }
         $stats['totalMarriages'] = (clone $certQuery)->where('type', 'Marriage')->count();
         $stats['totalBaptisms'] = (clone $certQuery)->where('type', 'Baptism')->count();

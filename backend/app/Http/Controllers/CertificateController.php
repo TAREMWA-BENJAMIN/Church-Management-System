@@ -16,21 +16,16 @@ class CertificateController extends Controller
     {
         $user = Auth::user();
         
+        $exactUnitIds = $user->roleAssignments()->pluck('organization_unit_id')->toArray();
+        
         $query = Certificate::with(['issuedBy', 'organizationUnit', 'diocese'])
             ->orderBy('issued_date', 'desc');
             
-        if ($user->is_super_admin) {
-            // Super admins only see certificates they generated themselves in the list
-            // to avoid mixing all certificates from all parishes in one view.
-            $query->where('issued_by_user_id', $user->id);
-        } else {
-            // Regular admins only see certificates for their EXACT assigned unit,
-            // not a mixed list of all child parishes.
-            $exactUnitIds = $user->roleAssignments()->pluck('organization_unit_id')->toArray();
+        if (!$user->is_super_admin) {
             if (!empty($exactUnitIds)) {
                 $query->whereIn('organization_unit_id', $exactUnitIds);
             } else {
-                $query->where('id', '<', 0);
+                $query->where('id', '<', 0); // No assigned units
             }
         }
 
@@ -100,6 +95,9 @@ class CertificateController extends Controller
             'diocese_id' => $dioceseId,
             'issued_by_user_id' => Auth::id(),
         ]);
+
+        // Clear dashboard cache for the user so it updates immediately
+        \Illuminate\Support\Facades\Cache::forget('dashboard_data_' . Auth::id());
 
         return redirect()->back()->with('success', 'Certificate generated successfully.');
     }
